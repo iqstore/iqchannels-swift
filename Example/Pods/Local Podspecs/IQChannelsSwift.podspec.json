@@ -1,0 +1,36 @@
+{
+  "name": "IQChannelsSwift",
+  "version": "1.0.0",
+  "summary": "IQChannelsSwift SDK",
+  "description": "IQChannelsSwift iOS SDK",
+  "homepage": "https://github.com/dato3/iqchannels-swift-sdk",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Daulet Tokmukhanbet": "61043918+dato3@users.noreply.github.com"
+  },
+  "source": {
+    "git": "https://github.com/dato3/iqchannels-swift-sdk.git",
+    "tag": "1.0.0"
+  },
+  "platforms": {
+    "ios": "14.0"
+  },
+  "source_files": "IQChannelsSwift/Classes/**/*",
+  "dependencies": {
+    "SDWebImage": [
+      "~>5.10"
+    ],
+    "TRVSEventSource": [
+      "0.0.8"
+    ],
+    "MessageKit": [
+      "3.1.1"
+    ],
+    "SnapKit": [
+      "5.6.0"
+    ]
+  }
+}

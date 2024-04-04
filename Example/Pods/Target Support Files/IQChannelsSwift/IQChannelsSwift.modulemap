@@ -1,0 +1,6 @@
+framework module IQChannelsSwift {
+  umbrella header "IQChannelsSwift-umbrella.h"
+
+  export *
+  module * { export * }
+}
