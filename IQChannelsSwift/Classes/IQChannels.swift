@@ -751,7 +751,11 @@ public class IQChannels {
     private func messageTyping(_ event: IQChatEvent) {
         guard event.actor != .client else { return }
         
-        guard let messageId = event.messageId, let message = getMessageById(messageId) else { return }
+        if let id1 = getMessageById(event.messageId)?.eventId,
+           let id2 = event.id,
+           id1 > id2{
+            return
+        }
         
         for listener in messageListeners {
             DispatchQueue.main.async {
@@ -770,12 +774,12 @@ public class IQChannels {
         }
     }
     
-    private func getMessageById(_ messageId: Int) -> IQChatMessage? {
+    private func getMessageById(_ messageId: Int?) -> IQChatMessage? {
         guard let index = getMessageIndexById(messageId), index != -1 else { return nil }
         return messages[index]
     }
     
-    private func getMessageIndexById(_ messageId: Int) -> Int? {
+    private func getMessageIndexById(_ messageId: Int?) -> Int? {
         guard messageId != 0 else { return -1 }
         
         for (index, message) in messages.enumerated() {
@@ -896,13 +900,15 @@ public class IQChannels {
     }
     
     func loadMessageMedia(messageId: Int) {
+        imageDownloading[messageId]?.cancel()
+        imageDownloading.removeValue(forKey: messageId)
+        
         guard let message = getMessageById(messageId),
               message.isMediaMessage,
               let file = message.file,
               let url = file.imagePreviewUrl,
               let media = message.media,
-              media.image == nil,
-              imageDownloading[messageId] == nil else {
+              media.image == nil else {
             return
         }
         
@@ -916,7 +922,9 @@ public class IQChannels {
                 }
             }
         }
-        imageDownloading[messageId] = operation
+        if let operation {
+            imageDownloading.updateValue(operation, forKey: messageId)
+        }
         print("Loading a message image, messageId=\(messageId), url=\(url)")
     }
     
@@ -1139,6 +1147,8 @@ public class IQChannels {
     }
 
     private func sentRead(messageIds: [Int]) {
+        guard readSending != nil else { return }
+        
         readSending = nil
         readSendAttempt = 0
         log?.info("Sent read message ids, count=\(messageIds.count)")

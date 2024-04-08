@@ -9,9 +9,9 @@ PODS:
     - TRVSEventSource (= 0.0.8)
   - MessageKit (3.1.1):
     - InputBarAccessoryView (~> 4.3.0)
-  - SDWebImage (5.19.0):
-    - SDWebImage/Core (= 5.19.0)
-  - SDWebImage/Core (5.19.0)
+  - SDWebImage (5.19.1):
+    - SDWebImage/Core (= 5.19.1)
+  - SDWebImage/Core (5.19.1)
   - SnapKit (5.6.0)
   - TRVSEventSource (0.0.8)
 
@@ -34,10 +34,10 @@ SPEC CHECKSUMS:
   InputBarAccessoryView: 8e7fc09e9cba75e0fee5da13450e15c194806f69
   IQChannelsSwift: d578d12cda7cd5a12dd9e3c640eb8be5e687d269
   MessageKit: a3e612a54a24f5d9ca0295760749b481afd3f2da
-  SDWebImage: 981fd7e860af070920f249fd092420006014c3eb
+  SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   TRVSEventSource: 19fb940e0351ceb97125d46fd40cd55e339568d8
 
-PODFILE CHECKSUM: 5c5669f7aaa82b6ed28bdb0ef0d35e309d95a4aa
+PODFILE CHECKSUM: c0f9bde666ee50351f781959509bcacbe1f14425
 
 COCOAPODS: 1.15.2

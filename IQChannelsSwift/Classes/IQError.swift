@@ -14,8 +14,8 @@ extension IQError {
         }
 
         let error = IQError()
-        error.code = IQErrorCode(rawValue: IQJSON.string(from: jsonObject, key: "code") ?? "")
-        error.text = IQJSON.string(from: jsonObject, key: "text")
+        error.code = IQErrorCode(rawValue: IQJSON.string(from: jsonObject, key: "Code") ?? "")
+        error.text = IQJSON.string(from: jsonObject, key: "Text")
         return error
     }
 }

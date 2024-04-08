@@ -21,17 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.backgroundColor = UIColor.white
         window?.overrideUserInterfaceStyle = .light
         window?.makeKeyAndVisible()
-        
-        let config = IQChannelsConfig(address: "https://sandbox.iqstore.ru/",
-                                      channel: "support")
-        let headers = ["User-Agent": "MyAgent"]
-        IQChannels.configure(config)
-        IQChannels.setCustomHeaders(headers)
-        IQChannels.login("101")
-        
-        let navigationController = UINavigationController(rootViewController: IQChannelMessagesViewController())
-        setNavigationBarAppearance(to: navigationController)
-        window?.rootViewController = navigationController
+        window?.rootViewController = IQLoginViewController()
         
         return true
     }

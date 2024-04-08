@@ -3,7 +3,7 @@ import MessageKit
 import SDWebImage
 import InputBarAccessoryView
 
-open class IQChannelMessagesViewController: MessagesViewController {
+open class IQChannelMessagesViewController: MessagesViewController, UIGestureRecognizerDelegate {
     
     //MARK: - Views
 
@@ -18,6 +18,8 @@ open class IQChannelMessagesViewController: MessagesViewController {
     private var state: IQChannelsState = .loggedOut
     private var visible: Bool = false
     private var readMessages: Set<Int> = []
+    private var typingTimer: Timer?
+    private var typingUser: IQUser?
     private var messagesSub: IQSubscription?
     private var moreMessagesLoading: IQSubscription?    
     private var messagesLoaded: Bool = false
@@ -71,6 +73,7 @@ open class IQChannelMessagesViewController: MessagesViewController {
         messageInputBar.inputTextView.backgroundColor = .init(hex: 0xF4F4F8)
         messageInputBar.inputTextView.placeholder = "Сообщение"
         messageInputBar.inputTextView.textContainerInset = .init(top: 9, left: 16, bottom: 9, right: 16)
+        messageInputBar.inputTextView.placeholderLabelInsets.left += 2.5
         messageInputBar.inputTextView.layer.cornerRadius = 20
         messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
         messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
@@ -93,6 +96,13 @@ open class IQChannelMessagesViewController: MessagesViewController {
     private func setupRefreshControl(){
         refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
         messagesCollectionView.refreshControl = refreshControl
+    }
+    
+    private func setupTypingTimer() {
+        typingTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(onTick), userInfo: nil, repeats: false)
+        if typingTimer == nil {
+            typingTimer?.invalidate()
+        }
     }
     
     private func setupIndicators(){
@@ -122,17 +132,18 @@ open class IQChannelMessagesViewController: MessagesViewController {
                                                                  textInsets: .zero))
         layout?.setMessageOutgoingCellBottomLabelAlignment(.init(textAlignment: .right,
                                                                  textInsets: .zero))
-        layout?.textMessageSizeCalculator.incomingMessageLabelInsets.bottom = 28
-        layout?.textMessageSizeCalculator.outgoingMessageLabelInsets.bottom = 28
         messagesCollectionView.register(IQCardCell.self, forCellWithReuseIdentifier: IQCardCell.cellIdentifier)
         messagesCollectionView.register(IQSingleChoicesCell.self, forCellWithReuseIdentifier: IQSingleChoicesCell.cellIdentifier)
         messagesCollectionView.register(IQStackedSingleChoicesCell.self, forCellWithReuseIdentifier: IQStackedSingleChoicesCell.cellIdentifier)
-        messagesCollectionView.register(IQFilePreviewCell.self, forCellWithReuseIdentifier: IQFilePreviewCell.cellIdentifier)
         messagesCollectionView.register(MyCustomCell.self, forCellWithReuseIdentifier: MyCustomCell.cellIdentifier)
+        messagesCollectionView.register(IQFilePreviewCell.self, forCellWithReuseIdentifier: IQFilePreviewCell.cellIdentifier)
         messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
+        let gr = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        gr.delegate = self
+        messagesCollectionView.addGestureRecognizer(gr)
     }
     
     private func setupObservers(){
@@ -162,6 +173,14 @@ open class IQChannelMessagesViewController: MessagesViewController {
         }
     }
     
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        true
+    }
+    
+    @objc private func dismissKeyboard(){
+        messageInputBar.inputTextView.resignFirstResponder()
+    }
+    
     @objc private func attachmentDidTap(){
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
@@ -175,7 +194,7 @@ open class IQChannelMessagesViewController: MessagesViewController {
         alert.addAction(.init(title: "Файл", style: .default, handler: { _ in
             self.fileSourceDidTap()
         }))
-        alert.addAction(.init(title: "Cancel", style: .cancel))
+        alert.addAction(.init(title: "Отмена", style: .cancel))
         messageInputBar.inputTextView.resignFirstResponder()
         present(alert, animated: true)
     }
@@ -187,12 +206,24 @@ open class IQChannelMessagesViewController: MessagesViewController {
         picker.allowsEditing = true
         present(picker, animated: true)
     }
+    
+    @objc
+    private func onTick() {
+        setTypingIndicatorViewHidden(true, animated: true)
+        typingUser = nil
+        typingTimer?.invalidate()
+    }
         
     private func fileSourceDidTap(){
         let documentController = UIDocumentPickerViewController(forOpeningContentTypes: [.data])
         documentController.delegate = self
         documentController.modalPresentationStyle = .formSheet
         present(documentController, animated: true)
+    }
+    
+    private func extendByTime(_ seconds: TimeInterval) {
+        let newFireDate = (typingTimer?.fireDate ?? Date()).addingTimeInterval(seconds)
+        typingTimer?.fireDate = newFireDate
     }
     
     private func openMessageInBrowser(messageID: Int) {
@@ -296,10 +327,6 @@ open class IQChannelMessagesViewController: MessagesViewController {
     }
     
     override open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let messagesDataSource = messagesCollectionView.messagesDataSource else {
-            fatalError("Ouch. nil data source for messages")
-        }
-        
         if isSectionReservedForTypingIndicator(indexPath.section){
             return super.collectionView(collectionView, cellForItemAt: indexPath)
         }
@@ -315,17 +342,27 @@ open class IQChannelMessagesViewController: MessagesViewController {
             setInputToolbarEnabled(!message.disableFreeText)
         }
         
+        if !message.isMy {
+            if (visible) {
+                IQChannels.markAsRead(message.id)
+            } else {
+                readMessages.update(with: message.id)
+            }
+        }
+        
         if case .custom = message.kind {
             if message.payload == .singleChoice {
                 let cell = messagesCollectionView.dequeueReusableCell(IQStackedSingleChoicesCell.self, for: indexPath)
                 cell.setSingleChoices(message.singleChoices ?? [])
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.stackedSingleChoicesDelegate = self
+                cell.delegate = self
                 return cell
             } else if message.payload == .card || message.payload == .carousel {
                 let cell = messagesCollectionView.dequeueReusableCell(IQCardCell.self, for: indexPath)
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.cardCellDelegate = self
+                cell.delegate = self
                 return cell
             }
             
@@ -347,6 +384,7 @@ open class IQChannelMessagesViewController: MessagesViewController {
                 let cell = messagesCollectionView.dequeueReusableCell(IQSingleChoicesCell.self, for: indexPath)
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.singleChoiceDelegate = self
+                cell.delegate = self
                 return cell
             }
         }
@@ -370,6 +408,10 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
         IQChannels.sendText(text)
     }
     
+    public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
+        IQChannels.typing()
+    }
+    
     func setInputToolbarEnabled(_ enabled: Bool) {
         self.messageInputBar.inputTextView.isEditable = enabled
         self.messageInputBar.leftStackView.isUserInteractionEnabled = enabled
@@ -387,13 +429,19 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
         return messages[indexPath.row]
     }
     
+    public func typingIndicator(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell {
+         let indicator = messagesCollectionView.dequeueReusableCell(TypingIndicatorCell.self, for: indexPath)
+        indicator.insets.left = 40
+        return indicator
+    }
+    
     public func textCell(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell? {
         let cell = messagesCollectionView.dequeueReusableCell(
           IQTimestampMessageCell.self,
           for: indexPath)
         cell.configure(with: message, at: indexPath, and: messagesCollectionView)
+        cell.delegate = self
         return cell
-
     }
     
     public func numberOfSections(in messagesCollectionView: MessageKit.MessagesCollectionView) -> Int {
@@ -410,6 +458,10 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
     
     public func didTapImage(in cell: MessageCollectionViewCell) {
         handleTap(at: cell)
+    }
+    
+    public func didSelectURL(_ url: URL) {
+        UIApplication.shared.open(url)
     }
     
     private func handleTap(at cell: MessageCollectionViewCell) {
@@ -476,6 +528,16 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
                                                                     NSAttributedStringKey.foregroundColor : UIColor.lightGray])
     }
     
+    public func detectorAttributes(for detector: DetectorType, and message: any MessageType, at indexPath: IndexPath) -> [NSAttributedString.Key : Any] {
+        [
+            .foregroundColor: UIColor.link
+        ]
+    }
+    
+    public func enabledDetectors(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> [DetectorType] {
+        [.url, .address, .phoneNumber, .date, .transitInformation, .mention, .hashtag]
+    }
+    
     public func backgroundColor(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
         guard let dataSource = messagesCollectionView.messagesDataSource else { return .jsq_messageBubbleLightGray() }
         let isSender = dataSource.isFromCurrentSender(message: message)
@@ -514,31 +576,25 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
         if let avatarImage = user.avatarImage {
             let avatar: Avatar = .init(image: avatarImage)
             avatarView.set(avatar: avatar)
-        }
-
-        if let avatarURL = user.avatarURL {
-            let m = SDWebImageManager.shared
-            m.loadImage(with: avatarURL, options: [], progress: nil) { [weak self] (image, data, error, cacheType, finished, imageURL) in
-                DispatchQueue.main.async {
-                    guard let self = self, let image = image else { return }
-                    user.avatarImage = image
-                    let index: Int
-                    if message.isMy {
-                        index = self.getMyMessageByLocalId(localId: message.localId)
-                    } else {
-                        index = self.getMessageIndexById(messageId: message.id)
-                    }
-                    let path = IndexPath(item: index, section: 0)
-                    messagesCollectionView.reloadItems(at: [path])
+        } else if let url = user.avatarURL {
+            SDWebImageManager.shared.loadImage(with: url, progress: nil) { [weak self] image, _, _, _, _, _ in
+                guard let self else { return }
+                
+                self.messages[indexPath.row].user?.avatarImage = image
+                let index: Int
+                if message.isMy {
+                    index = self.getMyMessageByLocalId(localId: message.localId)
+                } else {
+                    index = self.getMessageIndexById(messageId: message.id)
                 }
+                messagesCollectionView.reloadItems(at: [.init(item: index, section: 0)])
             }
+        } else {
+            let initials = String((message.user?.name ?? "").prefix(1))
+            let avatar: Avatar = .init(initials: initials)
+            avatarView.set(avatar: avatar)
         }
-
-        let initials = String((message.user?.name ?? "").prefix(1))
-        let backgroundColor = UIColor.paletteColorFromString(string: user.name)
-        let avatar: Avatar = .init(initials: initials)
-        avatarView.backgroundColor = backgroundColor
-        avatarView.set(avatar: avatar)
+        avatarView.backgroundColor = UIColor.paletteColorFromString(string: user.name)
     }
 
 }
@@ -748,16 +804,68 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
     }
     
     func iq(messagesRemoved messages: [IQChatMessage]) {
+        guard let messagesSub = messagesSub else { return }
         
+        var remoteMessages = messages
+        
+        var index = 0
+        var paths = [IndexPath]()
+        for localMessage in self.messages {
+            for remoteMessage in remoteMessages {
+                if localMessage.id == remoteMessage.id {
+                    paths.append(IndexPath(item: index, section: 0))
+                }
+            }
+            
+            index += 1
+        }
+        
+        self.messages.remove(elementsAtIndices: paths.map { $0.item })
+        messagesCollectionView.deleteItems(at: paths)
     }
     
     func iq(messageTyping user: IQUser?) {
+        if isTypingIndicatorHidden {
+            setupTypingTimer()
+        } else {
+            extendByTime(2)
+        }
         
+        typingUser = user
+        setTypingIndicatorViewHidden(false, animated: false)
+        messagesCollectionView.scrollToBottom()
     }
 }
 
 open class MyCustomCell: UICollectionViewCell {
     open func configure(with message: MessageType, at indexPath: IndexPath, and messagesCollectionView: MessagesCollectionView) {
-        self.contentView.backgroundColor = UIColor.red
+        self.contentView.backgroundColor = UIColor.clear
+    }
+}
+
+extension Array {
+    mutating func remove(elementsAtIndices indicesToRemove: [Int]) -> [Element] {
+        var shouldRemove: [Bool] = .init(repeating: false, count: count)
+        
+        for ix in indicesToRemove {
+            shouldRemove[ix] = true
+        }
+        
+        // Copy the removed elements in the specified order.
+        let removedElements = indicesToRemove.map { self[$0] }
+        
+        // Compact the array
+        var j = 0
+        for i in 0..<count {
+            if !shouldRemove[i] {
+                self[j] = self[i]
+                j+=1
+            }
+        }
+        
+        // Remove the extra elements from the end of the array.
+        self.removeLast(count-j)
+        
+        return removedElements
     }
 }

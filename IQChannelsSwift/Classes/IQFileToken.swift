@@ -12,7 +12,7 @@ extension IQFileToken {
         }
         
         let fileToken = IQFileToken()
-        fileToken.token = IQJSON.string(from: jsonObject, key: "token")
+        fileToken.token = IQJSON.string(from: jsonObject, key: "Token")
         return fileToken
     }
 }

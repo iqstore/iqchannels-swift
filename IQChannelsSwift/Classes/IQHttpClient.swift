@@ -504,8 +504,12 @@ class IQHttpClient {
         log?.debug("SSE \(url.absoluteString)")
         
         let eventSource = IQHttpEventSource(url: url, authToken: token, customHeaders: customHeaders) { data, error in
+            guard error == nil else {
+                callback(nil, error)
+                return
+            }
+            
             guard let data = data as? Data else {
-                // Must be an open event.
                 callback(nil, nil)
                 return
             }

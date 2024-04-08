@@ -17,7 +17,7 @@ class IQTimestampMessageCell: TextMessageCell {
         return dateFormatter
     }()
     
-    private let readImageView = UIImageView(image: .init(named: "doubleCheckmark"))
+    private let readImageView = UIImageView()
     
     private let dateLabel = UILabel()
     
@@ -51,7 +51,8 @@ class IQTimestampMessageCell: TextMessageCell {
                                                    .foregroundColor: message.isMy ? UIColor.white.withAlphaComponent(0.63) : .init(hex: 0x919399)]))
         dateLabel.attributedText = attributedString
         
-        readImageView.isHidden = !(message.isMy && message.read)
+        readImageView.isHidden = !(message.isMy && (message.read || message.received))
+        readImageView.image = message.read ? .init(named: "doubleCheckmark") : .init(named: "singleCheckmark")
         labelToImageConstraint?.isActive = message.isMy && message.read
     }
     
