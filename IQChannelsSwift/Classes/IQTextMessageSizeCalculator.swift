@@ -2,7 +2,7 @@
 //  IQTextMessageSizeCalculator.swift
 //  IQChannelsSwift
 //
-//  Created by Muhammed Aralbek on 07.04.2024.
+//  Created by Daulet on 07.04.2024.
 //
 
 import MessageKit
@@ -20,6 +20,9 @@ class IQTextMessageSizeCalculator: TextMessageSizeCalculator {
         guard let message = message as? IQChatMessage else { return super.messageContainerSize(for: message) }
         var size = super.messageContainerSize(for: message)
         size.width = max(size.width, message.read ? 79 : 56)
+        if message.isPendingRatingMessage{
+            size.height += 100
+        }
         return size
     }
 

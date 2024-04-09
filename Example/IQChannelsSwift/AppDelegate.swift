@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.backgroundColor = UIColor.white
         window?.overrideUserInterfaceStyle = .light
         window?.makeKeyAndVisible()
-        window?.rootViewController = IQLoginViewController()
+        window?.rootViewController = LoginViewController()
         
         return true
     }

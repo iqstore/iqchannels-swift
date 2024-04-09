@@ -2,12 +2,13 @@
 //  IQLoginViewController.swift
 //  IQChannelsSwift
 //
-//  Created by Muhammed Aralbek on 05.04.2024.
+//  Created by Daulet on 05.04.2024.
 //
 
 import UIKit
+import IQChannelsSwift
 
-public class IQLoginViewController: UIViewController, UITextFieldDelegate {
+public class LoginViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var serverField: UITextField = {
         let field = UITextField()

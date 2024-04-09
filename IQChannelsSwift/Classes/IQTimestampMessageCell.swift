@@ -2,7 +2,7 @@
 //  IQTimestampMessageCell.swift
 //  IQChannelsSwift
 //
-//  Created by Muhammed Aralbek on 31.03.2024.
+//  Created by Daulet on 31.03.2024.
 //
 
 import UIKit
@@ -19,7 +19,7 @@ class IQTimestampMessageCell: TextMessageCell {
     
     private let readImageView = UIImageView()
     
-    private let dateLabel = UILabel()
+    let dateLabel = UILabel()
     
     private var labelToImageConstraint: Constraint?
     

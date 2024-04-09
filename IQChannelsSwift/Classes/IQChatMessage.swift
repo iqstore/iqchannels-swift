@@ -92,11 +92,12 @@ class IQChatMessage: MessageType {
             return "\(file!.name ?? ""), \(IQFileSize.unit(with: file!.size))"
         }
         if let rating {
-            if rating.state == .ignored {
-                return "Без оценки"
-            }
-            if rating.state == .rated {
-                return "Оценка оператора: \(rating.value ?? 0) из 5"
+            switch rating.state {
+            case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
+            case .ignored: return "Без оценки"
+            case .rated: return "Оценка принята! Спасибо, что помогаете нам стать лучше!"
+            case .none, .some(.invalid):
+                break
             }
         }
         return _text ?? ""

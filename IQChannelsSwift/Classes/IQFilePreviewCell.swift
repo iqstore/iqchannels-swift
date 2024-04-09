@@ -20,8 +20,7 @@ final class IQFilePreviewCell: MessageContentCell {
     var messageLabel = MessageLabel()
     var fileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "doc")
-        imageView.tintColor = .black
+        imageView.image = UIImage(named: "doc")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -49,7 +48,7 @@ final class IQFilePreviewCell: MessageContentCell {
         contentStackView.addArrangedSubview(messageLabel)
         
         fileImageView.snp.makeConstraints { make in
-            make.size.equalTo(18)
+            make.size.equalTo(32)
         }
     }
 
@@ -61,6 +60,8 @@ final class IQFilePreviewCell: MessageContentCell {
         }
         
         guard let chatMessage = message as? IQChatMessage else { return }
+        
+        fileImageView.tintColor = chatMessage.isMy ? .white : .black
 
         let enabledDetectors = displayDelegate.enabledDetectors(for: message, at: indexPath, in: messagesCollectionView)
 

@@ -941,6 +941,7 @@ public class IQChannels {
         }
         
         message._media?.image = image
+        message._media?.setAppropriateSizeForImage()
         imageDownloading.removeValue(forKey: messageId)
         print("Loaded a message image, messageId=\(messageId), url=\(url)")
         

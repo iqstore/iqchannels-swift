@@ -2,7 +2,7 @@
 //  IQAttachmentButton.swift
 //  IQChannelsSwift
 //
-//  Created by Muhammed Aralbek on 31.03.2024.
+//  Created by Daulet on 31.03.2024.
 //
 
 import UIKit

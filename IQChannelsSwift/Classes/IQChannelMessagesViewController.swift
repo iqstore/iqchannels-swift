@@ -73,7 +73,8 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         messageInputBar.inputTextView.backgroundColor = .init(hex: 0xF4F4F8)
         messageInputBar.inputTextView.placeholder = "Сообщение"
         messageInputBar.inputTextView.textContainerInset = .init(top: 9, left: 16, bottom: 9, right: 16)
-        messageInputBar.inputTextView.placeholderLabelInsets.left += 2.5
+        messageInputBar.inputTextView.placeholderLabelInsets.left += 4
+        messageInputBar.inputTextView.tintColor = .init(hex: 0xDD0A34)
         messageInputBar.inputTextView.layer.cornerRadius = 20
         messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
         messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
@@ -138,6 +139,8 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         messagesCollectionView.register(MyCustomCell.self, forCellWithReuseIdentifier: MyCustomCell.cellIdentifier)
         messagesCollectionView.register(IQFilePreviewCell.self, forCellWithReuseIdentifier: IQFilePreviewCell.cellIdentifier)
         messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
+        messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
+        messagesCollectionView.register(IQRatingCell.self, forCellWithReuseIdentifier: IQRatingCell.cellIdentifier)
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
@@ -147,22 +150,6 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     }
     
     private func setupObservers(){
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(IQChannelMessagesViewController.inputTextViewDidBeginEditing),
-                                               name: .UITextViewTextDidBeginEditing, object: messageInputBar.inputTextView)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(IQChannelMessagesViewController.inputTextViewDidEndEditing),
-                                               name: .UITextViewTextDidEndEditing, object: messageInputBar.inputTextView)
-    }
-    
-    @objc private func inputTextViewDidBeginEditing(){
-        messageInputBar.setRightStackViewWidthConstant(to: 40, animated: true)
-    }
-    
-    @objc private func inputTextViewDidEndEditing(){
-        if messageInputBar.inputTextView.text.isEmpty {
-            messageInputBar.setRightStackViewWidthConstant(to: .zero, animated: true)            
-        }
     }
     
     @objc private func refresh() {
@@ -377,6 +364,13 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
             cell.configure(with: message, at: indexPath, and: messagesCollectionView)
             return cell
         } else if case .text = message.kind {
+            if message.isPendingRatingMessage{
+                let cell = messagesCollectionView.dequeueReusableCell(IQRatingCell.self, for: indexPath)
+                cell.configure(with: message, at: indexPath, and: messagesCollectionView)
+                cell.delegate = self
+                cell.ratingDelegate = self
+                return cell
+            }
             if message.payload == .singleChoice,
                message.isDropDown,
                messages.count - 1 == indexPath.row,
@@ -410,6 +404,15 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
     
     public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
         IQChannels.typing()
+        if text.isEmpty {
+            if messageInputBar.rightStackViewWidthConstant != .zero {
+                messageInputBar.setRightStackViewWidthConstant(to: .zero, animated: true)
+            }
+        } else {
+            if messageInputBar.rightStackViewWidthConstant != 40 {
+                messageInputBar.setRightStackViewWidthConstant(to: 40, animated: true)
+            }
+        }
     }
     
     func setInputToolbarEnabled(_ enabled: Bool) {
@@ -433,6 +436,13 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
          let indicator = messagesCollectionView.dequeueReusableCell(TypingIndicatorCell.self, for: indexPath)
         indicator.insets.left = 40
         return indicator
+    }
+    
+    public func photoCell(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell? {
+        let cell = messagesCollectionView.dequeueReusableCell(IQMediaMessageCell.self, for: indexPath)
+        cell.configure(with: message, at: indexPath, and: messagesCollectionView)
+        cell.delegate = self
+        return cell
     }
     
     public func textCell(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell? {
@@ -506,7 +516,7 @@ extension IQChannelMessagesViewController: MessagesLayoutDelegate {
             return 0
         }
         
-        return 20
+        return 40
     }
     
 }
@@ -524,7 +534,7 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
             return nil
         }
         
-        return NSAttributedString(string: displayName, attributes: [NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: 11),
+        return NSAttributedString(string: displayName, attributes: [NSAttributedStringKey.font : UIFont.systemFont(ofSize: 11),
                                                                     NSAttributedStringKey.foregroundColor : UIColor.lightGray])
     }
     
@@ -554,11 +564,11 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
         
         let dateFormatter = DateFormatter()
         dateFormatter.doesRelativeDateFormatting = true
-        dateFormatter.locale = NSLocale.current
+        dateFormatter.locale = .init(identifier: "ru_RU")
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .none
         let date = dateFormatter.string(from: message.sentDate)
-        return NSAttributedString(string: date, attributes: [NSAttributedStringKey.font : UIFont.boldSystemFont(ofSize: 13),
+        return NSAttributedString(string: date, attributes: [NSAttributedStringKey.font : UIFont.systemFont(ofSize: 13),
                                                              NSAttributedStringKey.foregroundColor : UIColor.init(hex: 0x919399)])
     }
     
@@ -679,7 +689,14 @@ extension IQChannelMessagesViewController: IQChannelsStateListener {
 }
 
 //MARK: - ChoiceDelegates
-extension IQChannelMessagesViewController: IQCardCellDelegate, IQStackedSingleChoicesCellDelegate, IQSingleChoicesViewDelegate {
+extension IQChannelMessagesViewController: IQCardCellDelegate, IQStackedSingleChoicesCellDelegate, IQSingleChoicesViewDelegate, IQRatingCellDelegate {
+    
+    func cell(didTapSendButtonFrom cell: IQRatingCell, value: Int) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+        let ratingId = messages[indexPath.row].ratingId else { return }
+        
+        IQChannels.rate(ratingId, value: value)
+    }
     
     func singleChoicesView(_ view: IQSingleChoicesView, didSelectOption singleChoice: IQSingleChoice) {
         IQChannels.sendSingleChoice(singleChoice)
