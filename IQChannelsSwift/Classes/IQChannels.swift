@@ -582,7 +582,7 @@ public class IQChannels {
         if messagesLoaded {
             let messagesCopy = messages
             DispatchQueue.main.async {
-                listener.iq(messages: messagesCopy)
+                listener.iq(messages: messagesCopy, moreMessages: false)
             }
             listenToEvents()
         } else {
@@ -649,7 +649,7 @@ public class IQChannels {
         
         for listener in messageListeners {
             DispatchQueue.main.async {
-                listener.iq(messages: messages)
+                listener.iq(messages: messages, moreMessages: false)
             }
         }
         
@@ -886,7 +886,7 @@ public class IQChannels {
         let messagesCopy = messages
         for listener in messageListeners {
             DispatchQueue.main.async {
-                listener.iq(messages: messagesCopy)
+                listener.iq(messages: messagesCopy, moreMessages: true)
             }
         }
     }
@@ -1389,7 +1389,7 @@ public class IQChannels {
         let updatedMessages = messages.map { $0 }
         for listener in messageListeners {
             DispatchQueue.main.async {
-                listener.iq(messages: updatedMessages)
+                listener.iq(messages: updatedMessages, moreMessages: false)
             }
         }
     }

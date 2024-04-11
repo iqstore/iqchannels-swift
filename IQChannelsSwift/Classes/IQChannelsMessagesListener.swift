@@ -2,7 +2,7 @@ import Foundation
 
 protocol IQChannelsMessagesListener: AnyObject {
     var id: String { get }
-    func iq(messages: [IQChatMessage])
+    func iq(messages: [IQChatMessage], moreMessages: Bool)
     func iqMessagesCleared()
     func iq(messagesError error: Error)
     func iq(messageAdded message: IQChatMessage)

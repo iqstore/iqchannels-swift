@@ -8,20 +8,24 @@ final class IQFilePreviewCell: MessageContentCell {
             messageLabel.delegate = delegate
         }
     }
+    
+    private let timestampView = IQTimestampView()
 
     var contentStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.spacing = 4
+        stackView.spacing = 8
         stackView.distribution = .fillProportionally
-        stackView.alignment = .center
+        stackView.alignment = .top
         return stackView
     }()
     var messageLabel = MessageLabel()
     var fileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "doc")
-        imageView.contentMode = .scaleAspectFit
+        imageView.image = UIImage(named: "doc",
+                                  in: .channelsAssetBundle(),
+                                  compatibleWith: nil)
+        imageView.contentMode = .bottom
         return imageView
     }()
 
@@ -43,18 +47,25 @@ final class IQFilePreviewCell: MessageContentCell {
     override func setupSubviews() {
         super.setupSubviews()
         messageContainerView.addSubview(contentStackView)
+        messageContainerView.addSubview(timestampView)
         
         contentStackView.addArrangedSubview(fileImageView)
         contentStackView.addArrangedSubview(messageLabel)
         
+        timestampView.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(12)
+            make.bottom.equalToSuperview().inset(8)
+        }
+        
         fileImageView.snp.makeConstraints { make in
-            make.size.equalTo(32)
+            make.size.equalTo(CGSize(width: 32, height: 36))
         }
     }
 
     override func configure(with message: MessageType, at indexPath: IndexPath, and messagesCollectionView: MessagesCollectionView) {
         super.configure(with: message, at: indexPath, and: messagesCollectionView)
 
+        timestampView.configure(with: message)
         guard let displayDelegate = messagesCollectionView.messagesDisplayDelegate else {
             fatalError("MessagesDisplayDelegate has not been set.")
         }
@@ -73,8 +84,16 @@ final class IQFilePreviewCell: MessageContentCell {
             }
             
             let textColor = displayDelegate.textColor(for: message, at: indexPath, in: messagesCollectionView)
-            messageLabel.text = chatMessage.text
-            messageLabel.textColor = textColor
+            let attributedText = NSMutableAttributedString()
+            attributedText.append(.init(string: chatMessage.text + "\n", attributes: [
+                .foregroundColor: textColor,
+                .font: UIFont.preferredFont(forTextStyle: .body)
+            ]))
+            attributedText.append(.init(string: IQFileSize.unit(with: chatMessage.file?.size ?? 0), attributes: [
+                .foregroundColor: textColor.withAlphaComponent(0.64),
+                .font: UIFont.systemFont(ofSize: 15)
+            ]))
+            messageLabel.attributedText = attributedText
         }
     }
 }

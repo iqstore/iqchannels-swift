@@ -6,6 +6,7 @@ PODS:
     - MessageKit (= 3.1.1)
     - SDWebImage (~> 5.10)
     - SnapKit (= 5.6.0)
+    - SwiftMessages (= 9.0.9)
     - TRVSEventSource (= 0.0.8)
   - MessageKit (3.1.1):
     - InputBarAccessoryView (~> 4.3.0)
@@ -13,6 +14,9 @@ PODS:
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
   - SnapKit (5.6.0)
+  - SwiftMessages (9.0.9):
+    - SwiftMessages/App (= 9.0.9)
+  - SwiftMessages/App (9.0.9)
   - TRVSEventSource (0.0.8)
 
 DEPENDENCIES:
@@ -24,6 +28,7 @@ SPEC REPOS:
     - MessageKit
     - SDWebImage
     - SnapKit
+    - SwiftMessages
     - TRVSEventSource
 
 EXTERNAL SOURCES:
@@ -32,12 +37,13 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   InputBarAccessoryView: 8e7fc09e9cba75e0fee5da13450e15c194806f69
-  IQChannelsSwift: d578d12cda7cd5a12dd9e3c640eb8be5e687d269
+  IQChannelsSwift: c605a75a1b08aa80c1a6b66ebd357deda55b4127
   MessageKit: a3e612a54a24f5d9ca0295760749b481afd3f2da
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+  SwiftMessages: 1a23aef303fa7bb26ad802880746cf8358e378fe
   TRVSEventSource: 19fb940e0351ceb97125d46fd40cd55e339568d8
 
-PODFILE CHECKSUM: c0f9bde666ee50351f781959509bcacbe1f14425
+PODFILE CHECKSUM: dc6ea7a708a47086bc3077945ee7611d5130f16c
 
 COCOAPODS: 1.15.2

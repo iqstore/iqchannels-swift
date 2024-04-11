@@ -21,6 +21,7 @@ final class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
     lazy var filePreviewSizeCalculator = FilePreviewSizeCalculator(layout: self)
     lazy var defaultCellSizeCalculator = DefaultCellSizeCalculator(layout: self)
     lazy var textSizeCalculator = IQTextMessageSizeCalculator(layout: self)
+    lazy var _typingIndicatorSizeCalculator = IQTypingIndicatorCellSizeCalculator(layout: self)
     
     override class var layoutAttributesClass: AnyClass {
         return CustomMessagesCollectionViewLayoutAttributes.self
@@ -28,7 +29,7 @@ final class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
     
     override func cellSizeCalculatorForItem(at indexPath: IndexPath) -> CellSizeCalculator {
         if isSectionReservedForTypingIndicator(indexPath.section) {
-            return typingIndicatorSizeCalculator
+            return _typingIndicatorSizeCalculator
         }
         
         let message = messagesDataSource.messageForItem(at: indexPath, in: messagesCollectionView)

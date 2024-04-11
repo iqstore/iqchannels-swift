@@ -43,7 +43,7 @@ class IQRatingCell: IQTimestampMessageCell {
     
     override func setupSubviews() {
         super.setupSubviews()
-        dateLabel.isHidden = true
+        timestampView.isHidden = true
         messageContainerView.addSubview(sendButton)
         messageContainerView.addSubview(ratingView)
         sendButton.snp.makeConstraints { make in

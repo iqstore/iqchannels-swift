@@ -5,8 +5,8 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
     
     var messageLabelFont = UIFont.preferredFont(forTextStyle: .body)
     
-    var incomingCellInsets = UIEdgeInsets(top: 4, left: 18, bottom: 4, right: 16)
-    var outgoingCellInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 18)
+    var incomingCellInsets = UIEdgeInsets(top: 8, left: 18, bottom: 28, right: 16)
+    var outgoingCellInsets = UIEdgeInsets(top: 8, left: 16, bottom: 28, right: 18)
     
     override func configure(attributes: UICollectionViewLayoutAttributes) {
         super.configure(attributes: attributes)
@@ -25,9 +25,14 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
         guard let chatMessage = message as? IQChatMessage else { return .zero }
         
         let maxWidth = messageContainerMaxWidth(for: message)
-        let attributedText: NSAttributedString = NSAttributedString(string: chatMessage.text,
-                                                                    attributes: [.font: messageLabelFont])
-        let labelSize = labelSize(for: attributedText, considering: maxWidth - 18 + 4)
+        let attributedText = NSMutableAttributedString()
+        attributedText.append(.init(string: chatMessage.text + "\n", attributes: [
+            .font: UIFont.preferredFont(forTextStyle: .body)
+        ]))
+        attributedText.append(.init(string: IQFileSize.unit(with: chatMessage.file?.size ?? 0), attributes: [
+            .font: UIFont.systemFont(ofSize: 15)
+        ]))
+        let labelSize = labelSize(for: attributedText, considering: maxWidth - 32 + 8)
         
         return CGSize(width: maxWidth,
                       height: max(labelSize.height, 18) + (cellInsets(for: message).top + cellInsets(for: message).bottom))

@@ -89,7 +89,7 @@ class IQChatMessage: MessageType {
             return "Ошибка: \(uploadError.localizedDescription)"
         }
         if isFileMessage {
-            return "\(file!.name ?? ""), \(IQFileSize.unit(with: file!.size))"
+            return "\(file!.name ?? "")"
         }
         if let rating {
             switch rating.state {

@@ -2,6 +2,7 @@ import UIKit
 import MessageKit
 import SDWebImage
 import InputBarAccessoryView
+import SwiftMessages
 
 open class IQChannelMessagesViewController: MessagesViewController, UIGestureRecognizerDelegate {
     
@@ -9,6 +10,8 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
 
     private var messagesIndicator = IQActivityIndicator()
     private var loginIndicator = IQActivityIndicator()
+    private var scrollDownButton = IQScrollDownButton()
+    private var chatUnavailableView = IQChatUnavailableView()
     private var refreshControl = UIRefreshControl()
     
     // MARK: - PROPERTIES
@@ -34,6 +37,8 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         setupIndicators()
         setupRefreshControl()
         setupNavBar()
+        setupChatUnavailableView()
+        setupScrollDownButton()
         setupCollectionView()
         setupInputBar()
         setupObservers()
@@ -94,6 +99,20 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         messageInputBar.setLeftStackViewWidthConstant(to: 40, animated: false)
     }
     
+    private func setupScrollDownButton(){
+        view.addSubview(scrollDownButton)
+        scrollDownButton.alpha = 0
+        scrollDownButton.addTarget(self, action: #selector(scrollDownDidTap), for: .touchUpInside)
+        scrollDownButton.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(8)
+            if #available(iOS 15.0, *) {
+                make.bottom.equalTo(view.keyboardLayoutGuide.snp.top).inset(-8)
+            }else{
+                make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(-8)
+            }
+        }
+    }
+    
     private func setupRefreshControl(){
         refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
         messagesCollectionView.refreshControl = refreshControl
@@ -104,6 +123,20 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         if typingTimer == nil {
             typingTimer?.invalidate()
         }
+    }
+    
+    private func setupChatUnavailableView(){
+        view.addSubview(chatUnavailableView)
+        setChatUnavailable(hidden: true)
+        chatUnavailableView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.horizontalEdges.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setChatUnavailable(hidden: Bool) {
+        chatUnavailableView.isHidden = hidden
+        messagesCollectionView.isHidden = !hidden
     }
     
     private func setupIndicators(){
@@ -141,6 +174,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
         messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
         messagesCollectionView.register(IQRatingCell.self, forCellWithReuseIdentifier: IQRatingCell.cellIdentifier)
+        messagesCollectionView.register(IQTypingIndicatorCell.self, forCellWithReuseIdentifier: IQTypingIndicatorCell.cellIdentifier)
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
@@ -152,6 +186,10 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     private func setupObservers(){
     }
     
+    @objc private func scrollDownDidTap() {
+        messagesCollectionView.scrollToBottom(animated: true)
+    }
+
     @objc private func refresh() {
         if messagesLoaded {
             self.loadMoreMessages()
@@ -312,6 +350,24 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         messageDateComponents.month != prevDateComponents.month ||
         messageDateComponents.day != prevDateComponents.day
     }
+        
+    open override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let shouldHide = shouldHideScrollDownButton()
+        let targetAlpha: CGFloat = shouldHide ? 0 : 1
+        if shouldHide {
+            scrollDownButton.dotHidden = true
+        }
+        guard scrollDownButton.alpha != targetAlpha else { return }
+        
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.scrollDownButton.alpha = targetAlpha
+        }
+    }
+    
+    func shouldHideScrollDownButton() -> Bool {
+        let offset = messagesCollectionView.contentOffset.y + messagesCollectionView.frame.height
+        return !(offset < messagesCollectionView.contentSize.height - 100)
+    }
     
     override open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if isSectionReservedForTypingIndicator(indexPath.section){
@@ -389,6 +445,12 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         return cell
     }
 
+    open override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
+        super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+        
+        let view = IQMessageView.view()
+        SwiftMessages.show(view: view)
+    }
 }
 
 //MARK: - INPUT BAR DELEGATE
@@ -433,8 +495,8 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
     }
     
     public func typingIndicator(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell {
-         let indicator = messagesCollectionView.dequeueReusableCell(TypingIndicatorCell.self, for: indexPath)
-        indicator.insets.left = 40
+        let indicator = messagesCollectionView.dequeueReusableCell(IQTypingIndicatorCell.self, for: indexPath)
+        indicator.textLabel.text = "\(typingUser?.displayName ?? "") печатает..."
         return indicator
     }
     
@@ -516,7 +578,7 @@ extension IQChannelMessagesViewController: MessagesLayoutDelegate {
             return 0
         }
         
-        return 40
+        return 50
     }
     
 }
@@ -614,14 +676,23 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         picker.dismiss(animated: true)
-        guard let image = info[UIImagePickerControllerEditedImage] as? UIImage else { return }
+        guard let image = info[UIImagePickerControllerEditedImage] as? UIImage,
+        let url = info[UIImagePickerControllerImageURL] as? URL else { return }
+        
+        if url.pathExtension == "gif",
+           let data = try? Data(contentsOf: url){
+            sendData(data: data, filename: nil)
+            return
+        }
         
         sendImage(image)
     }
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let url = urls.first,
-        let data = try? Data.init(contentsOf: url) else { return }
+            url.startAccessingSecurityScopedResource() else { return }
+        defer { url.stopAccessingSecurityScopedResource() }
+        guard let data = try? Data(contentsOf: url) else { return }
         
         DispatchQueue.main.async {
             self.confirmDataSubmission(data: data, filename: url.lastPathComponent)
@@ -662,12 +733,14 @@ extension IQChannelMessagesViewController: IQChannelsStateListener {
     func iqLoggedOut(_ state: IQChannelsState) {
         self.state = state
         loginIndicator.stopAnimating()
+        setChatUnavailable(hidden: false)
     }
 
     func iqAwaitingNetwork(_ state: IQChannelsState) {
         self.state = state
         
         loginIndicator.label.text = "Ожидание сети..."
+        setChatUnavailable(hidden: true)
         loginIndicator.startAnimating()
     }
 
@@ -675,6 +748,7 @@ extension IQChannelMessagesViewController: IQChannelsStateListener {
         self.state = state
         
         loginIndicator.label.text = "Авторизация..."
+        setChatUnavailable(hidden: true)
         loginIndicator.startAnimating()
     }
 
@@ -684,6 +758,7 @@ extension IQChannelMessagesViewController: IQChannelsStateListener {
         
         loadMessages()
         loginIndicator.label.text = ""
+        setChatUnavailable(hidden: true)
         loginIndicator.stopAnimating()
     }
 }
@@ -771,7 +846,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
         present(UIAlertController(error: error), animated: true)
     }
 
-    func iq(messages: [IQChatMessage]) {
+    func iq(messages: [IQChatMessage], moreMessages: Bool) {
         guard messagesSub != nil else { return }
         
         self.messages = messages
@@ -781,7 +856,9 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
         messagesIndicator.stopAnimating()
         refreshControl.endRefreshing()
         messagesCollectionView.reloadData()
-        messagesCollectionView.scrollToBottom()
+        if !moreMessages {
+            messagesCollectionView.scrollToBottom()
+        }
     }
 
     func iqMessagesCleared() {
@@ -796,8 +873,11 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
 
     func iq(messageAdded message: IQChatMessage) {
         messages.append(message)
+        scrollDownButton.dotHidden = false
         messagesCollectionView.reloadData()
-        messagesCollectionView.scrollToBottom()
+        if shouldHideScrollDownButton() {
+            messagesCollectionView.scrollToBottom(animated: true)
+        }
     }
 
     func iq(messageSent message: IQChatMessage) {
@@ -850,7 +930,6 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
         
         typingUser = user
         setTypingIndicatorViewHidden(false, animated: false)
-        messagesCollectionView.scrollToBottom()
     }
 }
 
