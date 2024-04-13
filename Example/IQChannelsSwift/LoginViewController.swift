@@ -69,7 +69,7 @@ public class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     func setServer(server: String?) {
-        let server = (server?.isEmpty ?? true) ? "" : (server ?? "")
+        let server = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru/" : (server ?? "")
         
         let config = IQChannelsConfig(address: server,
                                       channel: "support")
@@ -101,6 +101,7 @@ public class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func loginDidTap() {
+        setServer(server: serverField.text)
         loginWithEmail(emailField.text)
     }
     

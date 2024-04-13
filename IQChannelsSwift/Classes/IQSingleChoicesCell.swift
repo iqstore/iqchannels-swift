@@ -239,7 +239,7 @@ final class IQSingleChoicesCell: UICollectionViewCell {
 
         switch attributes.avatarPosition.vertical {
         case .messageBottom:
-            origin.y = attributes.size.height - attributes.messageContainerPadding.bottom - attributes.cellBottomLabelSize.height - attributes.messageBottomLabelSize.height - attributes.messageContainerSize.height - attributes.additionalContainerSize.height - attributes.messageContainerPadding.top
+            origin.y = attributes.size.height - attributes.messageContainerPadding.bottom - attributes.cellBottomLabelSize.height - attributes.messageBottomLabelSize.height - attributes.messageContainerSize.height - attributes.additionalContainerSize.height - attributes.messageContainerPadding.top - 8
         case .messageCenter:
             if attributes.avatarSize.height > attributes.messageContainerSize.height {
                 let messageHeight = attributes.messageContainerSize.height + attributes.additionalContainerSize.height + attributes.messageContainerPadding.top + attributes.messageContainerPadding.bottom
@@ -270,9 +270,9 @@ final class IQSingleChoicesCell: UICollectionViewCell {
     }
     
     private func layoutSingleChoicesView(with attributes: CustomMessagesCollectionViewLayoutAttributes) {
-        let y = cellBottomLabel.frame.maxY
+        let y = cellBottomLabel.frame.maxY + 8
         let avatarPadding = attributes.avatarLeadingTrailingPadding
-        let originX: CGFloat = attributes.avatarSize.width + attributes.messageContainerPadding.left + avatarPadding
+        let originX: CGFloat = attributes.avatarSize.width + attributes.messageContainerPadding.left + avatarPadding - 8
         let origin = CGPoint(x: originX, y: y)
 
         singleChoicesView.frame = CGRect(origin: origin, size: attributes.additionalContainerSize)

@@ -1,9 +1,9 @@
 import UIKit
 import SwiftMessages
 
-struct IQMessageView {
+extension UIViewController {
     
-    static func view() -> MessageView {
+    func showCopyPreviewView() {
         let view = MessageView.viewFromNib(layout: .cardView)
         view.backgroundHeight = 60
         view.configureTheme(backgroundColor: UIColor(hex: 0x57B22F),
@@ -32,6 +32,6 @@ struct IQMessageView {
 
         (view.backgroundView as? CornerRoundingView)?.cornerRadius = 12
 
-        return view
+        SwiftMessages.show(view: view)
     }
 }

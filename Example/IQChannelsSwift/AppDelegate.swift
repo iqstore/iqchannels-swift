@@ -26,15 +26,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    private func setNavigationBarAppearance(to controller: UINavigationController){
+    private func setNavigationBarAppearance(){
         let appearance = UINavigationBarAppearance()
         appearance.backgroundColor = .white
         appearance.shadowColor = .white
-        controller.navigationBar.standardAppearance = appearance
-        controller.navigationBar.scrollEdgeAppearance = appearance
-        controller.navigationBar.compactAppearance = appearance
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
         if #available(iOS 15.0, *) {
-            controller.navigationBar.compactScrollEdgeAppearance = appearance
+            UINavigationBar.appearance().compactScrollEdgeAppearance = appearance
         }
     }
 

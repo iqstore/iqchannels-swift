@@ -2,12 +2,10 @@ import UIKit
 import MessageKit
 import SDWebImage
 import InputBarAccessoryView
-import SwiftMessages
 
 open class IQChannelMessagesViewController: MessagesViewController, UIGestureRecognizerDelegate {
     
-    //MARK: - Views
-
+    //MARK: - VIEWS
     private var messagesIndicator = IQActivityIndicator()
     private var loginIndicator = IQActivityIndicator()
     private var scrollDownButton = IQScrollDownButton()
@@ -70,288 +68,24 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         NotificationCenter.default.removeObserver(self)
     }
     
-    // MARK: - PRIVATE METHODS
-    
-    private func setupInputBar(){
-        messageInputBar.delegate = self
-        messageInputBar.separatorLine.isHidden = true
-        messageInputBar.inputTextView.backgroundColor = .init(hex: 0xF4F4F8)
-        messageInputBar.inputTextView.placeholder = "Сообщение"
-        messageInputBar.inputTextView.textContainerInset = .init(top: 9, left: 16, bottom: 9, right: 16)
-        messageInputBar.inputTextView.placeholderLabelInsets.left += 4
-        messageInputBar.inputTextView.tintColor = .init(hex: 0xDD0A34)
-        messageInputBar.inputTextView.layer.cornerRadius = 20
-        messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
-        messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
-        messageInputBar.sendButton.configure {
-            $0.layer.cornerRadius = 20
-            $0.backgroundColor = .init(hex: 0x242729)
-            $0.setImage(.init(systemName: "arrow.up"), for: .normal)
-            $0.imageView?.tintColor = .white
-            $0.setTitle(nil, for: .normal)
-            $0.setSize(.init(width: 40, height: 40), animated: false)
-        }
-        messageInputBar.middleContentViewPadding.left = 8
-        let button = IQAttachmentButton()
-        button.addTarget(self, action: #selector(attachmentDidTap), for: .touchUpInside)
-        messageInputBar.setStackViewItems([button], forStack: .left, animated: false)
-        messageInputBar.setRightStackViewWidthConstant(to: .zero, animated: false)
-        messageInputBar.setLeftStackViewWidthConstant(to: 40, animated: false)
-    }
-    
-    private func setupScrollDownButton(){
-        view.addSubview(scrollDownButton)
-        scrollDownButton.alpha = 0
-        scrollDownButton.addTarget(self, action: #selector(scrollDownDidTap), for: .touchUpInside)
-        scrollDownButton.snp.makeConstraints { make in
-            make.right.equalToSuperview().inset(8)
-            if #available(iOS 15.0, *) {
-                make.bottom.equalTo(view.keyboardLayoutGuide.snp.top).inset(-8)
-            }else{
-                make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(-8)
-            }
-        }
-    }
-    
-    private func setupRefreshControl(){
-        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
-        messagesCollectionView.refreshControl = refreshControl
-    }
-    
-    private func setupTypingTimer() {
-        typingTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(onTick), userInfo: nil, repeats: false)
-        if typingTimer == nil {
-            typingTimer?.invalidate()
-        }
-    }
-    
-    private func setupChatUnavailableView(){
-        view.addSubview(chatUnavailableView)
-        setChatUnavailable(hidden: true)
-        chatUnavailableView.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.horizontalEdges.equalToSuperview().inset(16)
-        }
-    }
-    
-    private func setChatUnavailable(hidden: Bool) {
-        chatUnavailableView.isHidden = hidden
-        messagesCollectionView.isHidden = !hidden
-    }
-    
-    private func setupIndicators(){
-        view.addSubview(loginIndicator)
-        view.addSubview(messagesIndicator)
-        loginIndicator.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-        messagesIndicator.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-    }
-
-    private func setupNavBar() {
-        navigationItem.title = "Сообщения"
-    }
-    
-    private func setupCollectionView() {
-        let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout
-        
-        layout?.setMessageOutgoingAvatarSize(.zero)
-        layout?.setMessageIncomingAvatarSize(.init(width: 40, height: 40))
-        layout?.setMessageIncomingMessageTopLabelAlignment(.init(textAlignment: .left, textInsets: .init(top: 0, left: 68, bottom: 0, right: 0)))
-        layout?.setMessageIncomingMessagePadding(.init(top: 0, left: 8, bottom: 0, right: 40))
-        layout?.setMessageIncomingAvatarPosition(AvatarPosition(vertical: .messageBottom))
-        layout?.setMessageIncomingCellBottomLabelAlignment(.init(textAlignment: .left,
-                                                                 textInsets: .zero))
-        layout?.setMessageOutgoingCellBottomLabelAlignment(.init(textAlignment: .right,
-                                                                 textInsets: .zero))
-        messagesCollectionView.register(IQCardCell.self, forCellWithReuseIdentifier: IQCardCell.cellIdentifier)
-        messagesCollectionView.register(IQSingleChoicesCell.self, forCellWithReuseIdentifier: IQSingleChoicesCell.cellIdentifier)
-        messagesCollectionView.register(IQStackedSingleChoicesCell.self, forCellWithReuseIdentifier: IQStackedSingleChoicesCell.cellIdentifier)
-        messagesCollectionView.register(MyCustomCell.self, forCellWithReuseIdentifier: MyCustomCell.cellIdentifier)
-        messagesCollectionView.register(IQFilePreviewCell.self, forCellWithReuseIdentifier: IQFilePreviewCell.cellIdentifier)
-        messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
-        messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
-        messagesCollectionView.register(IQRatingCell.self, forCellWithReuseIdentifier: IQRatingCell.cellIdentifier)
-        messagesCollectionView.register(IQTypingIndicatorCell.self, forCellWithReuseIdentifier: IQTypingIndicatorCell.cellIdentifier)
-        messagesCollectionView.messagesDataSource = self
-        messagesCollectionView.messagesLayoutDelegate = self
-        messagesCollectionView.messagesDisplayDelegate = self
-        let gr = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        gr.delegate = self
-        messagesCollectionView.addGestureRecognizer(gr)
-    }
-    
-    private func setupObservers(){
-    }
-    
-    @objc private func scrollDownDidTap() {
-        messagesCollectionView.scrollToBottom(animated: true)
-    }
-
-    @objc private func refresh() {
-        if messagesLoaded {
-            self.loadMoreMessages()
-        } else {
-            self.loadMessages()
-        }
-    }
-    
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    // MARK: - PUBLIC METHODS
+    private func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
     
-    @objc private func dismissKeyboard(){
-        messageInputBar.inputTextView.resignFirstResponder()
-    }
-    
-    @objc private func attachmentDidTap(){
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
-            self.photoSourceDidTap(source: .photoLibrary)
-        }))
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            alert.addAction(.init(title: "Камера", style: .default, handler: { _ in
-                self.photoSourceDidTap(source: .camera)
-            }))
-        }
-        alert.addAction(.init(title: "Файл", style: .default, handler: { _ in
-            self.fileSourceDidTap()
-        }))
-        alert.addAction(.init(title: "Отмена", style: .cancel))
-        messageInputBar.inputTextView.resignFirstResponder()
-        present(alert, animated: true)
-    }
-    
-    private func photoSourceDidTap(source: UIImagePickerController.SourceType){
-        let picker = UIImagePickerController()
-        picker.sourceType = source
-        picker.delegate = self
-        picker.allowsEditing = true
-        present(picker, animated: true)
-    }
-    
-    @objc
-    private func onTick() {
-        setTypingIndicatorViewHidden(true, animated: true)
-        typingUser = nil
-        typingTimer?.invalidate()
-    }
-        
-    private func fileSourceDidTap(){
-        let documentController = UIDocumentPickerViewController(forOpeningContentTypes: [.data])
-        documentController.delegate = self
-        documentController.modalPresentationStyle = .formSheet
-        present(documentController, animated: true)
-    }
-    
-    private func extendByTime(_ seconds: TimeInterval) {
-        let newFireDate = (typingTimer?.fireDate ?? Date()).addingTimeInterval(seconds)
-        typingTimer?.fireDate = newFireDate
-    }
-    
-    private func openMessageInBrowser(messageID: Int) {
-        let index = getMessageIndexById(messageId: messageID)
-        if (index == -1) {
-            return
-        }
-
-        guard messages.indices.contains(index) else { return }
-        let message = messages[index]
-        guard let file = message.file else { return }
-        
-        let _ = IQChannels.fileURL(file.id ?? "") { url, error in
-            guard let url, error == nil else {
-                let alert = UIAlertController(title: "Ошибка", message: error?.localizedDescription, preferredStyle: .alert)
-                alert.addAction(.init(title: "OK", style: .cancel))
-                self.present(alert, animated: true)
-                return
-            }
-            
-            UIApplication.shared.open(url)
+    func scrollToBottomIfNeeded(animated: Bool = true){
+        if shouldHideScrollDownButton(){
+            messagesCollectionView.scrollToBottom(animated: animated)
+            scrollDownButton.dotHidden = true
         }
     }
     
-    private func getMessageIndexById(messageId: Int) -> Int {
-        guard messageId != 0 else {
-            return -1
-        }
-
-        for (index, message) in messages.enumerated() {
-            if message.id == messageId {
-                return index
-            }
-        }
-        return -1
-    }
-
-    private func getMyMessageByLocalId(localId: Int) -> Int {
-        guard localId != 0 else {
-            return -1
-        }
-
-        for (index, message) in messages.enumerated() {
-            if message.isMy && message.localId == localId {
-                return index
-            }
-        }
-        return -1
+    func shouldHideScrollDownButton() -> Bool {
+        let offset = messagesCollectionView.contentOffset.y + messagesCollectionView.frame.height
+        return !(offset < messagesCollectionView.contentSize.height - 100)
     }
     
-    private func getMessageIndex(_ message: IQChatMessage) -> Int? {
-        let index = getMessageIndexById(messageId: message.id)
-        if index >= 0 {
-            return index
-        }
-        if message.isMy {
-            return getMyMessageByLocalId(localId: message.localId)
-        }
-        return nil
-    }
-    
-    private func isGroupStart(_ indexPath: IndexPath) -> Bool {
-        let index = indexPath.row
-        let message = messages[index]
-        if index == 0 {
-            return true
-        }
-
-        let prev = messages[index - 1]
-        return prev.isMy != message.isMy
-                || (prev.userId != nil && prev.userId != message.userId)
-                || (message.createdAt - prev.createdAt) > 60000
-    }
-
-    private func isGroupEnd(_ indexPath: IndexPath) -> Bool {
-        let index = indexPath.row
-        let message = messages[index]
-        if index + 1 == messages.count {
-            return true
-        }
-
-        let next = messages[index + 1]
-        return next.isMy != message.isMy
-                || (next.userId != nil && next.userId != message.userId)
-                || (next.createdAt - message.createdAt) > 60000
-    }
-    
-    private func shouldDisplayMessageDate(_ indexPath: IndexPath) -> Bool {
-        let index = indexPath.row
-        guard index > 0 else { return true }
-        let message = messages[index]
-        let prev = messages[index - 1]
-        
-        let calendar = Calendar.current
-        let messageDateComponents = calendar.dateComponents([.year, .month, .day], from: message.sentDate)
-        let prevDateComponents = calendar.dateComponents([.year, .month, .day], from: prev.sentDate)
-        
-        return messageDateComponents.year != prevDateComponents.year ||
-        messageDateComponents.month != prevDateComponents.month ||
-        messageDateComponents.day != prevDateComponents.day
-    }
-        
-    open override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let shouldHide = shouldHideScrollDownButton()
         let targetAlpha: CGFloat = shouldHide ? 0 : 1
         if shouldHide {
@@ -364,11 +98,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         }
     }
     
-    func shouldHideScrollDownButton() -> Bool {
-        let offset = messagesCollectionView.contentOffset.y + messagesCollectionView.frame.height
-        return !(offset < messagesCollectionView.contentSize.height - 100)
-    }
-    
+    // MARK: - CELL FOR ITEM
     override open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if isSectionReservedForTypingIndicator(indexPath.section){
             return super.collectionView(collectionView, cellForItemAt: indexPath)
@@ -444,18 +174,69 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         }
         return cell
     }
+}
 
-    open override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-        super.collectionView(collectionView, performAction: action, forItemAt: indexPath, withSender: sender)
+// MARK: - MESSAGES COLLECTION VIEW
+extension IQChannelMessagesViewController {
+    
+    open func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let collectionView = collectionView as? MessagesCollectionView,
+              let messagesDataSource = collectionView.messagesDataSource,
+              let indexPath = indexPaths.first else {
+            return nil
+        }
         
-        let view = IQMessageView.view()
-        SwiftMessages.show(view: view)
+        let message = messagesDataSource.messageForItem(at: indexPath, in: collectionView)
+        var textToCopy: String = ""
+        switch message.kind {
+        case .text(let text), .emoji(let text):
+            textToCopy = text
+        case .attributedText(let attributedText):
+            textToCopy = attributedText.string
+        default:
+            return nil
+        }
+        
+        let context = UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { (action) -> UIMenu? in
+            let copy = UIAction(title: "Копировать", image: UIImage(systemName: "doc.on.doc"), identifier: nil, discoverabilityTitle: nil, state: .off) { [weak self] (_) in
+                UIPasteboard.general.string = textToCopy
+                self?.showCopyPreviewView()
+            }
+            return UIMenu(title: "", image: nil, identifier: nil, options: UIMenu.Options.displayInline, children: [copy])
+        }
+        return context
+    }
+    
+    open func collectionView(_ collectionView: UICollectionView, contextMenuConfiguration configuration: UIContextMenuConfiguration, highlightPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
+        return contextMenuPreview(collectionView: collectionView, indexPath: indexPath)
+    }
+    
+    open func collectionView(_ collectionView: UICollectionView, contextMenuConfiguration configuration: UIContextMenuConfiguration, dismissalPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
+        return contextMenuPreview(collectionView: collectionView, indexPath: indexPath)
     }
 }
 
 //MARK: - INPUT BAR DELEGATE
 extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
     
+    @objc func inputBarDidBeginEditing(){
+        DispatchQueue.main.async {
+            self.scrollToBottomIfNeeded()
+        }
+    }
+    
+    @objc func keyboardFrameDidChange(_ notification: Notification){
+        guard let rect = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let height = self.view.frame.height - rect.origin.y
+        UIView.animate(withDuration: 0.2) {
+            self.scrollDownButton.snp.updateConstraints { make in
+                make.bottom.equalToSuperview().inset(height + 16).priority(.high)
+            }
+            self.view.layoutIfNeeded()
+        }
+    }
+        
     public func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
         if !messagesLoaded {
             return
@@ -578,13 +359,14 @@ extension IQChannelMessagesViewController: MessagesLayoutDelegate {
             return 0
         }
         
-        return 50
+        return 56
     }
     
 }
 
 // MARK: - MESSAGES DISPLAY DELEGATE
 extension IQChannelMessagesViewController: MessagesDisplayDelegate {
+    
     public func messageTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
         guard isGroupStart(indexPath) else {
             return nil
@@ -644,25 +426,30 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
             avatarView.isHidden = true
             return
         }
+        let initials = String((message.user?.name ?? "").prefix(1))
 
         if let avatarImage = user.avatarImage {
             let avatar: Avatar = .init(image: avatarImage)
             avatarView.set(avatar: avatar)
         } else if let url = user.avatarURL {
+            avatarView.set(avatar: .init(initials: initials))
             SDWebImageManager.shared.loadImage(with: url, progress: nil) { [weak self] image, _, _, _, _, _ in
-                guard let self else { return }
-                
-                self.messages[indexPath.row].user?.avatarImage = image
-                let index: Int
-                if message.isMy {
-                    index = self.getMyMessageByLocalId(localId: message.localId)
-                } else {
-                    index = self.getMessageIndexById(messageId: message.id)
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    
+                    let index: Int
+                    if message.isMy {
+                        index = self.getMyMessageByLocalId(localId: message.localId)
+                    } else {
+                        index = self.getMessageIndexById(messageId: message.id)
+                    }
+                    self.messages[index].user?.avatarImage = image
+                    if let cell = (messagesCollectionView.cellForItem(at: .init(item: index, section: 0)) as? MessageContentCell) {
+                        cell.avatarView.set(avatar: .init(image: image))
+                    }
                 }
-                messagesCollectionView.reloadItems(at: [.init(item: index, section: 0)])
             }
         } else {
-            let initials = String((message.user?.name ?? "").prefix(1))
             let avatar: Avatar = .init(initials: initials)
             avatarView.set(avatar: avatar)
         }
@@ -676,10 +463,10 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         picker.dismiss(animated: true)
-        guard let image = info[UIImagePickerControllerEditedImage] as? UIImage,
-        let url = info[UIImagePickerControllerImageURL] as? URL else { return }
+        guard let image = info[UIImagePickerControllerEditedImage] as? UIImage else { return }
         
-        if url.pathExtension == "gif",
+        if let url = info[UIImagePickerControllerImageURL] as? URL,
+           url.pathExtension == "gif",
            let data = try? Data(contentsOf: url){
             sendData(data: data, filename: nil)
             return
@@ -719,7 +506,7 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
 }
 
 // MARK: - STATE LISTENER
-extension IQChannelMessagesViewController: IQChannelsStateListener {
+extension IQChannelMessagesViewController: IQChannelsStateListenerProtocol {
     var id: String { UUID().uuidString }
     
     private func clearState() {
@@ -796,7 +583,7 @@ extension IQChannelMessagesViewController: IQCardCellDelegate, IQStackedSingleCh
 }
 
 // MARK: - MESSAGES LISTENER
-extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannelsMoreMessagesListener {
+extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, IQChannelsMoreMessagesListenerProtocol {
     private func clearMessages() {
         messagesIndicator.stopAnimating()
         messagesSub?.unsubscribe()
@@ -808,7 +595,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
     }
     
     private func loadMoreMessages() {
-        guard let client, messagesLoaded else { return }
+        guard client != nil, messagesLoaded else { return }
 
         moreMessagesLoading = IQChannels.moreMessages(self)
         refreshControl.beginRefreshing()
@@ -830,7 +617,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
     }
 
     private func loadMessages() {
-        guard let client, messagesSub == nil, !messagesLoaded else { return }
+        guard client != nil, messagesSub == nil, !messagesLoaded else { return }
 
         messagesSub = IQChannels.messages(self)
         messagesIndicator.label.text = "Загрузка..."
@@ -875,15 +662,13 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
         messages.append(message)
         scrollDownButton.dotHidden = false
         messagesCollectionView.reloadData()
-        if shouldHideScrollDownButton() {
-            messagesCollectionView.scrollToBottom(animated: true)
-        }
+        scrollToBottomIfNeeded()
     }
 
     func iq(messageSent message: IQChatMessage) {
         messages.append(message)
         messagesCollectionView.reloadData()
-        messagesCollectionView.scrollToBottom()
+        scrollToBottomIfNeeded()
     }
 
     func iq(messageUpdated message: IQChatMessage) {
@@ -897,13 +682,16 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListener, IQChannel
         if index > 0 {
             paths.append(IndexPath(item: index - 1, section: 0))
         }
-        messagesCollectionView.reloadItems(at: paths)
+        DispatchQueue.main.async {
+            self.messagesCollectionView.reloadItems(at: paths)      
+            self.scrollToBottomIfNeeded()
+        }
     }
     
     func iq(messagesRemoved messages: [IQChatMessage]) {
-        guard let messagesSub = messagesSub else { return }
+        guard messagesSub != nil else { return }
         
-        var remoteMessages = messages
+        let remoteMessages = messages
         
         var index = 0
         var paths = [IndexPath]()
@@ -963,5 +751,299 @@ extension Array {
         self.removeLast(count-j)
         
         return removedElements
+    }
+}
+
+// MARK: - PRIVATE EXTENSION
+private extension IQChannelMessagesViewController {
+    
+    // MARK: - METHODS
+    func setupCollectionView() {
+        let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout
+        
+        layout?.setMessageOutgoingAvatarSize(.zero)
+        layout?.setMessageIncomingAvatarSize(.init(width: 40, height: 40))
+        layout?.setMessageIncomingMessageTopLabelAlignment(.init(textAlignment: .left, textInsets: .init(top: 0, left: 68, bottom: 0, right: 0)))
+        layout?.setMessageIncomingMessagePadding(.init(top: 0, left: 8, bottom: 0, right: 40))
+        layout?.setMessageIncomingAvatarPosition(AvatarPosition(vertical: .messageBottom))
+        layout?.setMessageIncomingCellBottomLabelAlignment(.init(textAlignment: .left,
+                                                                 textInsets: .zero))
+        layout?.setMessageOutgoingCellBottomLabelAlignment(.init(textAlignment: .right,
+                                                                 textInsets: .zero))
+        messagesCollectionView.register(IQCardCell.self, forCellWithReuseIdentifier: IQCardCell.cellIdentifier)
+        messagesCollectionView.register(IQSingleChoicesCell.self, forCellWithReuseIdentifier: IQSingleChoicesCell.cellIdentifier)
+        messagesCollectionView.register(IQStackedSingleChoicesCell.self, forCellWithReuseIdentifier: IQStackedSingleChoicesCell.cellIdentifier)
+        messagesCollectionView.register(MyCustomCell.self, forCellWithReuseIdentifier: MyCustomCell.cellIdentifier)
+        messagesCollectionView.register(IQFilePreviewCell.self, forCellWithReuseIdentifier: IQFilePreviewCell.cellIdentifier)
+        messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
+        messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
+        messagesCollectionView.register(IQRatingCell.self, forCellWithReuseIdentifier: IQRatingCell.cellIdentifier)
+        messagesCollectionView.register(IQTypingIndicatorCell.self, forCellWithReuseIdentifier: IQTypingIndicatorCell.cellIdentifier)
+        messagesCollectionView.messagesDataSource = self
+        messagesCollectionView.messagesLayoutDelegate = self
+        messagesCollectionView.messagesDisplayDelegate = self
+        let gr = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        gr.delegate = self
+        messagesCollectionView.addGestureRecognizer(gr)
+    }
+    
+    func setupInputBar(){
+        messageInputBar.delegate = self
+        messageInputBar.separatorLine.isHidden = true
+        messageInputBar.inputTextView.backgroundColor = .init(hex: 0xF4F4F8)
+        messageInputBar.inputTextView.placeholder = "Сообщение"
+        messageInputBar.inputTextView.textContainerInset = .init(top: 9, left: 16, bottom: 9, right: 16)
+        messageInputBar.inputTextView.placeholderLabelInsets.left += 4
+        messageInputBar.inputTextView.tintColor = .init(hex: 0xDD0A34)
+        messageInputBar.inputTextView.layer.cornerRadius = 20
+        messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
+        messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
+        messageInputBar.sendButton.configure {
+            $0.layer.cornerRadius = 20
+            $0.backgroundColor = .init(hex: 0x242729)
+            $0.setImage(.init(systemName: "arrow.up"), for: .normal)
+            $0.imageView?.tintColor = .white
+            $0.setTitle(nil, for: .normal)
+            $0.setSize(.init(width: 40, height: 40), animated: false)
+        }
+        messageInputBar.middleContentViewPadding.left = 8
+        let button = IQAttachmentButton()
+        button.addTarget(self, action: #selector(attachmentDidTap), for: .touchUpInside)
+        messageInputBar.setStackViewItems([button], forStack: .left, animated: false)
+        messageInputBar.setRightStackViewWidthConstant(to: .zero, animated: false)
+        messageInputBar.setLeftStackViewWidthConstant(to: 40, animated: false)
+    }
+    
+    func setupScrollDownButton(){
+        view.addSubview(scrollDownButton)
+        scrollDownButton.alpha = 0
+        scrollDownButton.addTarget(self, action: #selector(scrollDownDidTap), for: .touchUpInside)
+        scrollDownButton.snp.makeConstraints { make in
+            make.right.equalToSuperview().inset(8)
+            make.bottom.equalToSuperview().inset(0).priority(.high)
+        }
+    }
+    
+    func setupRefreshControl(){
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        messagesCollectionView.refreshControl = refreshControl
+    }
+    
+    func setupTypingTimer() {
+        typingTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(onTick), userInfo: nil, repeats: false)
+        if typingTimer == nil {
+            typingTimer?.invalidate()
+        }
+    }
+    
+    func setupChatUnavailableView(){
+        view.addSubview(chatUnavailableView)
+        setChatUnavailable(hidden: true)
+        chatUnavailableView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.horizontalEdges.equalToSuperview().inset(16)
+        }
+    }
+    
+    func setChatUnavailable(hidden: Bool) {
+        chatUnavailableView.isHidden = hidden
+        messagesCollectionView.isHidden = !hidden
+    }
+    
+    func setupIndicators(){
+        view.addSubview(loginIndicator)
+        view.addSubview(messagesIndicator)
+        loginIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        messagesIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+    }
+
+    func setupNavBar() {
+        navigationItem.title = "Сообщения"
+    }
+    
+    func setupObservers(){
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(IQChannelMessagesViewController.inputBarDidBeginEditing),
+                                               name: NSNotification.Name.UITextViewTextDidBeginEditing, object: messageInputBar.inputTextView)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(IQChannelMessagesViewController.keyboardFrameDidChange),
+                                               name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+    }
+    
+    func photoSourceDidTap(source: UIImagePickerController.SourceType){
+        let picker = UIImagePickerController()
+        picker.sourceType = source
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
+    }
+        
+    func fileSourceDidTap(){
+        let documentController = UIDocumentPickerViewController(forOpeningContentTypes: [.data])
+        documentController.delegate = self
+        documentController.modalPresentationStyle = .formSheet
+        present(documentController, animated: true)
+    }
+    
+    func extendByTime(_ seconds: TimeInterval) {
+        let newFireDate = (typingTimer?.fireDate ?? Date()).addingTimeInterval(seconds)
+        typingTimer?.fireDate = newFireDate
+    }
+    
+    func openMessageInBrowser(messageID: Int) {
+        let index = getMessageIndexById(messageId: messageID)
+        if (index == -1) {
+            return
+        }
+
+        guard messages.indices.contains(index) else { return }
+        let message = messages[index]
+        guard let file = message.file else { return }
+        
+        let _ = IQChannels.fileURL(file.id ?? "") { url, error in
+            guard let url, error == nil else {
+                let alert = UIAlertController(title: "Ошибка", message: error?.localizedDescription, preferredStyle: .alert)
+                alert.addAction(.init(title: "OK", style: .cancel))
+                self.present(alert, animated: true)
+                return
+            }
+            
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    func getMessageIndexById(messageId: Int) -> Int {
+        guard messageId != 0 else {
+            return -1
+        }
+
+        for (index, message) in messages.enumerated() {
+            if message.id == messageId {
+                return index
+            }
+        }
+        return -1
+    }
+
+    func getMyMessageByLocalId(localId: Int) -> Int {
+        guard localId != 0 else {
+            return -1
+        }
+
+        for (index, message) in messages.enumerated() {
+            if message.isMy && message.localId == localId {
+                return index
+            }
+        }
+        return -1
+    }
+    
+    func getMessageIndex(_ message: IQChatMessage) -> Int? {
+        let index = getMessageIndexById(messageId: message.id)
+        if index >= 0 {
+            return index
+        }
+        if message.isMy {
+            return getMyMessageByLocalId(localId: message.localId)
+        }
+        return nil
+    }
+    
+    func isGroupStart(_ indexPath: IndexPath) -> Bool {
+        let index = indexPath.row
+        let message = messages[index]
+        if index == 0 {
+            return true
+        }
+
+        let prev = messages[index - 1]
+        return prev.isMy != message.isMy
+                || (prev.userId != nil && prev.userId != message.userId)
+                || (message.createdAt - prev.createdAt) > 60000
+    }
+
+    func isGroupEnd(_ indexPath: IndexPath) -> Bool {
+        let index = indexPath.row
+        let message = messages[index]
+        if index + 1 == messages.count {
+            return true
+        }
+
+        let next = messages[index + 1]
+        return next.isMy != message.isMy
+                || (next.userId != nil && next.userId != message.userId)
+                || (next.createdAt - message.createdAt) > 60000
+    }
+    
+    func shouldDisplayMessageDate(_ indexPath: IndexPath) -> Bool {
+        let index = indexPath.row
+        guard index > 0 else { return true }
+        let message = messages[index]
+        let prev = messages[index - 1]
+        
+        let calendar = Calendar.current
+        let messageDateComponents = calendar.dateComponents([.year, .month, .day], from: message.sentDate)
+        let prevDateComponents = calendar.dateComponents([.year, .month, .day], from: prev.sentDate)
+        
+        return messageDateComponents.year != prevDateComponents.year ||
+        messageDateComponents.month != prevDateComponents.month ||
+        messageDateComponents.day != prevDateComponents.day
+    }
+    
+    func contextMenuPreview(collectionView: UICollectionView, indexPath: IndexPath) -> UITargetedPreview? {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? MessageContentCell else {
+            return nil
+        }
+        
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        parameters.visiblePath = UIBezierPath(roundedRect: cell.messageContainerView.bounds, cornerRadius: 16)
+        let preview = UITargetedPreview(view: cell.messageContainerView, parameters: parameters)
+        return preview
+    }
+    
+    // MARK: - ACTIONS
+    @objc func scrollDownDidTap() {
+        messagesCollectionView.scrollToBottom(animated: true)
+    }
+
+    @objc func refresh() {
+        if messagesLoaded {
+            self.loadMoreMessages()
+        } else {
+            self.loadMessages()
+        }
+    }
+    
+    @objc func dismissKeyboard(){
+        messageInputBar.inputTextView.resignFirstResponder()
+    }
+    
+    @objc func attachmentDidTap(){
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
+            self.photoSourceDidTap(source: .photoLibrary)
+        }))
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            alert.addAction(.init(title: "Камера", style: .default, handler: { _ in
+                self.photoSourceDidTap(source: .camera)
+            }))
+        }
+        alert.addAction(.init(title: "Файл", style: .default, handler: { _ in
+            self.fileSourceDidTap()
+        }))
+        alert.addAction(.init(title: "Отмена", style: .cancel))
+        messageInputBar.inputTextView.resignFirstResponder()
+        present(alert, animated: true)
+    }
+    
+    @objc func onTick() {
+        setTypingIndicatorViewHidden(true, animated: true)
+        typingUser = nil
+        typingTimer?.invalidate()
     }
 }

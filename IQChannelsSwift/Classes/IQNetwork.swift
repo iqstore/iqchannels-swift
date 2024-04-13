@@ -7,7 +7,7 @@ enum IQNetworkStatus: Int {
     case reachableViaWWAN
 }
 
-protocol IQNetworkListener: AnyObject {
+protocol IQNetworkListenerProtocol: AnyObject {
     func networkStatusChanged(_ status: IQNetworkStatus)
 }
 
@@ -31,7 +31,7 @@ class IQNetwork {
         startNotifier()
     }
     
-    init(listener: IQNetworkListener) {
+    init(listener: IQNetworkListenerProtocol) {
         reachability = SCNetworkReachabilityCreateWithName(nil, "example.com")!
         addListener(listener)
         startNotifier()
@@ -56,15 +56,15 @@ class IQNetwork {
     private func statusChanged() {
         let status = self.status()
         for listener in listeners.allObjects {
-            (listener as? IQNetworkListener)?.networkStatusChanged(status)
+            (listener as? IQNetworkListenerProtocol)?.networkStatusChanged(status)
         }
     }
     
-    func addListener(_ listener: IQNetworkListener) {
+    func addListener(_ listener: IQNetworkListenerProtocol) {
         listeners.add(listener)
     }
     
-    func removeListener(_ listener: IQNetworkListener) {
+    func removeListener(_ listener: IQNetworkListenerProtocol) {
         listeners.remove(listener)
     }
     

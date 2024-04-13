@@ -1,6 +1,6 @@
 import Foundation
 
-protocol IQChannelsMessagesListener: AnyObject {
+protocol IQChannelsMessagesListenerProtocol: AnyObject {
     var id: String { get }
     func iq(messages: [IQChatMessage], moreMessages: Bool)
     func iqMessagesCleared()

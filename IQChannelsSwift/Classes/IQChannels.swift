@@ -23,7 +23,7 @@ public class IQChannels {
     private var config: IQChannelsConfig?
     
     private var state: IQChannelsState = .awaitingNetwork
-    private var stateListeners: [IQChannelsStateListener] = []
+    private var stateListeners: [IQChannelsStateListenerProtocol] = []
     
     private var signingUp: IQHttpRequest?
     private var signupAttempt: Int = 0
@@ -40,18 +40,18 @@ public class IQChannels {
     private var unread: Int = 0
     private var unreadAttempt: Int = 0
     private var unreadListening: IQHttpRequest?
-    private var unreadListeners: [IQChannelsUnreadListener] = []
+    private var unreadListeners: [IQChannelsUnreadListenerProtocol] = []
     
     private var messages: [IQChatMessage] = []
     private var messagesLoaded: Bool = false
     private var messagesLoading: IQHttpRequest?
-    private var messageListeners: [IQChannelsMessagesListener] = []
+    private var messageListeners: [IQChannelsMessagesListenerProtocol] = []
     
     private var eventsAttempt: Int = 0
     private var eventsListening: IQHttpRequest?
     
     private var moreMessagesLoading: IQHttpRequest?
-    private var moreMessageListeners: [IQChannelsMoreMessagesListener] = []
+    private var moreMessageListeners: [IQChannelsMoreMessagesListenerProtocol] = []
     
     private var receivedQueue: Set<Int> = []
     private var receivedSendAttempt: Int = 0
@@ -90,22 +90,465 @@ public class IQChannels {
         self.clear()
     }
     
-    private func clear() {
-        self.clearSignup()
-        self.clearAuth()
-        self.clearApnsSending()
-        self.clearUnread()
-        self.clearMessages()
-        self.clearMoreMessages()
-        self.clearMedia()
-        self.clearEvents()
-        self.clearReceived()
-        self.clearRead()
-        self.clearSend()
-        self.clearTyping()
-        self.clearUploading()
+    // MARK: - STATE
+    func unread(listener: IQChannelsUnreadListenerProtocol) -> IQSubscription {
+        DispatchQueue.main.async {
+            listener.iqUnreadChanged(self.unread)
+        }
+        
+        unreadListeners.append(listener)
+        return IQSubscription { [weak self] in
+            self?.unreadListeners.removeAll(where: { $0.id == listener.id })
+        }
+    }
+
+    // MARK: - MESSAGES
+    func messages(listener: IQChannelsMessagesListenerProtocol) -> IQSubscription {
+        messageListeners.append(listener)
+        
+        if messagesLoaded {
+            let messagesCopy = messages
+            DispatchQueue.main.async {
+                listener.iq(messages: messagesCopy, moreMessages: false)
+            }
+            listenToEvents()
+        } else {
+            loadMessages()
+        }
+        
+        return IQSubscription { [weak self] in
+            self?.messageListeners.removeAll(where: { $0.id == listener.id })
+            self?.cancelLoadingMessagesWhenNoListeners()
+            self?.cancelListeningToEventsWhenNoListeners()
+        }
     }
     
+    // MARK: - MORE MESSAGES
+    func moreMessages(_ listener: IQChannelsMoreMessagesListenerProtocol) -> IQSubscription {
+        moreMessageListeners.append(listener)
+        loadMoreMessages()
+        
+        return IQSubscription { [weak self] in
+            self?.moreMessageListeners.removeAll(where: { $0.id == listener.id })
+        }
+    }
+    
+    // MARK: - MESSAGE MEDIA
+    func loadMessageMedia(messageId: Int) {
+        imageDownloading[messageId]?.cancel()
+        imageDownloading.removeValue(forKey: messageId)
+        
+        guard let message = getMessageById(messageId),
+              message.isMediaMessage,
+              let file = message.file,
+              let url = file.imagePreviewUrl,
+              let media = message.media,
+              media.image == nil else {
+            return
+        }
+        
+        let operation = SDWebImageManager.shared.loadImage(with: url, options: [], progress: nil) { [weak self] (image, _, error, _, _, _) in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if let error = error {
+                    self.loadMessageMediaFailed(messageId: messageId, url: url, error: error)
+                } else if let image = image {
+                    self.loadedMessage(messageId: messageId, url: url, image: image)
+                }
+            }
+        }
+        if let operation {
+            imageDownloading.updateValue(operation, forKey: messageId)
+        }
+        print("Loading a message image, messageId=\(messageId), url=\(url)")
+    }
+    
+    // MARK: - TYPING
+    func clearTyping() {
+        typingRequest?.cancel()
+        typingRequest = nil
+        typingSentAt = nil
+    }
+
+    func typing() {
+        guard typingRequest == nil, clientAuth != nil else { return }
+
+        if let typingSentAt {
+            let now = Date()
+            let delta = now.timeIntervalSince1970 - typingSentAt.timeIntervalSince1970
+            if delta < TYPING_DEBOUNCE_SEC {
+                return
+            }
+        }
+
+        typingSentAt = Date()
+        typingRequest = client?.chatsChannel(channel: config?.channel, typing: { error in
+            DispatchQueue.main.async {
+                self.typingRequest = nil
+            }
+        })
+        
+        log?.debug("Typing")
+    }
+    
+    // MARK: - SENDING
+    func clearSend() {
+        sending?.cancel()
+        localId = 0
+        sendQueue = []
+        sendAttempt = 0
+        sending = nil
+    }
+
+    func nextLocalId() -> Int {
+        var tempLocalId = Int(Date().timeIntervalSince1970 * 1000)
+        if tempLocalId < localId {
+            tempLocalId = localId + 1
+        }
+
+        localId = tempLocalId
+        return tempLocalId
+    }
+
+    func sendText(_ text: String) {
+        guard let client = clientAuth?.client, text.count > 0 else { return }
+
+        let localId = nextLocalId()
+        let message = IQChatMessage(client: client,
+                                    localId: localId,
+                                    text: text)
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        appendMessage(message)
+        sendMessage(message)
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageSent: message)
+            }
+        }
+    }
+
+    func sendImage(_ image: UIImage, fileName: String?) {
+        guard let client = clientAuth?.client else { return }
+
+        let localId = nextLocalId()
+        let fileName = fileName ?? "image.jpeg"
+        let message = IQChatMessage(client: client, localId: localId, image: image, fileName: fileName)
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        appendMessage(message)
+        uploadMessage(message)
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageSent: message)
+            }
+        }
+    }
+
+    func sendData(_ data: Data, fileName: String?) {
+        guard let client = clientAuth?.client else { return }
+
+        let localId = nextLocalId()
+        let fileName = fileName ?? "data"
+        let message = IQChatMessage(client: client, localId: localId, data: data, fileName: fileName)
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        appendMessage(message)
+        uploadFileMessage(message)
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageSent: message)
+            }
+        }
+    }
+
+    func sendMessage(_ message: IQChatMessage) {
+        guard clientAuth != nil else { return }
+
+        sendQueue.append(message)
+        log?.debug("Enqueued a message to send, localId=\(message.localId), payload=\(message.payload ?? .invalid)")
+        sendMessages()
+    }
+
+    func sendMessages() {
+        guard sending == nil, clientAuth != nil, !sendQueue.isEmpty else { return }
+
+        let message = sendQueue.removeFirst()
+        let form = IQChatMessageForm(message: message)
+        sendAttempt += 1
+
+        sending = client?.chatsChannel(channel: config?.channel, form: form) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.send(message, failedWithError: error)
+                    return
+                }
+
+                self.sent(form)
+            }
+        }
+
+        log?.info("Sending a message, localId=\(form.localId), payload=\(form.payload ?? .invalid)")
+    }
+
+    func send(_ message: IQChatMessage, failedWithError error: Error) {
+        guard sending != nil else { return }
+        sending = nil
+        sendQueue.insert(message, at: 0)
+
+        if !(network?.isReachable() ?? false) {
+            log?.info("Failed to send a message, network is unreachable, error=\(error.localizedDescription)")
+            return
+        }
+
+        let timeout = IQTimeout.seconds(withAttempt: sendAttempt)
+        let time = IQTimeout.time(withTimeoutSeconds: timeout)
+        DispatchQueue.main.asyncAfter(deadline: time) {
+            self.sendMessages()
+        }
+
+        log?.info("Failed to send a message, will retry \(timeout) second(s), error=\(error.localizedDescription)")
+    }
+
+    func sent(_ form: IQChatMessageForm) {
+        guard sending != nil else { return }
+        sending = nil
+
+        log?.info("Sent a message, localId=\(form.localId), payload=\(form.payload ?? .invalid)")
+        sendMessages()
+    }
+
+    func sendSingleChoice(_ singleChoice: IQSingleChoice) {
+        guard let client = clientAuth?.client else { return }
+
+        let localId = nextLocalId()
+        let message = IQChatMessage(client: client, localId: localId, text: singleChoice.title)
+        message.payload = .text
+        message.botpressPayload = singleChoice.value
+
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        appendMessage(message)
+        sendMessage(message)
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageSent: message)
+            }
+        }
+    }
+
+    func sendAction(_ action: IQAction) {
+        guard let client = clientAuth?.client else { return }
+
+        let localId = nextLocalId()
+        let message = IQChatMessage(client: client, localId: localId, text: action.title)
+        message.payload = .text
+        message.botpressPayload = action.payload
+
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        appendMessage(message)
+        sendMessage(message)
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageSent: message)
+            }
+        }
+    }
+
+    
+    // MARK: - UPLOADING
+    func clearUploading() {
+        for (_, request) in uploading {
+            request.cancel()
+        }
+        uploading.removeAll()
+    }
+
+    func retryUpload(_ localId: Int) {
+        guard let message = getMyMessageByLocalId(localId), message.uploadError != nil else { return }
+        uploadMessage(message)
+    }
+
+    func deleteFailedUpload(_ localId: Int) {
+        guard let index = getMyMessageIndexByLocalId(localId), index != -1 else { return }
+        
+        _ = messages.remove(at: index)
+
+        guard let request = uploading[localId] else { return }
+        request.cancel()
+        uploading.removeValue(forKey: localId)
+
+        let updatedMessages = messages.map { $0 }
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messages: updatedMessages, moreMessages: false)
+            }
+        }
+    }
+
+    func uploadMessage(_ message: IQChatMessage) {
+        guard clientAuth != nil, let client else { return }
+        
+        let localId = message.localId
+        
+        guard localId != 0, let image = message.uploadImage, !message.uploaded, uploading[localId] == nil else { return }
+        
+        var filename = message.uploadFilename
+        if filename?.isEmpty ?? true {
+            filename = uploadImageDefaultFilename()
+        }
+        
+        guard let data = image.sd_imageData(as: .JPEG, compressionQuality: 0.8) else { return }
+
+        message.uploaded = false
+        message.uploading = false
+        message.uploadError = nil
+
+        uploading[localId] = client.filesUploadImage(filename, data: data) { file, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.uploadMessage(localId, failedWithError: error)
+                    return
+                }
+                self.uploadedMessage(localId, file: file)
+            }
+        }
+        log?.info("Uploading a message image, localId=\(localId), fileName=\(filename ?? "")")
+    }
+
+    func uploadFileMessage(_ message: IQChatMessage) {
+        guard clientAuth != nil, let client else { return }
+        
+        let localId = message.localId
+        
+        guard localId != 0, let data = message.uploadData, !message.uploaded, uploading[localId] == nil else { return }
+        
+        var filename = message.uploadFilename
+        if filename?.isEmpty ?? true {
+            filename = uploadImageDefaultFilename()
+        }
+
+        message.uploaded = false
+        message.uploading = false
+        message.uploadError = nil
+
+        uploading[localId] = client.filesUploadData(filename, data: data) { file, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.uploadMessage(localId, failedWithError: error)
+                    return
+                }
+                self.uploadedMessage(localId, file: file)
+            }
+        }
+        log?.info("Uploading a message image, localId=\(localId), fileName=\(filename ?? "")")
+    }
+
+    func uploadImageDefaultFilename() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm"
+        return "IMG_\(dateFormatter.string(from: Date())).jpeg"
+    }
+
+    func uploadMessage(_ localId: Int, failedWithError error: Error) {
+        guard let message = getMyMessageByLocalId(localId) else { return }
+        uploading.removeValue(forKey: localId)
+
+        message.uploaded = false
+        message.uploading = false
+        message.uploadError = error
+
+        log?.info("Failed to upload a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), error=\(error.localizedDescription)")
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageUpdated: message)
+            }
+        }
+    }
+
+    func uploadedMessage(_ localId: Int, file: IQFile?) {
+        guard let client = clientAuth?.client, let message = getMyMessageByLocalId(localId) else { return }
+        uploading.removeValue(forKey: localId)
+
+        message.uploaded = true
+        message.uploading = false
+        message.file = file
+        message.fileId = file?.id
+        message.uploadImage = nil
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
+
+        log?.info("Uploaded a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), fileId=\(file?.id ?? "")")
+
+        for listener in messageListeners {
+            DispatchQueue.main.async {
+                listener.iq(messageUpdated: message)
+            }
+        }
+
+        sendMessage(message)
+    }
+
+    // MARK: RATINGS
+    func rate(ratingId: Int, value: Int) {
+        _ = client?.ratingsRate(ratingId, value: value) { [weak self] error in
+            if error == nil, let self,
+               let index = self.messages.lastIndex(where: { $0.ratingId == ratingId }){
+                self.messages[index].rating?.state = .rated
+                self.messageListeners.forEach { $0.iq(messageUpdated: self.messages[index]) }
+            }
+        }
+        log?.info("Rated \(ratingId) as \(value)")
+    }
+
+    // MARK: FILES
+    func fileURL(fileId: String, callback: @escaping IQFileURLCallback) -> IQHttpRequest? {
+        return client?.filesToken(fileId) { token, error in
+            DispatchQueue.main.async {
+                guard let token = token?.token else {
+                    callback(nil, error)
+                    return
+                }
+                let url = self.client?.fileURL(fileId, token: token)
+                callback(url, nil)
+            }
+        }
+    }
+}
+
+// MARK: - IQNetworkListener
+extension IQChannels: IQNetworkListenerProtocol {
+    func networkStatusChanged(_ status: IQNetworkStatus) {
+        guard status != .notReachable else {
+            return
+        }
+        
+        auth()
+        sendApnsToken()
+        listenToUnread()
+        loadMessages()
+        listenToEvents()
+        sendReceived()
+        sendRead()
+        sendMessages()
+    }
+}
+
+// MARK: - PRIVATE METHODS
+private extension IQChannels {
+        
     // MARK: - CONFIGURE
     private func configure(_ config: IQChannelsConfig) {
         logout()
@@ -133,9 +576,25 @@ public class IQChannels {
         }
     }
     
+    private func clear() {
+        self.clearSignup()
+        self.clearAuth()
+        self.clearApnsSending()
+        self.clearUnread()
+        self.clearMessages()
+        self.clearMoreMessages()
+        self.clearMedia()
+        self.clearEvents()
+        self.clearReceived()
+        self.clearRead()
+        self.clearSend()
+        self.clearTyping()
+        self.clearUploading()
+    }
+    
     // MARK: - STATE
     @discardableResult
-    private func state(_ listener: IQChannelsStateListener) -> IQSubscription {
+    private func state(_ listener: IQChannelsStateListenerProtocol) -> IQSubscription {
         stateListeners.append(listener)
         notifyStateListener(listener)
         
@@ -149,7 +608,7 @@ public class IQChannels {
         notifyStateListeners()
     }
     
-    private func notifyStateListener(_ listener: IQChannelsStateListener) {
+    private func notifyStateListener(_ listener: IQChannelsStateListenerProtocol) {
         let state = self.state
         let client = clientAuth?.client
         
@@ -172,6 +631,63 @@ public class IQChannels {
     private func notifyStateListeners() {
         for listener in stateListeners {
             notifyStateListener(listener)
+        }
+    }
+    
+    private func listenToUnread() {
+        guard unreadListening == nil, clientAuth != nil else { return }
+        
+        unreadAttempt += 1
+        unreadListening = client?.chatsChannel(channel: config?.channel, callback: { [weak self] number, error in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.unreadError(error)
+                    return
+                }
+                
+                self.unreadEvent(number)
+            }
+        })
+        
+        log?.info("Listening to unread notifications, attempt=\(unreadAttempt)")
+    }
+    
+    private func unreadError(_ error: Error) {
+        guard unreadListening != nil else { return }
+        unreadListening = nil
+        
+        if !(network?.isReachable() ?? false) {
+            log?.info("Listening to unread failed, network is unreachable, error=\(error.localizedDescription)")
+            return
+        }
+        
+        let timeout = IQTimeout.seconds(withAttempt: unreadAttempt)
+        let time = IQTimeout.time(withTimeoutSeconds: timeout)
+        DispatchQueue.main.asyncAfter(deadline: time) { [weak self] in
+            self?.listenToUnread()
+        }
+        
+        log?.info("Listening to unread failed, will retry in \(timeout) second(s), error=\(error.localizedDescription)")
+    }
+    
+    private func unreadEvent(_ number: NSNumber?) {
+        guard unreadListening != nil else { return }
+        
+        unreadAttempt = 0
+        unread = number?.intValue ?? 0
+        if !(config?.disableUnreadBadge ?? true) {
+            UIApplication.shared.applicationIconBadgeNumber = unread
+        }
+        log?.debug("Received an unread event, unread=\(number ?? 0)")
+        notifyUnreadListeners()
+    }
+    
+    private func notifyUnreadListeners() {
+        for listener in unreadListeners {
+            DispatchQueue.main.async {
+                listener.iqUnreadChanged(self.unread)
+            }
         }
     }
     
@@ -450,7 +966,7 @@ public class IQChannels {
     }
     
     private func sendApnsTokenError(_ error: Error) {
-        guard let apnsSending = apnsSending else {
+        guard apnsSending != nil else {
             return
         }
         self.apnsSending = nil
@@ -470,7 +986,7 @@ public class IQChannels {
     }
     
     private func sentApnsToken() {
-        guard let apnsSending = apnsSending else {
+        guard apnsSending != nil else {
             return
         }
         self.apnsSending = nil
@@ -491,75 +1007,7 @@ public class IQChannels {
         
         notifyUnreadListeners()
     }
-
-    func unread(listener: IQChannelsUnreadListener) -> IQSubscription {
-        DispatchQueue.main.async {
-            listener.iqUnreadChanged(self.unread)
-        }
-        
-        unreadListeners.append(listener)
-        return IQSubscription { [weak self] in
-            self?.unreadListeners.removeAll(where: { $0.id == listener.id })
-        }
-    }
     
-    private func listenToUnread() {
-        guard unreadListening == nil, clientAuth != nil else { return }
-        
-        unreadAttempt += 1
-        unreadListening = client?.chatsChannel(channel: config?.channel, callback: { [weak self] number, error in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.unreadError(error)
-                    return
-                }
-                
-                self.unreadEvent(number)
-            }
-        })
-        
-        log?.info("Listening to unread notifications, attempt=\(unreadAttempt)")
-    }
-    
-    private func unreadError(_ error: Error) {
-        guard unreadListening != nil else { return }
-        unreadListening = nil
-        
-        if !(network?.isReachable() ?? false) {
-            log?.info("Listening to unread failed, network is unreachable, error=\(error.localizedDescription)")
-            return
-        }
-        
-        let timeout = IQTimeout.seconds(withAttempt: unreadAttempt)
-        let time = IQTimeout.time(withTimeoutSeconds: timeout)
-        DispatchQueue.main.asyncAfter(deadline: time) { [weak self] in
-            self?.listenToUnread()
-        }
-        
-        log?.info("Listening to unread failed, will retry in \(timeout) second(s), error=\(error.localizedDescription)")
-    }
-    
-    private func unreadEvent(_ number: NSNumber?) {
-        guard let unreadListening = unreadListening else { return }
-        
-        unreadAttempt = 0
-        unread = number?.intValue ?? 0
-        if !(config?.disableUnreadBadge ?? true) {
-            UIApplication.shared.applicationIconBadgeNumber = unread
-        }
-        log?.debug("Received an unread event, unread=\(number ?? 0)")
-        notifyUnreadListeners()
-    }
-    
-    private func notifyUnreadListeners() {
-        for listener in unreadListeners {
-            DispatchQueue.main.async {
-                listener.iqUnreadChanged(self.unread)
-            }
-        }
-    }
-
     // MARK: - MESSAGES
     private func clearMessages() {
         messagesLoading?.cancel()
@@ -576,26 +1024,6 @@ public class IQChannels {
         }
     }
     
-    func messages(listener: IQChannelsMessagesListener) -> IQSubscription {
-        messageListeners.append(listener)
-        
-        if messagesLoaded {
-            let messagesCopy = messages
-            DispatchQueue.main.async {
-                listener.iq(messages: messagesCopy, moreMessages: false)
-            }
-            listenToEvents()
-        } else {
-            loadMessages()
-        }
-        
-        return IQSubscription { [weak self] in
-            self?.messageListeners.removeAll(where: { $0.id == listener.id })
-            self?.cancelLoadingMessagesWhenNoListeners()
-            self?.cancelListeningToEventsWhenNoListeners()
-        }
-    }
-    
     private func cancelLoadingMessagesWhenNoListeners() {
         if !messageListeners.isEmpty {
             return
@@ -606,7 +1034,7 @@ public class IQChannels {
     }
     
     private func loadMessages() {
-        guard !messagesLoaded, messagesLoading == nil, let clientAuth, !messageListeners.isEmpty else { return }
+        guard !messagesLoaded, messagesLoading == nil, clientAuth != nil, !messageListeners.isEmpty else { return }
         
         let query = IQMaxIdQuery()
         messagesLoading = client?.chatsChannel(channel: config?.channel, query: query) { [weak self] messages, error in
@@ -640,7 +1068,7 @@ public class IQChannels {
     }
     
     private func messagesLoaded(_ messages: [IQChatMessage]) {
-        guard let messagesLoading = messagesLoading else { return }
+        guard messagesLoading != nil else { return }
         
         self.messagesLoading = nil
         messagesLoaded = true
@@ -813,17 +1241,8 @@ public class IQChannels {
         moreMessageListeners.removeAll()
     }
     
-    func moreMessages(_ listener: IQChannelsMoreMessagesListener) -> IQSubscription {
-        moreMessageListeners.append(listener)
-        loadMoreMessages()
-        
-        return IQSubscription { [weak self] in
-            self?.moreMessageListeners.removeAll(where: { $0.id == listener.id })
-        }
-    }
-    
     private func loadMoreMessages() {
-        guard let clientAuth, messagesLoaded else {
+        guard clientAuth != nil, messagesLoaded else {
             for listener in moreMessageListeners {
                 DispatchQueue.main.async {
                     listener.iqMoreMessagesLoaded()
@@ -857,7 +1276,7 @@ public class IQChannels {
     }
     
     private func moreMessagesError(_ error: Error) {
-        guard let moreMessagesLoading = moreMessagesLoading else { return }
+        guard moreMessagesLoading != nil else { return }
         self.moreMessagesLoading = nil
         log?.info("Failed to load more messages, error=\(error.localizedDescription)")
         
@@ -870,7 +1289,7 @@ public class IQChannels {
     }
     
     private func moreMessagesLoaded(_ moreMessages: [IQChatMessage]) {
-        guard let moreMessagesLoading = moreMessagesLoading else { return }
+        guard moreMessagesLoading != nil else { return }
         
         self.moreMessagesLoading = nil
         prependMessages(moreMessages)
@@ -891,41 +1310,12 @@ public class IQChannels {
         }
     }
     
-    // MARK: - MESSAGE MEDIA
+    // MARK: - MESSAGE DATA
     private func clearMedia() {
         for operation in imageDownloading.values {
             operation.cancel()
         }
         imageDownloading.removeAll()
-    }
-    
-    func loadMessageMedia(messageId: Int) {
-        imageDownloading[messageId]?.cancel()
-        imageDownloading.removeValue(forKey: messageId)
-        
-        guard let message = getMessageById(messageId),
-              message.isMediaMessage,
-              let file = message.file,
-              let url = file.imagePreviewUrl,
-              let media = message.media,
-              media.image == nil else {
-            return
-        }
-        
-        let operation = SDWebImageManager.shared.loadImage(with: url, options: [], progress: nil) { [weak self] (image, _, error, _, _, _) in
-            DispatchQueue.main.async {
-                guard let self = self else { return }
-                if let error = error {
-                    self.loadMessageMediaFailed(messageId: messageId, url: url, error: error)
-                } else if let image = image {
-                    self.loadedMessage(messageId: messageId, url: url, image: image)
-                }
-            }
-        }
-        if let operation {
-            imageDownloading.updateValue(operation, forKey: messageId)
-        }
-        print("Loading a message image, messageId=\(messageId), url=\(url)")
     }
     
     private func loadMessageMediaFailed(messageId: Int, url: URL, error: Error) {
@@ -1055,7 +1445,7 @@ public class IQChannels {
     }
 
     private func sendReceived() {
-        guard receivedSending == nil, let clientAuth, receivedQueue.count != 0 else { return }
+        guard receivedSending == nil, clientAuth != nil, receivedQueue.count != 0 else { return }
         var messageIds = Array(receivedQueue)
         messageIds.sort()
         receivedQueue.removeAll()
@@ -1114,7 +1504,7 @@ public class IQChannels {
     }
 
     private func sendRead() {
-        guard readSending == nil, let clientAuth, readQueue.count != 0 else { return }
+        guard readSending == nil, clientAuth != nil, readQueue.count != 0 else { return }
         var messageIds = Array(readQueue)
         messageIds.sort()
         readQueue.removeAll()
@@ -1155,388 +1545,6 @@ public class IQChannels {
         log?.info("Sent read message ids, count=\(messageIds.count)")
         sendRead()
     }
-    
-    // MARK: - TYPING
-    func clearTyping() {
-        typingRequest?.cancel()
-        typingRequest = nil
-        typingSentAt = nil
-    }
-
-    func typing() {
-        guard typingRequest == nil else { return }
-
-        guard let clientAuth else { return }
-
-        if let typingSentAt {
-            let now = Date()
-            let delta = now.timeIntervalSince1970 - typingSentAt.timeIntervalSince1970
-            if delta < TYPING_DEBOUNCE_SEC {
-                return
-            }
-        }
-
-        typingSentAt = Date()
-        typingRequest = client?.chatsChannel(channel: config?.channel, typing: { error in
-            DispatchQueue.main.async {
-                self.typingRequest = nil
-            }
-        })
-        
-        log?.debug("Typing")
-    }
-    
-    // MARK: - SENDING
-    func clearSend() {
-        sending?.cancel()
-        localId = 0
-        sendQueue = []
-        sendAttempt = 0
-        sending = nil
-    }
-
-    func nextLocalId() -> Int {
-        var tempLocalId = Int(Date().timeIntervalSince1970 * 1000)
-        if tempLocalId < localId {
-            tempLocalId = localId + 1
-        }
-
-        localId = tempLocalId
-        return tempLocalId
-    }
-
-    func sendText(_ text: String) {
-        guard let client = clientAuth?.client, text.count > 0 else { return }
-
-        let localId = nextLocalId()
-        let message = IQChatMessage(client: client,
-                                    localId: localId,
-                                    text: text)
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        appendMessage(message)
-        sendMessage(message)
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageSent: message)
-            }
-        }
-    }
-
-    func sendImage(_ image: UIImage, fileName: String?) {
-        guard let client = clientAuth?.client else { return }
-
-        let localId = nextLocalId()
-        let fileName = fileName ?? "image.jpeg"
-        let message = IQChatMessage(client: client, localId: localId, image: image, fileName: fileName)
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        appendMessage(message)
-        uploadMessage(message)
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageSent: message)
-            }
-        }
-    }
-
-    func sendData(_ data: Data, fileName: String?) {
-        guard let client = clientAuth?.client else { return }
-
-        let localId = nextLocalId()
-        let fileName = fileName ?? "data"
-        let message = IQChatMessage(client: client, localId: localId, data: data, fileName: fileName)
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        appendMessage(message)
-        uploadFileMessage(message)
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageSent: message)
-            }
-        }
-    }
-
-    func sendMessage(_ message: IQChatMessage) {
-        guard let clientAuth else { return }
-
-        sendQueue.append(message)
-        log?.debug("Enqueued a message to send, localId=\(message.localId), payload=\(message.payload ?? .invalid)")
-        sendMessages()
-    }
-
-    func sendMessages() {
-        guard sending == nil,
-              let clientAuth,
-              !sendQueue.isEmpty else { return }
-
-        let message = sendQueue.removeFirst()
-        let form = IQChatMessageForm(message: message)
-        sendAttempt += 1
-
-        sending = client?.chatsChannel(channel: config?.channel, form: form) { error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.send(message, failedWithError: error)
-                    return
-                }
-
-                self.sent(form)
-            }
-        }
-
-        log?.info("Sending a message, localId=\(form.localId), payload=\(form.payload ?? .invalid)")
-    }
-
-    func send(_ message: IQChatMessage, failedWithError error: Error) {
-        guard sending != nil else { return }
-        sending = nil
-        sendQueue.insert(message, at: 0)
-
-        if !(network?.isReachable() ?? false) {
-            log?.info("Failed to send a message, network is unreachable, error=\(error.localizedDescription)")
-            return
-        }
-
-        let timeout = IQTimeout.seconds(withAttempt: sendAttempt)
-        let time = IQTimeout.time(withTimeoutSeconds: timeout)
-        DispatchQueue.main.asyncAfter(deadline: time) {
-            self.sendMessages()
-        }
-
-        log?.info("Failed to send a message, will retry \(timeout) second(s), error=\(error.localizedDescription)")
-    }
-
-    func sent(_ form: IQChatMessageForm) {
-        guard sending != nil else { return }
-        sending = nil
-
-        log?.info("Sent a message, localId=\(form.localId), payload=\(form.payload ?? .invalid)")
-        sendMessages()
-    }
-
-    func sendSingleChoice(_ singleChoice: IQSingleChoice) {
-        guard let client = clientAuth?.client else { return }
-
-        let localId = nextLocalId()
-        let message = IQChatMessage(client: client, localId: localId, text: singleChoice.title)
-        message.payload = .text
-        message.botpressPayload = singleChoice.value
-
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        appendMessage(message)
-        sendMessage(message)
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageSent: message)
-            }
-        }
-    }
-
-    func sendAction(_ action: IQAction) {
-        guard let client = clientAuth?.client else { return }
-
-        let localId = nextLocalId()
-        let message = IQChatMessage(client: client, localId: localId, text: action.title)
-        message.payload = .text
-        message.botpressPayload = action.payload
-
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        appendMessage(message)
-        sendMessage(message)
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageSent: message)
-            }
-        }
-    }
-
-    
-    // MARK: - UPLOADING
-    func clearUploading() {
-        for (_, request) in uploading {
-            request.cancel()
-        }
-        uploading.removeAll()
-    }
-
-    func retryUpload(_ localId: Int) {
-        guard let message = getMyMessageByLocalId(localId), message.uploadError != nil else { return }
-        uploadMessage(message)
-    }
-
-    func deleteFailedUpload(_ localId: Int) {
-        guard let index = getMyMessageIndexByLocalId(localId), index != -1 else { return }
-        
-        let message = messages.remove(at: index)
-
-        guard let request = uploading[localId] else { return }
-        request.cancel()
-        uploading.removeValue(forKey: localId)
-
-        let updatedMessages = messages.map { $0 }
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messages: updatedMessages, moreMessages: false)
-            }
-        }
-    }
-
-    func uploadMessage(_ message: IQChatMessage) {
-        guard let clientAuth, let client else { return }
-        
-        let localId = message.localId
-        
-        guard localId != 0, let image = message.uploadImage, !message.uploaded, uploading[localId] == nil else { return }
-        
-        var filename = message.uploadFilename
-        if filename?.isEmpty ?? true {
-            filename = uploadImageDefaultFilename()
-        }
-        
-        guard let data = image.sd_imageData(as: .JPEG, compressionQuality: 0.8) else { return }
-
-        message.uploaded = false
-        message.uploading = false
-        message.uploadError = nil
-
-        uploading[localId] = client.filesUploadImage(filename, data: data) { file, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.uploadMessage(localId, failedWithError: error)
-                    return
-                }
-                self.uploadedMessage(localId, file: file)
-            }
-        }
-        log?.info("Uploading a message image, localId=\(localId), fileName=\(filename ?? "")")
-    }
-
-    func uploadFileMessage(_ message: IQChatMessage) {
-        guard let clientAuth, let client else { return }
-        
-        let localId = message.localId
-        
-        guard localId != 0, let data = message.uploadData, !message.uploaded, uploading[localId] == nil else { return }
-        
-        var filename = message.uploadFilename
-        if filename?.isEmpty ?? true {
-            filename = uploadImageDefaultFilename()
-        }
-
-        message.uploaded = false
-        message.uploading = false
-        message.uploadError = nil
-
-        uploading[localId] = client.filesUploadData(filename, data: data) { file, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.uploadMessage(localId, failedWithError: error)
-                    return
-                }
-                self.uploadedMessage(localId, file: file)
-            }
-        }
-        log?.info("Uploading a message image, localId=\(localId), fileName=\(filename ?? "")")
-    }
-
-    func uploadImageDefaultFilename() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm"
-        return "IMG_\(dateFormatter.string(from: Date())).jpeg"
-    }
-
-    func uploadMessage(_ localId: Int, failedWithError error: Error) {
-        guard let message = getMyMessageByLocalId(localId) else { return }
-        uploading.removeValue(forKey: localId)
-
-        message.uploaded = false
-        message.uploading = false
-        message.uploadError = error
-
-        log?.info("Failed to upload a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), error=\(error.localizedDescription)")
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageUpdated: message)
-            }
-        }
-    }
-
-    func uploadedMessage(_ localId: Int, file: IQFile?) {
-        guard let client = clientAuth?.client, let message = getMyMessageByLocalId(localId) else { return }
-        uploading.removeValue(forKey: localId)
-
-        message.uploaded = true
-        message.uploading = false
-        message.file = file
-        message.fileId = file?.id
-        message.uploadImage = nil
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
-
-        log?.info("Uploaded a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), fileId=\(file?.id ?? "")")
-
-        for listener in messageListeners {
-            DispatchQueue.main.async {
-                listener.iq(messageUpdated: message)
-            }
-        }
-
-        sendMessage(message)
-    }
-
-    // MARK: RATINGS
-    func rate(ratingId: Int, value: Int) {
-        _ = client?.ratingsRate(ratingId, value: value) { error in
-            
-        }
-        log?.info("Rated \(ratingId) as \(value)")
-    }
-
-    // MARK: FILES
-    func fileURL(fileId: String, callback: @escaping IQFileURLCallback) -> IQHttpRequest? {
-        return client?.filesToken(fileId) { token, error in
-            DispatchQueue.main.async {
-                guard let token = token?.token else {
-                    callback(nil, error)
-                    return
-                }
-                let url = self.client?.fileURL(fileId, token: token)
-                callback(url, nil)
-            }
-        }
-    }
-}
-
-// MARK: - IQNetworkListener
-extension IQChannels: IQNetworkListener {
-    func networkStatusChanged(_ status: IQNetworkStatus) {
-        guard status != .notReachable else {
-            return
-        }
-        
-        auth()
-        sendApnsToken()
-        listenToUnread()
-        loadMessages()
-        listenToEvents()
-        sendReceived()
-        sendRead()
-        sendMessages()
-    }
 }
 
 // MARK: - STATIC METHODS
@@ -1558,7 +1566,7 @@ extension IQChannels {
         instance.pushToken(token)
     }
 
-    static func state(_ listener: IQChannelsStateListener) -> IQSubscription {
+    static func state(_ listener: IQChannelsStateListenerProtocol) -> IQSubscription {
         instance.state(listener)
     }
 
@@ -1574,15 +1582,15 @@ extension IQChannels {
         instance.logout()
     }
 
-    static func unread(_ listener: IQChannelsUnreadListener) -> IQSubscription {
+    static func unread(_ listener: IQChannelsUnreadListenerProtocol) -> IQSubscription {
         instance.unread(listener: listener)
     }
 
-    static func messages(_ listener: IQChannelsMessagesListener) -> IQSubscription {
+    static func messages(_ listener: IQChannelsMessagesListenerProtocol) -> IQSubscription {
         instance.messages(listener: listener)
     }
 
-    static func moreMessages(_ listener: IQChannelsMoreMessagesListener) -> IQSubscription {
+    static func moreMessages(_ listener: IQChannelsMoreMessagesListenerProtocol) -> IQSubscription {
         instance.moreMessages(listener)
     }
 

@@ -24,9 +24,9 @@ IQChannelsSwift iOS SDK
 
   s.source_files = 'IQChannelsSwift/Classes/**/*'
   
-  # s.resource_bundles = {
-  #   'IQChannelsSwift' => ['IQChannelsSwift/Assets/*.png']
-  # }
+  s.resource_bundles = {
+      'IQChannelsSwift' => ['IQChannelsSwift/Assets/Assets.xcassets']
+  }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
@@ -36,5 +36,6 @@ IQChannelsSwift iOS SDK
   s.dependency 'TRVSEventSource', '0.0.8'
   s.dependency 'MessageKit', '3.1.1'
   s.dependency 'SnapKit', '5.6.0'
+  s.dependency 'SwiftMessages', '9.0.9'
    
 end

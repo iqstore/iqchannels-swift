@@ -26,6 +26,15 @@ class IQScrollDownButton: UIButton {
         }
         return view
     }()
+    
+    private var circleLayer: CALayer = {
+       let layer = CALayer()
+        layer.backgroundColor = nil
+        layer.borderColor = UIColor(hex: 0xE4E8ED).cgColor
+        layer.borderWidth = 1
+        layer.cornerRadius = 20
+        return layer
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -41,12 +50,12 @@ class IQScrollDownButton: UIButton {
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        circleLayer.frame = bounds
         layer.cornerRadius = frame.height / 2
     }
         
     private func setupView(){
-        layer.borderColor = UIColor(hex: 0xE4E8ED).cgColor
-        layer.borderWidth = 1
+        layer.insertSublayer(circleLayer, at: 0)
         backgroundColor = .white
         setImage(.init(systemName: "chevron.down"), for: .normal)
         imageView?.tintColor = .init(hex: 0x919399)

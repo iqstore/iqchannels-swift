@@ -1,6 +1,6 @@
 import Foundation
 
-protocol IQChannelsUnreadListener: AnyObject {
+protocol IQChannelsUnreadListenerProtocol: AnyObject {
     var id: String { get }
     func iqUnreadChanged(_ unread: Int)
 }

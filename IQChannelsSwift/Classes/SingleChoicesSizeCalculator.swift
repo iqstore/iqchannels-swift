@@ -47,7 +47,7 @@ final class SingleChoicesSizeCalculator: MessageSizeCalculator {
     override func cellContentHeight(for message: MessageType, at indexPath: IndexPath) -> CGFloat {
         let contentHeight = super.cellContentHeight(for: message, at: indexPath)
         let additionalContainerHeight = additionalContainerSize(for: message).height
-        return contentHeight + additionalContainerHeight
+        return contentHeight + additionalContainerHeight + 8
     }
     
     internal func additionalContainerSize(for message: MessageType) -> CGSize {
