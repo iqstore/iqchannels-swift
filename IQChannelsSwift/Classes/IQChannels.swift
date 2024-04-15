@@ -1144,7 +1144,7 @@ private extension IQChannels {
         }
         
         message.eventId = event.id
-        message.received = true
+//        message.received = true
         message.receivedAt = event.createdAt
         
         for listener in messageListeners {
@@ -1165,7 +1165,7 @@ private extension IQChannels {
         message.read = true
         message.readAt = event.createdAt
         if !message.received {
-            message.received = true
+//            message.received = true
             message.receivedAt = event.createdAt
         }
         

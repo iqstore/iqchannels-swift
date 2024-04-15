@@ -3,7 +3,7 @@ import Foundation
 class IQFileSize {
     
     static func unit(with size: Int) -> String {
-        let units = ["bytes", "KB", "MB", "GB", "TB", "PB"]
+        let units = ["байт", "КБ", "МБ", "ГБ", "ТБ", "PБ"]
         var sizef = Double(size)
         var unit = 0
 

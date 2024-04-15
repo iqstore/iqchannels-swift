@@ -69,7 +69,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     }
     
     // MARK: - PUBLIC METHODS
-    private func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         true
     }
     

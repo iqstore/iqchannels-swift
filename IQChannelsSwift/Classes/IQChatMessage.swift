@@ -26,7 +26,9 @@ class IQChatMessage: MessageType {
     var botpressPayload: String?
     
     // Flags
-    var received: Bool = false
+    var received: Bool {
+        uploadError == nil
+    }
     var read: Bool = false
     var disableFreeText: Bool = false
     var isDropDown: Bool = false
@@ -273,7 +275,7 @@ extension IQChatMessage {
         message.noticeId = IQJSON.int(from: jsonObject, key: "NoticeId")
         message.botpressPayload = IQJSON.string(from: jsonObject, key: "BotpressPayload")
         
-        message.received = IQJSON.bool(from: jsonObject, key: "Received")
+//        message.received = IQJSON.bool(from: jsonObject, key: "Received")
         message.read = IQJSON.bool(from: jsonObject, key: "Read")
         message.disableFreeText = IQJSON.bool(from: jsonObject, key: "DisableFreeText")
         message.isDropDown = IQJSON.bool(from: jsonObject, key: "IsDropDown")
