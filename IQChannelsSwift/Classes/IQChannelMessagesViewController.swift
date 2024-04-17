@@ -848,6 +848,7 @@ private extension IQChannelMessagesViewController {
     func setChatUnavailable(hidden: Bool) {
         chatUnavailableView.isHidden = hidden
         messagesCollectionView.isHidden = !hidden
+        messageInputBar.isHidden = !hidden
     }
     
     func setupIndicators(){

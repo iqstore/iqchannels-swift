@@ -23,14 +23,42 @@ IQChannelsSwift iOS SDK
   s.ios.deployment_target = '14.0'
 
   s.source_files = 'IQChannelsSwift/Classes/**/*'
+
+  s.subspec 'Additional' do |spec|
+    spec.source_files = 'IQChannelsSwift/Additional/**/*'
+  end
+  
+  s.subspec 'Calculators' do |spec|
+    spec.source_files = 'IQChannelsSwift/Calculators/**/*'
+  end
+  
+  s.subspec 'Cells' do |spec|
+    spec.source_files = 'IQChannelsSwift/Cells/**/*'
+  end
+  
+  s.subspec 'Extensions' do |spec|
+    spec.source_files = 'IQChannelsSwift/Extensions/**/*'
+  end
+  
+  s.subspec 'Models' do |spec|
+    spec.source_files = 'IQChannelsSwift/Models/**/*'
+  end
+  
+  s.subspec 'Networking' do |spec|
+    spec.source_files = 'IQChannelsSwift/Networking/**/*'
+  end
+  
+  s.subspec 'Protocols' do |spec|
+    spec.source_files = 'IQChannelsSwift/Protocols/**/*'
+  end
+  
+  s.subspec 'Views' do |spec|
+    spec.source_files = 'IQChannelsSwift/Views/**/*'
+  end
   
   s.resource_bundles = {
       'IQChannelsSwift' => ['IQChannelsSwift/Assets/Assets.xcassets']
   }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
   
   s.dependency 'SDWebImage', '~>5.10'
   s.dependency 'TRVSEventSource', '0.0.8'

@@ -40,5 +40,39 @@
     "SwiftMessages": [
       "9.0.9"
     ]
-  }
+  },
+  "subspecs": [
+    {
+      "name": "Additional",
+      "source_files": "IQChannelsSwift/Additional/**/*"
+    },
+    {
+      "name": "Calculators",
+      "source_files": "IQChannelsSwift/Calculators/**/*"
+    },
+    {
+      "name": "Cells",
+      "source_files": "IQChannelsSwift/Cells/**/*"
+    },
+    {
+      "name": "Extensions",
+      "source_files": "IQChannelsSwift/Extensions/**/*"
+    },
+    {
+      "name": "Models",
+      "source_files": "IQChannelsSwift/Models/**/*"
+    },
+    {
+      "name": "Networking",
+      "source_files": "IQChannelsSwift/Networking/**/*"
+    },
+    {
+      "name": "Protocols",
+      "source_files": "IQChannelsSwift/Protocols/**/*"
+    },
+    {
+      "name": "Views",
+      "source_files": "IQChannelsSwift/Views/**/*"
+    }
+  ]
 }

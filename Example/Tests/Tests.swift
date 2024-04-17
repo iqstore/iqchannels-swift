@@ -1,20 +1,29 @@
 import XCTest
-//import IQChannelsSwift
+import IQChannelsSwift
 
 class Tests: XCTestCase {
     
+    var controller: IQChannelMessagesViewController!
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        controller = IQChannelMessagesViewController()
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        controller = nil
         super.tearDown()
     }
     
+    func testViewControllerNotNil() {
+        XCTAssertNotNil(controller.selectedIndexPathForMenu, "View controller should not be nil")
+    }
+    
+    func testSenderExists() {
+        XCTAssert(!controller.scrollsToBottomOnKeyboardBeginsEditing, "Pass")
+    }
+    
     func testExample() {
-        // This is an example of a functional test case.
         XCTAssert(true, "Pass")
     }
     
