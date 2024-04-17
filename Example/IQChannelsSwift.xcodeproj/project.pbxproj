@@ -14,6 +14,7 @@
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		992A9EA12BC5182D00A14496 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992A9EA02BC5182D00A14496 /* LoginViewController.swift */; };
+		99E78D452BD0579B002E7C77 /* MockDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E78D432BD05790002E7C77 /* MockDataSource.swift */; };
 		F4247F67D67C8D41A59524A1 /* Pods_IQChannelsSwift_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94A88EFCB6B842E32E4DAF90 /* Pods_IQChannelsSwift_Example.framework */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +44,7 @@
 		94A88EFCB6B842E32E4DAF90 /* Pods_IQChannelsSwift_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IQChannelsSwift_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		992A9EA02BC5182D00A14496 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		99E78D392BCA9CB3002E7C77 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		99E78D432BD05790002E7C77 /* MockDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDataSource.swift; sourceTree = "<group>"; };
 		ABA88B00C31BD624EC8BB183 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C81C89943FCEFEEF59E5E9CB /* IQChannelsSwift.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = IQChannelsSwift.podspec; path = ../IQChannelsSwift.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		C953E91130C2B6F157B60EBB /* Pods_IQChannelsSwift_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_IQChannelsSwift_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,6 +117,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				99E78D432BD05790002E7C77 /* MockDataSource.swift */,
 				607FACEB1AFB9204008FA782 /* Tests.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
@@ -353,6 +356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
+				99E78D452BD0579B002E7C77 /* MockDataSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
