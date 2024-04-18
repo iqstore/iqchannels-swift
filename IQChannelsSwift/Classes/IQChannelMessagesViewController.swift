@@ -82,7 +82,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     
     func shouldHideScrollDownButton() -> Bool {
         let offset = messagesCollectionView.contentOffset.y + messagesCollectionView.frame.height
-        return !(offset < messagesCollectionView.contentSize.height - 100)
+        return !(offset < messagesCollectionView.contentSize.height - 200)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -662,7 +662,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         messages.append(message)
         scrollDownButton.dotHidden = false
         messagesCollectionView.reloadData()
-        scrollToBottomIfNeeded()
+        scrollToBottomIfNeeded(animated: false)
     }
 
     func iq(messageSent message: IQChatMessage) {
@@ -718,6 +718,10 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         
         typingUser = user
         setTypingIndicatorViewHidden(false, animated: false)
+        
+        DispatchQueue.main.async {
+            self.scrollToBottomIfNeeded()
+        }
     }
 }
 

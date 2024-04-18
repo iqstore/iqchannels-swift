@@ -21,7 +21,7 @@ class IQTextMessageSizeCalculator: TextMessageSizeCalculator {
         var size = super.messageContainerSize(for: message)
         size.width = max(size.width, (message.read || message.received) ? 79 : 59)
         if message.isPendingRatingMessage{
-            size.height += 100
+            size.height += 86
         }
         return size
     }

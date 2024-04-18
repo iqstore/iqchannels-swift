@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol IQStarRatingViewDelegate: AnyObject {
+    func ratingView(_ ratingView: IQStarRatingView, didSet rating: Int)
+}
+
 class IQStarRatingView: UIStackView {
     
     var rating: Int = 0 {
@@ -14,6 +18,8 @@ class IQStarRatingView: UIStackView {
             updateRating()
         }
     }
+    
+    weak var delegate: IQStarRatingViewDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,11 +37,12 @@ class IQStarRatingView: UIStackView {
         spacing = 7
         for _ in 1...5 {
             let starButton = UIButton()
-            starButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(scale: .large), forImageIn: .normal)
-            starButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(scale: .large), forImageIn: .selected)
-            starButton.setImage(UIImage(systemName: "star"), for: .normal)
-            starButton.setImage(UIImage(systemName: "star.fill"), for: .selected)
+            starButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 40), forImageIn: .normal)
+            starButton.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 40), forImageIn: .selected)
+            starButton.setImage(UIImage(systemName: "star.fill")?.withTintColor(.init(hex: 0xDBDBE2), renderingMode: .alwaysOriginal), for: .normal)
+            starButton.setImage(UIImage(systemName: "star.fill")?.withTintColor(.init(hex: 0xFCBB14), renderingMode: .alwaysOriginal), for: .selected)
             starButton.imageView?.tintColor = .init(hex: 0xFCBB14)
+            starButton.imageView?.contentMode = .scaleAspectFit
             starButton.addTarget(self, action: #selector(starButtonTapped(_:)), for: .touchUpInside)
             addArrangedSubview(starButton)
         }
@@ -57,6 +64,7 @@ class IQStarRatingView: UIStackView {
         }
         
         rating = index + 1
+        delegate?.ratingView(self, didSet: rating)
     }
 
 }

@@ -17,7 +17,7 @@ public class IQChannelsConfig: NSObject, NSCopying, IQJSONEncodable {
         self.channel = channel
     }
     
-    func toJSONObject() -> [String: Any] {
+    public func toJSONObject() -> [String: Any] {
         var jsonDict = [String: Any]()
         if let address = address {
             jsonDict["address"] = address

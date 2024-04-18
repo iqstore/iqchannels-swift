@@ -12,23 +12,23 @@ protocol IQRatingCellDelegate: AnyObject {
     func cell(didTapSendButtonFrom cell: IQRatingCell, value: Int)
 }
 
-class IQRatingCell: IQTimestampMessageCell {
+class IQRatingCell: IQTimestampMessageCell, IQStarRatingViewDelegate {
     
     weak var ratingDelegate: IQRatingCellDelegate?
     
     private lazy var ratingView: IQStarRatingView = {
         let view = IQStarRatingView()
+        view.delegate = self
         return view
     }()
     
     private lazy var sendButton: UIButton = {
        let button = UIButton()
         button.layer.cornerRadius = 8
-        button.backgroundColor = .init(hex: 0xDD0A34)
         button.setTitle("Отправить", for: .normal)
-        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
         button.addTarget(self, action: #selector(sendDidTap), for: .touchUpInside)
+        button.setTitleColor(.white, for: .normal)
         return button
     }()
 
@@ -55,11 +55,24 @@ class IQRatingCell: IQTimestampMessageCell {
             make.horizontalEdges.equalToSuperview().inset(12)
             make.bottom.equalTo(sendButton.snp.top).inset(-20)
         }
-
+        setSendButton(enabled: false)
+    }
+    
+    func ratingView(_ ratingView: IQStarRatingView, didSet rating: Int) {
+        setSendButton(enabled: true)
     }
     
     @objc private func sendDidTap(){
         ratingDelegate?.cell(didTapSendButtonFrom: self, value: ratingView.rating)
+    }
+    
+    private func setSendButton(enabled: Bool) {
+        sendButton.isEnabled = enabled
+        if enabled {
+            sendButton.backgroundColor = .init(hex: 0xDD0A34)
+        } else {
+            sendButton.backgroundColor = .init(hex: 0xB7B7CA)
+        }
     }
 
 }
