@@ -2,6 +2,7 @@ import UIKit
 import MessageKit
 import SDWebImage
 import InputBarAccessoryView
+import PhotosUI
 
 open class IQChannelMessagesViewController: MessagesViewController, UIGestureRecognizerDelegate {
     
@@ -459,7 +460,31 @@ extension IQChannelMessagesViewController: MessagesDisplayDelegate {
 }
 
 //MARK: - DATA PICKER DELEGATE
-extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate{
+extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate, PHPickerViewControllerDelegate{
+    
+    public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+        
+        let itemProviders = results.map(\.itemProvider)
+          for item in itemProviders {
+              item.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, _ in
+                  if let url, url.pathExtension == "gif",
+                     let data = try? Data(contentsOf: url){
+                      self.sendData(data: data, filename: nil)
+                  } else {
+                      if item.canLoadObject(ofClass: UIImage.self) {
+                          item.loadObject(ofClass: UIImage.self) { (image, error) in
+                              DispatchQueue.main.async {
+                                  if let image = image as? UIImage {
+                                      self.sendImage(image)
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+    }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         picker.dismiss(animated: true)
@@ -476,20 +501,26 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     }
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let url = urls.first,
-            url.startAccessingSecurityScopedResource() else { return }
-        defer { url.stopAccessingSecurityScopedResource() }
-        guard let data = try? Data(contentsOf: url) else { return }
+        let files: [(data: Data, filename: String)] = urls.compactMap { url in
+            defer { url.stopAccessingSecurityScopedResource() }
+
+            guard url.startAccessingSecurityScopedResource(),
+                  let data = try? Data(contentsOf: url) else { return nil }
+            
+            return (data, url.lastPathComponent)
+        }
         
         DispatchQueue.main.async {
-            self.confirmDataSubmission(data: data, filename: url.lastPathComponent)
+            self.confirmDataSubmission(files)
         }
     }
     
-    public func confirmDataSubmission(data: Data, filename: String) {
-        let alertController = UIAlertController(title: "Подтвердите отправку файла", message: filename, preferredStyle: .actionSheet)
+    public func confirmDataSubmission(_ files: [(data: Data, filename: String)]) {
+        let alertController = UIAlertController(title: "Подтвердите отправку файлов(\(files.count))", message: nil, preferredStyle: .actionSheet)
         alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
-            self.sendData(data: data, filename: filename)
+            files.forEach { data, filename in
+                self.sendData(data: data, filename: filename)
+            }
         }))
         alertController.addAction(.init(title: "Отмена", style: .cancel))
         messageInputBar.inputTextView.resignFirstResponder()
@@ -880,16 +911,26 @@ private extension IQChannelMessagesViewController {
     }
     
     func photoSourceDidTap(source: UIImagePickerController.SourceType){
-        let picker = UIImagePickerController()
-        picker.sourceType = source
-        picker.delegate = self
-        picker.allowsEditing = true
-        present(picker, animated: true)
+        switch source {
+        case .photoLibrary, .savedPhotosAlbum:
+            var configuration = PHPickerConfiguration(photoLibrary: .shared())
+            configuration.selectionLimit = 0
+            let picker = PHPickerViewController(configuration: configuration)
+            picker.delegate = self
+            present(picker, animated: true)
+        case .camera:
+            let picker = UIImagePickerController()
+            picker.sourceType = .camera
+            picker.delegate = self
+            picker.allowsEditing = true
+            present(picker, animated: true)
+        }
     }
         
     func fileSourceDidTap(){
         let documentController = UIDocumentPickerViewController(forOpeningContentTypes: [.data])
         documentController.delegate = self
+        documentController.allowsMultipleSelection = true
         documentController.modalPresentationStyle = .formSheet
         present(documentController, animated: true)
     }
