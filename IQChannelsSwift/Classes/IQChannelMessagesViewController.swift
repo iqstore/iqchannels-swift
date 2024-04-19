@@ -501,17 +501,23 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     }
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        let files: [(data: Data, filename: String)] = urls.compactMap { url in
-            defer { url.stopAccessingSecurityScopedResource() }
+        if urls.count > 10 {
+            DispatchQueue.main.async {
+                self.showLimitReachedAlert()
+            }
+        } else {
+            let files: [(data: Data, filename: String)] = urls.compactMap { url in
+                defer { url.stopAccessingSecurityScopedResource() }
 
-            guard url.startAccessingSecurityScopedResource(),
-                  let data = try? Data(contentsOf: url) else { return nil }
+                guard url.startAccessingSecurityScopedResource(),
+                      let data = try? Data(contentsOf: url) else { return nil }
+                
+                return (data, url.lastPathComponent)
+            }
             
-            return (data, url.lastPathComponent)
-        }
-        
-        DispatchQueue.main.async {
-            self.confirmDataSubmission(files)
+            DispatchQueue.main.async {
+                self.confirmDataSubmission(files)
+            }
         }
     }
     
@@ -523,6 +529,13 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
             }
         }))
         alertController.addAction(.init(title: "Отмена", style: .cancel))
+        messageInputBar.inputTextView.resignFirstResponder()
+        present(alertController, animated: true)
+    }
+    
+    public func showLimitReachedAlert() {
+        let alertController = UIAlertController(title: "Выберите до 10 файлов, для успешной отправки", message: nil, preferredStyle: .actionSheet)
+        alertController.addAction(.init(title: "Подтвердить", style: .cancel))
         messageInputBar.inputTextView.resignFirstResponder()
         present(alertController, animated: true)
     }
@@ -914,7 +927,7 @@ private extension IQChannelMessagesViewController {
         switch source {
         case .photoLibrary, .savedPhotosAlbum:
             var configuration = PHPickerConfiguration(photoLibrary: .shared())
-            configuration.selectionLimit = 0
+            configuration.selectionLimit = 10
             let picker = PHPickerViewController(configuration: configuration)
             picker.delegate = self
             present(picker, animated: true)
