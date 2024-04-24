@@ -60,10 +60,25 @@ class IQTimestampView: UIView {
                                                    .foregroundColor: textColor]))
         dateLabel.attributedText = attributedString
         
-        readImageView.isHidden = !(message.isMy && (message.read || message.received))
-        let doubleCheckmarkImage = UIImage(named: "doubleCheckmark", in: .channelsAssetBundle(), with: nil)
-        let singleCheckmarkImage = UIImage(named: "singleCheckmark", in: .channelsAssetBundle(), with: nil)
-        readImageView.image = message.read ? doubleCheckmarkImage : singleCheckmarkImage
-        labelToImageConstraint?.isActive = message.isMy && (message.read || message.received)
+        let messageSent = (message.id != 0) || message.sent
+        var imageViewShown: Bool {
+            guard message.isMy else { return false }
+            
+            return !(!messageSent && message.payload != .text)
+        }
+        readImageView.isHidden = !imageViewShown
+        labelToImageConstraint?.isActive = imageViewShown
+        
+        if message.isMy {
+            if messageSent {
+                readImageView.stopRotating()
+                let doubleCheckmarkImage = UIImage(named: "doubleCheckmark", in: .channelsAssetBundle(), with: nil)
+                let singleCheckmarkImage = UIImage(named: "singleCheckmark", in: .channelsAssetBundle(), with: nil)
+                readImageView.image = message.read ? doubleCheckmarkImage : singleCheckmarkImage
+            } else {
+                readImageView.image = UIImage(named: "loader", in: .channelsAssetBundle(), with: nil)
+                readImageView.startRotating()
+            }
+        }
     }
 }

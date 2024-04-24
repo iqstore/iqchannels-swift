@@ -22,10 +22,6 @@ final class IQFilePreviewCell: MessageContentCell {
     var messageLabel = MessageLabel()
     var fileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "doc",
-                                  in: .channelsAssetBundle(),
-                                  compatibleWith: nil)
-        imageView.contentMode = .bottom
         return imageView
     }()
 
@@ -73,6 +69,20 @@ final class IQFilePreviewCell: MessageContentCell {
         guard let chatMessage = message as? IQChatMessage else { return }
         
         fileImageView.tintColor = chatMessage.isMy ? .white : .black
+        
+        if chatMessage.file?.url == nil {
+            fileImageView.startRotating()
+            fileImageView.contentMode = .center
+            fileImageView.image = UIImage(named: "loaderBig",
+                                      in: .channelsAssetBundle(),
+                                      compatibleWith: nil)
+        } else {
+            fileImageView.stopRotating()
+            fileImageView.contentMode = .bottom
+            fileImageView.image = UIImage(named: "doc",
+                                      in: .channelsAssetBundle(),
+                                      compatibleWith: nil)
+        }
 
         let enabledDetectors = displayDelegate.enabledDetectors(for: message, at: indexPath, in: messagesCollectionView)
 

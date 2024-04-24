@@ -76,7 +76,6 @@ public class LoginViewController: UIViewController, UITextFieldDelegate {
         let headers = ["User-Agent": "MyAgent"]
         IQChannels.configure(config)
         IQChannels.setCustomHeaders(headers)
-        IQChannels.login("101")
         serverField.text = server
     }
     

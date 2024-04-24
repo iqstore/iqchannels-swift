@@ -319,6 +319,11 @@ public class IQChannels {
     func sent(_ form: IQChatMessageForm) {
         guard sending != nil else { return }
         sending = nil
+        
+        if let message = getMyMessageByLocalId(form.localId) {
+            message.sent = true
+            messageListeners.forEach { $0.iq(messageUpdated: message) }
+        }
 
         log?.info("Sent a message, localId=\(form.localId), payload=\(form.payload ?? .invalid)")
         sendMessages()
@@ -482,13 +487,13 @@ public class IQChannels {
         guard let client = clientAuth?.client, let message = getMyMessageByLocalId(localId) else { return }
         uploading.removeValue(forKey: localId)
 
+        let map = IQRelationMap(client: client)
+        relations?.chatMessage(message, with: map)
         message.uploaded = true
         message.uploading = false
         message.file = file
         message.fileId = file?.id
         message.uploadImage = nil
-        let map = IQRelationMap(client: client)
-        relations?.chatMessage(message, with: map)
 
         log?.info("Uploaded a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), fileId=\(file?.id ?? "")")
 
@@ -869,14 +874,16 @@ private extension IQChannels {
             
             log?.info("Authenticating as customer, channel=\(channel ?? ""), attempt=\(authAttempt)")
         }
-        
-        setState(.authenticating)
+        if authAttempt == 1 {
+            setState(.authenticating)
+        }
     }
     
     private func authError(_ error: Error?) {
         guard authing != nil else { return }
         authing = nil
         
+        setState(.loggedOut)
         guard network?.isReachable() ?? false else {
             log?.info("Authentication failed, network is unreachable, error=\(error?.localizedDescription ?? "")")
             return

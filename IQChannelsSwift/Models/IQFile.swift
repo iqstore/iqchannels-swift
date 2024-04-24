@@ -20,6 +20,21 @@ class IQFile {
     // Local
     var url: URL?
     var imagePreviewUrl: URL?
+    
+    init () { }
+    
+    init(image: UIImage, filename: String) {
+        id = UUID().uuidString
+        type = .image
+        name = filename
+    }
+    
+    init(data: Data, filename: String) {
+        id = UUID().uuidString
+        type = .file
+        name = filename
+        size = data.count
+    }
 }
 
 extension IQFile {

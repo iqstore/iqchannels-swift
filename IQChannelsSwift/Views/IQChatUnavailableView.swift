@@ -30,6 +30,17 @@ class IQChatUnavailableView: UIStackView {
         label.textAlignment = .center
         return label
     }()
+    
+    private lazy var backButton: UIButton = {
+       let button = UIButton()
+        button.backgroundColor = .init(hex: 0xF4F4F8)
+        button.layer.cornerRadius = 12
+        button.setTitleColor(.init(hex: 0x242729), for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
+        button.setTitle("Вернуться", for: .normal)
+        button.addTarget(self, action: #selector(backDidTap), for: .touchUpInside)
+        return button
+    }()
 
     private lazy var labelsStackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [titleLabel, bodyLabel])
@@ -37,6 +48,8 @@ class IQChatUnavailableView: UIStackView {
         view.spacing = 8
         return view
     }()
+    
+    var onBackTapped: (() -> ())?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,6 +61,10 @@ class IQChatUnavailableView: UIStackView {
     required init(coder: NSCoder) {
         fatalError()
     }
+    
+    @objc private func backDidTap(){
+        onBackTapped?()
+    }
         
     private func setupViews(){
         axis = .vertical
@@ -56,11 +73,15 @@ class IQChatUnavailableView: UIStackView {
         
         addArrangedSubview(xmarkImageView)
         addArrangedSubview(labelsStackView)
+        addArrangedSubview(backButton)
     }
     
     private func setupConstraints(){
         xmarkImageView.snp.makeConstraints { make in
             make.size.equalTo(48)
+        }
+        backButton.snp.makeConstraints { make in
+            make.size.equalTo(CGSize(width: 130, height: 38))
         }
     }
    

@@ -18,16 +18,25 @@ class IQMediaMessageCell: MediaMessageCell {
         return view
     }()
     
-    private var activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .medium)
+    private var activityIndicator: UIImageView = {
+       let imageView = UIImageView(image: UIImage(named: "loaderBig",
+                                                  in: .channelsAssetBundle(),
+                                                  compatibleWith: nil))
+        imageView.backgroundColor = .init(hex: 0x242729).withAlphaComponent(0.56)
+        imageView.layer.cornerRadius = 38 / 2
+        imageView.clipsToBounds = true
+        return imageView
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+                
         messageContainerView.addSubview(activityIndicator)
         messageContainerView.addSubview(timestampContainer)
         timestampContainer.addSubview(timestampView)
         
         activityIndicator.snp.makeConstraints { make in
+            make.size.equalTo(38)
             make.center.equalToSuperview()
         }
         timestampView.snp.makeConstraints { make in
@@ -52,7 +61,7 @@ class IQMediaMessageCell: MediaMessageCell {
         case .photo(let media):
             let hasImage = media.image != nil
             activityIndicator.isHidden = hasImage
-            hasImage ? activityIndicator.stopAnimating() : activityIndicator.startAnimating()
+            hasImage ? activityIndicator.stopRotating() : activityIndicator.startRotating()
         default: break
         }
         contentView.layoutIfNeeded()

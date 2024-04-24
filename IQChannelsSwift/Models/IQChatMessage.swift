@@ -29,6 +29,8 @@ class IQChatMessage: MessageType {
     var received: Bool {
         uploadError == nil
     }
+    /// Custom flag
+    var sent: Bool = false
     var read: Bool = false
     var disableFreeText: Bool = false
     var isDropDown: Bool = false
@@ -189,6 +191,7 @@ class IQChatMessage: MessageType {
     convenience init(client: IQClient?, localId: Int, image: UIImage, fileName: String) {
         self.init(client: client, localId: localId)
         self.payload = .file
+        self.file = IQFile(image: image, filename: fileName)
         self.uploadImage = image
         self.uploadFilename = fileName
     }
@@ -196,6 +199,11 @@ class IQChatMessage: MessageType {
     convenience init(client: IQClient?, localId: Int, data: Data, fileName: String) {
         self.init(client: client, localId: localId)
         self.payload = .file
+        if fileName.contains("gif") {
+            self.file = IQFile(image: .init(data: data) ?? .init(), filename: fileName)
+        } else {
+            self.file = IQFile(data: data, filename: fileName)
+        }
         self.uploadData = data
         self.uploadFilename = fileName
     }

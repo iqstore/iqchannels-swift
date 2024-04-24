@@ -19,7 +19,7 @@ class IQTextMessageSizeCalculator: TextMessageSizeCalculator {
     override func messageContainerSize(for message: any MessageType) -> CGSize {
         guard let message = message as? IQChatMessage else { return super.messageContainerSize(for: message) }
         var size = super.messageContainerSize(for: message)
-        size.width = max(size.width, (message.read || message.received) ? 79 : 59)
+        size.width = max(size.width, (/*message.read || message.received*/ true) ? 79 : 59)
         if message.isPendingRatingMessage{
             size.height += 86
         }

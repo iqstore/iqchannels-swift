@@ -466,24 +466,42 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         picker.dismiss(animated: true)
         
         let itemProviders = results.map(\.itemProvider)
-          for item in itemProviders {
-              item.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, _ in
-                  if let url, url.pathExtension == "gif",
-                     let data = try? Data(contentsOf: url){
-                      self.sendData(data: data, filename: nil)
-                  } else {
-                      if item.canLoadObject(ofClass: UIImage.self) {
-                          item.loadObject(ofClass: UIImage.self) { (image, error) in
-                              DispatchQueue.main.async {
-                                  if let image = image as? UIImage {
-                                      self.sendImage(image)
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
+        for (index, item) in itemProviders.enumerated() {
+            if item.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+                item.loadDataRepresentation(forTypeIdentifier: UTType.gif.identifier) { data, _ in
+                    guard let data else { return }
+                    DispatchQueue.main.async {
+                        self.sendData(data: data, filename: "gif")
+                    }
+                }
+            } else {
+                item.loadImage { image, error in
+                    if let image {
+                        print("sending ----+, ", index)
+                        DispatchQueue.main.async {
+                            self.sendImage(image, filename: nil)
+                        }
+                    }
+                }
+            }
+//            item.loadDataRepresentation(forTypeIdentifier: item.registeredTypeIdentifiers.first ?? "public.image") { data, _ in
+//                print("sending ----, ", index, data?.count)
+//                guard let data else { return }
+//                
+//                if item.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+//                    DispatchQueue.main.async {
+//                        self.sendData(data: data, filename: "gif")
+//                    }
+//                } else if let image = UIImage(data: data) {
+//                    print("sending ----+, ", index)
+//                    DispatchQueue.main.async {
+//                        self.sendImage(image, filename: nil)
+//                    }
+//                } else {
+//                    print("sending ---- nilll")
+//                }
+//            }
+        }
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
@@ -493,14 +511,15 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         if let url = info[UIImagePickerControllerImageURL] as? URL,
            url.pathExtension == "gif",
            let data = try? Data(contentsOf: url){
-            sendData(data: data, filename: nil)
+            sendData(data: data, filename: "gif")
             return
         }
         
-        sendImage(image)
+        sendImage(image, filename: nil)
     }
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        controller.dismiss(animated: true)
         if urls.count > 10 {
             DispatchQueue.main.async {
                 self.showLimitReachedAlert()
@@ -524,8 +543,12 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     public func confirmDataSubmission(_ files: [(data: Data, filename: String)]) {
         let alertController = UIAlertController(title: "Подтвердите отправку файлов(\(files.count))", message: nil, preferredStyle: .actionSheet)
         alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
+            files.enumerated().forEach { index, turtle in
+                DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.5)) {
+                    self.sendData(data: turtle.data, filename: turtle.filename)
+                }
+            }
             files.forEach { data, filename in
-                self.sendData(data: data, filename: filename)
             }
         }))
         alertController.addAction(.init(title: "Отмена", style: .cancel))
@@ -544,8 +567,8 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         IQChannels.sendData(data, filename: filename)
     }
     
-    public func sendImage(_ image: UIImage) {
-        IQChannels.sendImage(image, filename: nil)
+    public func sendImage(_ image: UIImage, filename: String?) {
+        IQChannels.sendImage(image, filename: filename)
     }
 }
 
@@ -891,6 +914,16 @@ private extension IQChannelMessagesViewController {
             make.center.equalToSuperview()
             make.horizontalEdges.equalToSuperview().inset(16)
         }
+        
+        chatUnavailableView.onBackTapped = { [weak self] in
+            guard let self else { return }
+            
+            if navigationController?.viewControllers.first === self {
+                dismiss(animated: true)
+            } else {
+                navigationController?.popViewController(animated: true)
+            }
+        }
     }
     
     func setChatUnavailable(hidden: Bool) {
@@ -928,6 +961,7 @@ private extension IQChannelMessagesViewController {
         case .photoLibrary, .savedPhotosAlbum:
             var configuration = PHPickerConfiguration(photoLibrary: .shared())
             configuration.selectionLimit = 10
+            configuration.preferredAssetRepresentationMode = .current
             let picker = PHPickerViewController(configuration: configuration)
             picker.delegate = self
             present(picker, animated: true)
