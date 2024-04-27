@@ -6,6 +6,7 @@ class IQChatMessageForm: IQJSONEncodable {
     var payload: IQChatPayloadType?
     var text: String?
     var fileId: String?
+    var replyToMessageID: Int?
     var botpressPayload: String?
     
     init(message: IQChatMessage?) {
@@ -13,6 +14,7 @@ class IQChatMessageForm: IQJSONEncodable {
         payload = message?.payload
         text = message?.text ?? ""
         fileId = message?.fileId
+        replyToMessageID = message?.replyToMessageID
         botpressPayload = message?.botpressPayload
     }
     
@@ -26,6 +28,9 @@ class IQChatMessageForm: IQJSONEncodable {
         }
         if let text {
             dict["Text"] = text
+        }
+        if let replyToMessageID {
+            dict["ReplyToMessageId"] = replyToMessageID
         }
         if let fileId {
             dict["FileId"] = fileId

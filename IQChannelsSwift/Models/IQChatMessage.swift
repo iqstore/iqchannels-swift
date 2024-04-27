@@ -10,6 +10,8 @@ class IQChatMessage: MessageType {
     var sessionId: Int = 0
     var localId: Int = 0
     var eventId: Int?
+    var replyToMessageID: Int?
+    var replyToMessage: IQChatMessage?
     var isPublic: Bool = false
     
     // Author
@@ -182,21 +184,23 @@ class IQChatMessage: MessageType {
         self.isMy = true
     }
 
-    convenience init(client: IQClient?, localId: Int, text: String?) {
+    convenience init(client: IQClient?, localId: Int, text: String?, replyToMessageID: Int?) {
         self.init(client: client, localId: localId)
         self.payload = .text
         self._text = text
+        self.replyToMessageID = replyToMessageID
     }
 
-    convenience init(client: IQClient?, localId: Int, image: UIImage, fileName: String) {
+    convenience init(client: IQClient?, localId: Int, image: UIImage, fileName: String, replyToMessageID: Int?) {
         self.init(client: client, localId: localId)
         self.payload = .file
         self.file = IQFile(image: image, filename: fileName)
         self.uploadImage = image
         self.uploadFilename = fileName
+        self.replyToMessageID = replyToMessageID
     }
 
-    convenience init(client: IQClient?, localId: Int, data: Data, fileName: String) {
+    convenience init(client: IQClient?, localId: Int, data: Data, fileName: String, replyToMessageID: Int?) {
         self.init(client: client, localId: localId)
         self.payload = .file
         if fileName.contains("gif") {
@@ -205,6 +209,7 @@ class IQChatMessage: MessageType {
             self.file = IQFile(data: data, filename: fileName)
         }
         self.uploadData = data
+        self.replyToMessageID = replyToMessageID
         self.uploadFilename = fileName
     }
     
@@ -222,7 +227,7 @@ class IQChatMessage: MessageType {
         }
     }
     
-    private func chatMessageSenderDisplayName() -> String {
+    func chatMessageSenderDisplayName() -> String {
         switch author {
         case .client:
             if let client = client {
@@ -270,6 +275,7 @@ extension IQChatMessage {
         message.sessionId = IQJSON.int(from: jsonObject, key: "SessionId") ?? 0
         message.localId = IQJSON.int(from: jsonObject, key: "LocalId") ?? 0
         message.eventId = IQJSON.int(from: jsonObject, key: "EventId")
+        message.replyToMessageID = IQJSON.int(from: jsonObject, key: "ReplyToMessageId")
         message.isPublic = IQJSON.bool(from: jsonObject, key: "Public")
         
         message.author = IQActorType(rawValue: IQJSON.string(from: jsonObject, key: "Author") ?? "")

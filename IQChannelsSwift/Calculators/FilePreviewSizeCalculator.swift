@@ -17,7 +17,12 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
         let indexPath = attributes.indexPath
         let message = dataSource.messageForItem(at: indexPath, in: messagesLayout.messagesCollectionView)
         
-        attributes.messageLabelInsets = cellInsets(for: message)
+        var inset = cellInsets(for: message)
+        if let message = message as? IQChatMessage,
+           message.replyToMessage != nil {
+            inset.top += 42
+        }
+        attributes.messageLabelInsets = inset
         attributes.messageLabelFont = messageLabelFont
     }
 
@@ -33,9 +38,12 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
             .font: UIFont.systemFont(ofSize: 15)
         ]))
         let labelSize = labelSize(for: attributedText, considering: maxWidth - 32 + 8)
-        
+        var height = max(labelSize.height, 18) + (cellInsets(for: message).top + cellInsets(for: message).bottom)
+        if chatMessage.replyToMessage != nil {
+            height += 49
+        }
         return CGSize(width: maxWidth,
-                      height: max(labelSize.height, 18) + (cellInsets(for: message).top + cellInsets(for: message).bottom))
+                      height: height)
     }
     
     internal func labelSize(for attributedText: NSAttributedString, considering maxWidth: CGFloat) -> CGSize {

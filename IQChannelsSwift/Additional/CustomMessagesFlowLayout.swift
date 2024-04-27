@@ -22,6 +22,7 @@ final class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
     lazy var defaultCellSizeCalculator = DefaultCellSizeCalculator(layout: self)
     lazy var textSizeCalculator = IQTextMessageSizeCalculator(layout: self)
     lazy var _typingIndicatorSizeCalculator = IQTypingIndicatorCellSizeCalculator(layout: self)
+    lazy var _photoMessageSizeCalculator = IQMediaMessageSizeCalculator(layout: self)
     
     override class var layoutAttributesClass: AnyClass {
         return CustomMessagesCollectionViewLayoutAttributes.self
@@ -60,6 +61,8 @@ final class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
                 }
             }
             return textSizeCalculator
+        case .photo:
+            return _photoMessageSizeCalculator
         default:
             return super.cellSizeCalculatorForItem(at: indexPath)
         }
@@ -72,7 +75,8 @@ final class CustomMessagesFlowLayout: MessagesCollectionViewFlowLayout {
             cardCellSizeCalculator,
             filePreviewSizeCalculator,
             defaultCellSizeCalculator,
-            textSizeCalculator
+            textSizeCalculator,
+            _photoMessageSizeCalculator
         ])
         return messageSizeCalculators
     }

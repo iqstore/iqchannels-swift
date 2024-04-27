@@ -10,6 +10,10 @@ final class IQFilePreviewCell: MessageContentCell {
     }
     
     private let timestampView = IQTimestampView()
+    
+    private var replyView = IQCellReplyView()
+    
+    weak var replyViewDelegate: IQCellReplyViewDelegate?
 
     var contentStackView: UIStackView = {
         let stackView = UIStackView()
@@ -17,6 +21,7 @@ final class IQFilePreviewCell: MessageContentCell {
         stackView.spacing = 8
         stackView.distribution = .fillProportionally
         stackView.alignment = .top
+        stackView.isLayoutMarginsRelativeArrangement = true
         return stackView
     }()
     var messageLabel = MessageLabel()
@@ -28,8 +33,6 @@ final class IQFilePreviewCell: MessageContentCell {
     override func apply(_ layoutAttributes: UICollectionViewLayoutAttributes) {
         super.apply(layoutAttributes)
         if let attributes = layoutAttributes as? MessagesCollectionViewLayoutAttributes {
-            contentStackView.frame = messageContainerView.bounds
-            contentStackView.isLayoutMarginsRelativeArrangement = true
             contentStackView.layoutMargins = attributes.messageLabelInsets
         }
     }
@@ -44,10 +47,19 @@ final class IQFilePreviewCell: MessageContentCell {
         super.setupSubviews()
         messageContainerView.addSubview(contentStackView)
         messageContainerView.addSubview(timestampView)
+        messageContainerView.addSubview(replyView)
         
         contentStackView.addArrangedSubview(fileImageView)
         contentStackView.addArrangedSubview(messageLabel)
         
+        contentStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        replyView.snp.makeConstraints { make in
+            make.horizontalEdges.top.equalToSuperview()
+        }
+
         timestampView.snp.makeConstraints { make in
             make.right.equalToSuperview().inset(12)
             make.bottom.equalToSuperview().inset(8)
@@ -57,7 +69,16 @@ final class IQFilePreviewCell: MessageContentCell {
             make.size.equalTo(CGSize(width: 32, height: 36))
         }
     }
-
+    
+    override func handleTapGesture(_ gesture: UIGestureRecognizer) {
+        let touchLocation = convert(gesture.location(in: self), to: messageContainerView)
+        if !replyView.isHidden, replyView.frame.contains(touchLocation) {
+            replyViewDelegate?.cell(self, didTapReplyView: replyView)
+        } else {
+            super.handleTapGesture(gesture)
+        }
+    }
+        
     override func configure(with message: MessageType, at indexPath: IndexPath, and messagesCollectionView: MessagesCollectionView) {
         super.configure(with: message, at: indexPath, and: messagesCollectionView)
 
@@ -69,6 +90,9 @@ final class IQFilePreviewCell: MessageContentCell {
         guard let chatMessage = message as? IQChatMessage else { return }
         
         fileImageView.tintColor = chatMessage.isMy ? .white : .black
+        
+        replyView.configure(with: chatMessage)
+        replyView.isHidden = chatMessage.replyToMessage == nil
         
         if chatMessage.file?.url == nil {
             fileImageView.startRotating()

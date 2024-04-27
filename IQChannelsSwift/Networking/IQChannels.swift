@@ -210,13 +210,14 @@ public class IQChannels {
         return tempLocalId
     }
 
-    func sendText(_ text: String) {
+    func sendText(_ text: String, replyMessageID: Int? = nil) {
         guard let client = clientAuth?.client, text.count > 0 else { return }
 
         let localId = nextLocalId()
         let message = IQChatMessage(client: client,
                                     localId: localId,
-                                    text: text)
+                                    text: text,
+                                    replyToMessageID: replyMessageID)
         let map = IQRelationMap(client: client)
         relations?.chatMessage(message, with: map)
 
@@ -230,12 +231,12 @@ public class IQChannels {
         }
     }
 
-    func sendImage(_ image: UIImage, fileName: String?) {
+    func sendImage(_ image: UIImage, fileName: String?, replyMessageID: Int?) {
         guard let client = clientAuth?.client else { return }
 
         let localId = nextLocalId()
         let fileName = fileName ?? "image.jpeg"
-        let message = IQChatMessage(client: client, localId: localId, image: image, fileName: fileName)
+        let message = IQChatMessage(client: client, localId: localId, image: image, fileName: fileName, replyToMessageID: replyMessageID)
         let map = IQRelationMap(client: client)
         relations?.chatMessage(message, with: map)
 
@@ -249,12 +250,12 @@ public class IQChannels {
         }
     }
 
-    func sendData(_ data: Data, fileName: String?) {
+    func sendData(_ data: Data, fileName: String?, replyMessageID: Int?) {
         guard let client = clientAuth?.client else { return }
 
         let localId = nextLocalId()
         let fileName = fileName ?? "data"
-        let message = IQChatMessage(client: client, localId: localId, data: data, fileName: fileName)
+        let message = IQChatMessage(client: client, localId: localId, data: data, fileName: fileName, replyToMessageID: replyMessageID)
         let map = IQRelationMap(client: client)
         relations?.chatMessage(message, with: map)
 
@@ -333,7 +334,7 @@ public class IQChannels {
         guard let client = clientAuth?.client else { return }
 
         let localId = nextLocalId()
-        let message = IQChatMessage(client: client, localId: localId, text: singleChoice.title)
+        let message = IQChatMessage(client: client, localId: localId, text: singleChoice.title, replyToMessageID: nil)
         message.payload = .text
         message.botpressPayload = singleChoice.value
 
@@ -354,7 +355,7 @@ public class IQChannels {
         guard let client = clientAuth?.client else { return }
 
         let localId = nextLocalId()
-        let message = IQChatMessage(client: client, localId: localId, text: action.title)
+        let message = IQChatMessage(client: client, localId: localId, text: action.title, replyToMessageID: nil)
         message.payload = .text
         message.botpressPayload = action.payload
 
@@ -1609,16 +1610,16 @@ extension IQChannels {
         instance.typing()
     }
 
-    static func sendText(_ text: String) {
-        instance.sendText(text)
+    static func sendText(_ text: String, replyMessageID: Int? = nil) {
+        instance.sendText(text, replyMessageID: replyMessageID)
     }
 
-    static func sendImage(_ image: UIImage, filename: String?) {
-        instance.sendImage(image, fileName: filename)
+    static func sendImage(_ image: UIImage, filename: String?, replyMessageID: Int?) {
+        instance.sendImage(image, fileName: filename, replyMessageID: replyMessageID)
     }
 
-    static func sendData(_ data: Data, filename: String?) {
-        instance.sendData(data, fileName: filename)
+    static func sendData(_ data: Data, filename: String?, replyMessageID: Int?) {
+        instance.sendData(data, fileName: filename, replyMessageID: replyMessageID)
     }
 
     static func retryUpload(_ localId: Int) {

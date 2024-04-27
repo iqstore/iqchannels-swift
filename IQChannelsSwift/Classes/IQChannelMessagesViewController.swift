@@ -11,6 +11,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     private var loginIndicator = IQActivityIndicator()
     private var scrollDownButton = IQScrollDownButton()
     private var chatUnavailableView = IQChatUnavailableView()
+    private var pendingReplyView = IQPendingReplyView()
     private var refreshControl = UIRefreshControl()
     
     // MARK: - PROPERTIES
@@ -22,8 +23,11 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
     private var readMessages: Set<Int> = []
     private var typingTimer: Timer?
     private var typingUser: IQUser?
+    /// Set only via reply(to:) method
+    private var _messageToReply: IQChatMessage?
     private var messagesSub: IQSubscription?
     private var moreMessagesLoading: IQSubscription?    
+    private var slideCellManager = IQSlideCellManager()
     private var messagesLoaded: Bool = false
         
     // MARK: - LIFECYCLE
@@ -38,6 +42,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         setupNavBar()
         setupChatUnavailableView()
         setupScrollDownButton()
+        setupPendingReplyView()
         setupCollectionView()
         setupInputBar()
         setupObservers()
@@ -137,6 +142,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.cardCellDelegate = self
                 cell.delegate = self
+                slideCellManager.add(cell)
                 return cell
             }
             
@@ -144,6 +150,8 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
                 let cell = messagesCollectionView.dequeueReusableCell(IQFilePreviewCell.self, for: indexPath)
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.delegate = self
+                cell.replyViewDelegate = self
+                slideCellManager.add(cell)
                 return cell
             }
             
@@ -156,6 +164,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
                 cell.configure(with: message, at: indexPath, and: messagesCollectionView)
                 cell.delegate = self
                 cell.ratingDelegate = self
+                slideCellManager.add(cell)
                 return cell
             }
             if message.payload == .singleChoice,
@@ -172,6 +181,7 @@ open class IQChannelMessagesViewController: MessagesViewController, UIGestureRec
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath)
         if let cell = cell as? MessageContentCell {
             cell.delegate = self
+            slideCellManager.add(cell)
         }
         return cell
     }
@@ -203,7 +213,12 @@ extension IQChannelMessagesViewController {
                 UIPasteboard.general.string = textToCopy
                 self?.showCopyPreviewView()
             }
-            return UIMenu(title: "", image: nil, identifier: nil, options: UIMenu.Options.displayInline, children: [copy])
+            let reply = UIAction(title: "Ответить", image: UIImage(systemName: "arrowshape.turn.up.left"), identifier: nil, discoverabilityTitle: nil, state: .off) { [weak self] (_) in
+                if let message = message as? IQChatMessage {
+                    self?.reply(to: message)
+                }
+            }
+            return UIMenu(title: "", image: nil, identifier: nil, options: UIMenu.Options.displayInline, children: [copy, reply])
         }
         return context
     }
@@ -231,6 +246,9 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
         
         let height = self.view.frame.height - rect.origin.y
         UIView.animate(withDuration: 0.2) {
+            self.pendingReplyView.snp.updateConstraints { make in
+                make.bottom.equalToSuperview().inset(height).priority(.high)
+            }
             self.scrollDownButton.snp.updateConstraints { make in
                 make.bottom.equalToSuperview().inset(height + 16).priority(.high)
             }
@@ -243,7 +261,8 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
             return
         }
         inputBar.inputTextView.text = nil
-        IQChannels.sendText(text)
+        IQChannels.sendText(text, replyMessageID: _messageToReply?.id)
+        reply(to: nil)
     }
     
     public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
@@ -285,6 +304,7 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
     public func photoCell(for message: any MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UICollectionViewCell? {
         let cell = messagesCollectionView.dequeueReusableCell(IQMediaMessageCell.self, for: indexPath)
         cell.configure(with: message, at: indexPath, and: messagesCollectionView)
+        cell.replyViewDelegate = self
         cell.delegate = self
         return cell
     }
@@ -295,6 +315,7 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
           for: indexPath)
         cell.configure(with: message, at: indexPath, and: messagesCollectionView)
         cell.delegate = self
+        cell.replyViewDelegate = self
         return cell
     }
     
@@ -334,6 +355,20 @@ extension IQChannelMessagesViewController: MessagesDataSource, MessageCellDelega
             present(alert, animated: true)
         }
     }
+}
+
+//MARK: - IQSLIDECELLMANAGERDELEGATE
+extension IQChannelMessagesViewController: IQSlideCellManagerDelegate {
+ 
+    func slideManager(_ manager: IQSlideCellManager, slideDidOccurAt cell: MessageContentCell) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+              messages.indices.contains(indexPath.row) else { return }
+        
+        let message = messages[indexPath.row]
+        
+        reply(to: message)
+    }
+   
 }
 
 // MARK: - MESSAGES LAYOUT DELEGATE
@@ -471,36 +506,18 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
                 item.loadDataRepresentation(forTypeIdentifier: UTType.gif.identifier) { data, _ in
                     guard let data else { return }
                     DispatchQueue.main.async {
-                        self.sendData(data: data, filename: "gif")
+                        self.sendData(data: data, filename: "gif", replyMessageID: self._messageToReply?.id)
                     }
                 }
             } else {
                 item.loadImage { image, error in
                     if let image {
-                        print("sending ----+, ", index)
                         DispatchQueue.main.async {
-                            self.sendImage(image, filename: nil)
+                            self.sendImage(image, filename: nil, replyMessageID: self._messageToReply?.id)
                         }
                     }
                 }
             }
-//            item.loadDataRepresentation(forTypeIdentifier: item.registeredTypeIdentifiers.first ?? "public.image") { data, _ in
-//                print("sending ----, ", index, data?.count)
-//                guard let data else { return }
-//                
-//                if item.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
-//                    DispatchQueue.main.async {
-//                        self.sendData(data: data, filename: "gif")
-//                    }
-//                } else if let image = UIImage(data: data) {
-//                    print("sending ----+, ", index)
-//                    DispatchQueue.main.async {
-//                        self.sendImage(image, filename: nil)
-//                    }
-//                } else {
-//                    print("sending ---- nilll")
-//                }
-//            }
         }
     }
     
@@ -511,11 +528,11 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         if let url = info[UIImagePickerControllerImageURL] as? URL,
            url.pathExtension == "gif",
            let data = try? Data(contentsOf: url){
-            sendData(data: data, filename: "gif")
+            sendData(data: data, filename: "gif", replyMessageID: _messageToReply?.id)
             return
         }
         
-        sendImage(image, filename: nil)
+        sendImage(image, filename: nil, replyMessageID: _messageToReply?.id)
     }
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
@@ -545,7 +562,7 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
             files.enumerated().forEach { index, turtle in
                 DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.5)) {
-                    self.sendData(data: turtle.data, filename: turtle.filename)
+                    self.sendData(data: turtle.data, filename: turtle.filename, replyMessageID: self._messageToReply?.id)
                 }
             }
             files.forEach { data, filename in
@@ -563,12 +580,14 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
         present(alertController, animated: true)
     }
     
-    public func sendData(data: Data, filename: String?) {
-        IQChannels.sendData(data, filename: filename)
+    public func sendData(data: Data, filename: String?, replyMessageID: Int?) {
+        reply(to: nil)
+        IQChannels.sendData(data, filename: filename, replyMessageID: replyMessageID)
     }
     
-    public func sendImage(_ image: UIImage, filename: String?) {
-        IQChannels.sendImage(image, filename: filename)
+    public func sendImage(_ image: UIImage, filename: String?, replyMessageID: Int?) {
+        reply(to: nil)
+        IQChannels.sendImage(image, filename: filename, replyMessageID: replyMessageID)
     }
 }
 
@@ -618,7 +637,16 @@ extension IQChannelMessagesViewController: IQChannelsStateListenerProtocol {
 }
 
 //MARK: - ChoiceDelegates
-extension IQChannelMessagesViewController: IQCardCellDelegate, IQStackedSingleChoicesCellDelegate, IQSingleChoicesViewDelegate, IQRatingCellDelegate {
+extension IQChannelMessagesViewController: IQCardCellDelegate, IQStackedSingleChoicesCellDelegate, IQSingleChoicesViewDelegate, IQRatingCellDelegate, IQCellReplyViewDelegate {
+    
+    func cell(_ cell: MessageContentCell, didTapReplyView: IQCellReplyView) {
+        guard let indexPath = messagesCollectionView.indexPath(for: cell),
+              messages.indices.contains(indexPath.row),
+              let replyId = messages[indexPath.row].replyToMessageID,
+              let row = messages.firstIndex(where: { $0.id == replyId }) else { return }
+        
+        messagesCollectionView.scrollToItem(at: .init(row: row, section: 0), at: .centeredVertically, animated: true)
+    }
     
     func cell(didTapSendButtonFrom cell: IQRatingCell, value: Int) {
         guard let indexPath = messagesCollectionView.indexPath(for: cell),
@@ -668,6 +696,17 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         refreshControl.beginRefreshing()
     }
     
+    func reply(to message: IQChatMessage?) {
+        _messageToReply = message
+        if let message {
+            pendingReplyView.configure(message)
+        }
+        pendingReplyView.isHidden = message == nil
+        additionalBottomInset = message == nil ? 0 : (56 + 16)
+        messageInputBar.inputTextView.becomeFirstResponder()
+        scrollToBottomIfNeeded()
+    }
+    
     func iqMoreMessagesLoaded() {
         guard moreMessagesLoading != nil else { return }
 
@@ -704,6 +743,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         guard messagesSub != nil else { return }
         
         self.messages = messages
+        linkReplyMessages()
         readMessages = []
         messagesLoaded = true
         
@@ -727,6 +767,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
 
     func iq(messageAdded message: IQChatMessage) {
         messages.append(message)
+        linkReplyMessages()
         scrollDownButton.dotHidden = false
         messagesCollectionView.reloadData()
         scrollToBottomIfNeeded(animated: false)
@@ -734,6 +775,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
 
     func iq(messageSent message: IQChatMessage) {
         messages.append(message)
+        linkReplyMessages()
         messagesCollectionView.reloadData()
         scrollToBottomIfNeeded()
     }
@@ -744,6 +786,7 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         }
 
         messages[index] = message
+        linkReplyMessages()
         var paths = [IndexPath]()
         paths.append(IndexPath(item: index, section: 0))
         if index > 0 {
@@ -751,7 +794,6 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         }
         DispatchQueue.main.async {
             self.messagesCollectionView.reloadItems(at: paths)      
-            self.scrollToBottomIfNeeded()
         }
     }
     
@@ -788,6 +830,14 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         
         DispatchQueue.main.async {
             self.scrollToBottomIfNeeded()
+        }
+    }
+    
+    private func linkReplyMessages(){
+        messages.filter { $0.replyToMessageID != nil }.forEach { message in
+            guard let replyID = message.replyToMessageID else { return }
+            
+            message.replyToMessage = messages.first(where: { $0.id == replyID })
         }
     }
 }
@@ -849,6 +899,7 @@ private extension IQChannelMessagesViewController {
         messagesCollectionView.register(IQTimestampMessageCell.self, forCellWithReuseIdentifier: IQTimestampMessageCell.cellIdentifier)
         messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
         messagesCollectionView.register(IQRatingCell.self, forCellWithReuseIdentifier: IQRatingCell.cellIdentifier)
+        messagesCollectionView.register(IQMediaMessageCell.self, forCellWithReuseIdentifier: IQMediaMessageCell.cellIdentifier)
         messagesCollectionView.register(IQTypingIndicatorCell.self, forCellWithReuseIdentifier: IQTypingIndicatorCell.cellIdentifier)
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
@@ -856,6 +907,8 @@ private extension IQChannelMessagesViewController {
         let gr = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         gr.delegate = self
         messagesCollectionView.addGestureRecognizer(gr)
+        
+        slideCellManager.delegate = self
     }
     
     func setupInputBar(){
@@ -883,6 +936,19 @@ private extension IQChannelMessagesViewController {
         messageInputBar.setStackViewItems([button], forStack: .left, animated: false)
         messageInputBar.setRightStackViewWidthConstant(to: .zero, animated: false)
         messageInputBar.setLeftStackViewWidthConstant(to: 40, animated: false)
+    }
+    
+    func setupPendingReplyView(){
+        view.addSubview(pendingReplyView)
+        pendingReplyView.snp.makeConstraints { make in
+            make.height.equalTo(56)
+            make.horizontalEdges.equalToSuperview()
+            make.bottom.equalToSuperview().inset(0).priority(.high)
+        }
+        pendingReplyView.onCloseDidTap = { [unowned self] in
+            reply(to: nil)
+        }
+        reply(to: nil)
     }
     
     func setupScrollDownButton(){
