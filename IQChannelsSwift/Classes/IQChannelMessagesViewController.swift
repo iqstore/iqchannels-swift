@@ -263,6 +263,9 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
         inputBar.inputTextView.text = nil
         IQChannels.sendText(text, replyMessageID: _messageToReply?.id)
         reply(to: nil)
+        DispatchQueue.main.async {
+            self.messagesCollectionView.scrollToBottom(animated: true)
+        }
     }
     
     public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
@@ -537,35 +540,28 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         controller.dismiss(animated: true)
-        if urls.count > 10 {
-            DispatchQueue.main.async {
-                self.showLimitReachedAlert()
-            }
-        } else {
-            let files: [(data: Data, filename: String)] = urls.compactMap { url in
-                defer { url.stopAccessingSecurityScopedResource() }
-
-                guard url.startAccessingSecurityScopedResource(),
-                      let data = try? Data(contentsOf: url) else { return nil }
-                
-                return (data, url.lastPathComponent)
-            }
+        let files: [(data: Data, filename: String)] = urls.compactMap { url in
+            defer { url.stopAccessingSecurityScopedResource() }
             
-            DispatchQueue.main.async {
-                self.confirmDataSubmission(files)
-            }
+            guard url.startAccessingSecurityScopedResource(),
+                  let data = try? Data(contentsOf: url) else { return nil }
+            
+            return (data, url.lastPathComponent)
+        }
+        
+        DispatchQueue.main.async {
+            self.confirmDataSubmission(files)
         }
     }
     
     public func confirmDataSubmission(_ files: [(data: Data, filename: String)]) {
-        let alertController = UIAlertController(title: "Подтвердите отправку файлов(\(files.count))", message: nil, preferredStyle: .actionSheet)
+        let title = files.count > 10 ? "За один раз можно отправить не более 10 файлов. Вы действительно желаете отправить первые выбранные 10 файлов?" : "Подтвердите отправку файлов(\(files.count))"
+        let alertController = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
         alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
-            files.enumerated().forEach { index, turtle in
+            files.prefix(10).enumerated().forEach { index, turtle in
                 DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.5)) {
                     self.sendData(data: turtle.data, filename: turtle.filename, replyMessageID: self._messageToReply?.id)
                 }
-            }
-            files.forEach { data, filename in
             }
         }))
         alertController.addAction(.init(title: "Отмена", style: .cancel))
