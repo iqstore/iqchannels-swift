@@ -699,8 +699,10 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         }
         pendingReplyView.isHidden = message == nil
         additionalBottomInset = message == nil ? 0 : (56 + 16)
-        messageInputBar.inputTextView.becomeFirstResponder()
-        scrollToBottomIfNeeded()
+        if message != nil {
+            messageInputBar.inputTextView.becomeFirstResponder()
+            scrollToBottomIfNeeded()
+        }
     }
     
     func iqMoreMessagesLoaded() {
@@ -1179,6 +1181,7 @@ private extension IQChannelMessagesViewController {
     }
     
     @objc func attachmentDidTap(){
+        messageInputBar.inputTextView.resignFirstResponder()
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
             self.photoSourceDidTap(source: .photoLibrary)
@@ -1192,8 +1195,9 @@ private extension IQChannelMessagesViewController {
             self.fileSourceDidTap()
         }))
         alert.addAction(.init(title: "Отмена", style: .cancel))
-        messageInputBar.inputTextView.resignFirstResponder()
-        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            self.present(alert, animated: true)
+        }
     }
     
     @objc func onTick() {

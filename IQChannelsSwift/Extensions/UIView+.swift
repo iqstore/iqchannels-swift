@@ -18,6 +18,7 @@ extension UIView {
             rotationAnimation.fromValue = 0.0
             rotationAnimation.toValue = Float.pi * 2.0
             rotationAnimation.duration = duration
+            rotationAnimation.isRemovedOnCompletion = false
             rotationAnimation.repeatCount = Float.infinity
 
             layer.add(rotationAnimation, forKey: UIView.kRotationAnimationKey)
