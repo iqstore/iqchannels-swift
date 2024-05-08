@@ -4,7 +4,7 @@ platform :ios, '14.0'
 
 target 'IQChannelsSwift_Example' do
 
-  pod 'IQChannelsSwift', :path => '/Users/dato3/Desktop/Git/iqchannels-swift'
+  pod 'IQChannelsSwift', :path => '../'
 
   target 'IQChannelsSwift_Tests' do
     inherit! :search_paths
