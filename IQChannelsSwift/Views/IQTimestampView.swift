@@ -47,12 +47,7 @@ class IQTimestampView: UIView {
         guard let message = message as? IQChatMessage else { return }
 
         var textColor: UIColor {
-            switch message.payload {
-            case .file:
-                return UIColor.white.withAlphaComponent(0.64)
-            default:
                 return message.isMy ? UIColor.white.withAlphaComponent(0.63) : .init(hex: 0x919399)
-            }
         }
         let attributedString = NSMutableAttributedString()
         attributedString.append(.init(string: dateFormatter.string(from: message.sentDate),

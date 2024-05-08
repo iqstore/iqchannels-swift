@@ -5,8 +5,8 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
     
     var messageLabelFont = UIFont.preferredFont(forTextStyle: .body)
     
-    var incomingCellInsets = UIEdgeInsets(top: 8, left: 18, bottom: 28, right: 16)
-    var outgoingCellInsets = UIEdgeInsets(top: 8, left: 16, bottom: 28, right: 18)
+    var incomingCellInsets = UIEdgeInsets(top: 8, left: 12, bottom: 28, right: 12)
+    var outgoingCellInsets = UIEdgeInsets(top: 8, left: 12, bottom: 28, right: 12)
     
     override func configure(attributes: UICollectionViewLayoutAttributes) {
         super.configure(attributes: attributes)

@@ -476,6 +476,14 @@ public class IQChannels {
         message.uploadError = error
 
         log?.info("Failed to upload a message image, localId=\(localId), fileName=\(message.uploadFilename ?? ""), error=\(error.localizedDescription)")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if message.file?.type == .file {
+                self.uploadFileMessage(message)
+            } else {
+                self.uploadMessage(message)
+            }
+        }
 
         for listener in messageListeners {
             DispatchQueue.main.async {
@@ -1328,6 +1336,9 @@ private extension IQChannels {
     
     private func loadMessageMediaFailed(messageId: Int, url: URL, error: Error) {
         imageDownloading.removeValue(forKey: messageId)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.loadMessageMedia(messageId: messageId)
+        }
         print("Failed to load a message image, messageId=\(messageId), url=\(url), error=\(error.localizedDescription)")
     }
     

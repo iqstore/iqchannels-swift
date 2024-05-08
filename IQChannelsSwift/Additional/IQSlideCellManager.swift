@@ -55,6 +55,19 @@ class IQSlideCellManager: NSObject, UIGestureRecognizerDelegate {
         case .began:
             break
         case .changed:
+            guard translation.x < 0 else { return }
+            
+            if let scrollView = superView as? UIScrollView,
+               scrollView.isDragging || scrollView.isDecelerating /*|| scrollView.isTracking*/ {
+                gesture.setTranslation(.zero, in: superView)
+                return
+            }
+            
+            if translation.x < -150 {
+                gesture.setTranslation(translation, in: superView)
+                return
+            }
+            
             let newTransform = CGAffineTransform(translationX: translation.x, y: 0)
             slidingView.transform = newTransform
             UIView.animate(withDuration: 0.2) {

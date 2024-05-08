@@ -263,6 +263,9 @@ extension IQChannelMessagesViewController: InputBarAccessoryViewDelegate {
         inputBar.inputTextView.text = nil
         IQChannels.sendText(text, replyMessageID: _messageToReply?.id)
         reply(to: nil)
+        DispatchQueue.main.async {
+            self.messagesCollectionView.scrollToBottom(animated: true)
+        }
     }
     
     public func inputBar(_ inputBar: InputBarAccessoryView, textViewTextDidChangeTo text: String) {
@@ -537,35 +540,28 @@ extension IQChannelMessagesViewController: UIImagePickerControllerDelegate & UIN
     
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         controller.dismiss(animated: true)
-        if urls.count > 10 {
-            DispatchQueue.main.async {
-                self.showLimitReachedAlert()
-            }
-        } else {
-            let files: [(data: Data, filename: String)] = urls.compactMap { url in
-                defer { url.stopAccessingSecurityScopedResource() }
-
-                guard url.startAccessingSecurityScopedResource(),
-                      let data = try? Data(contentsOf: url) else { return nil }
-                
-                return (data, url.lastPathComponent)
-            }
+        let files: [(data: Data, filename: String)] = urls.compactMap { url in
+            defer { url.stopAccessingSecurityScopedResource() }
             
-            DispatchQueue.main.async {
-                self.confirmDataSubmission(files)
-            }
+            guard url.startAccessingSecurityScopedResource(),
+                  let data = try? Data(contentsOf: url) else { return nil }
+            
+            return (data, url.lastPathComponent)
+        }
+        
+        DispatchQueue.main.async {
+            self.confirmDataSubmission(files)
         }
     }
     
     public func confirmDataSubmission(_ files: [(data: Data, filename: String)]) {
-        let alertController = UIAlertController(title: "Подтвердите отправку файлов(\(files.count))", message: nil, preferredStyle: .actionSheet)
+        let title = files.count > 10 ? "За один раз можно отправить не более 10 файлов. Вы действительно желаете отправить первые выбранные 10 файлов?" : "Подтвердите отправку файлов(\(files.count))"
+        let alertController = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
         alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
-            files.enumerated().forEach { index, turtle in
+            files.prefix(10).enumerated().forEach { index, turtle in
                 DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.5)) {
                     self.sendData(data: turtle.data, filename: turtle.filename, replyMessageID: self._messageToReply?.id)
                 }
-            }
-            files.forEach { data, filename in
             }
         }))
         alertController.addAction(.init(title: "Отмена", style: .cancel))
@@ -703,8 +699,10 @@ extension IQChannelMessagesViewController: IQChannelsMessagesListenerProtocol, I
         }
         pendingReplyView.isHidden = message == nil
         additionalBottomInset = message == nil ? 0 : (56 + 16)
-        messageInputBar.inputTextView.becomeFirstResponder()
-        scrollToBottomIfNeeded()
+        if message != nil {
+            messageInputBar.inputTextView.becomeFirstResponder()
+            scrollToBottomIfNeeded()
+        }
     }
     
     func iqMoreMessagesLoaded() {
@@ -921,7 +919,6 @@ private extension IQChannelMessagesViewController {
         messageInputBar.inputTextView.tintColor = .init(hex: 0xDD0A34)
         messageInputBar.inputTextView.layer.cornerRadius = 20
         messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
-        messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
         messageInputBar.sendButton.configure {
             $0.layer.cornerRadius = 20
             $0.backgroundColor = .init(hex: 0x242729)
@@ -1183,6 +1180,7 @@ private extension IQChannelMessagesViewController {
     }
     
     @objc func attachmentDidTap(){
+        messageInputBar.inputTextView.resignFirstResponder()
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
             self.photoSourceDidTap(source: .photoLibrary)
@@ -1196,8 +1194,9 @@ private extension IQChannelMessagesViewController {
             self.fileSourceDidTap()
         }))
         alert.addAction(.init(title: "Отмена", style: .cancel))
-        messageInputBar.inputTextView.resignFirstResponder()
-        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            self.present(alert, animated: true)
+        }
     }
     
     @objc func onTick() {
