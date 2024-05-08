@@ -919,7 +919,6 @@ private extension IQChannelMessagesViewController {
         messageInputBar.inputTextView.tintColor = .init(hex: 0xDD0A34)
         messageInputBar.inputTextView.layer.cornerRadius = 20
         messageInputBar.padding = .init(top: 8, left: 12, bottom: 8, right: 12)
-        messageInputBar.heightAnchor.constraint(greaterThanOrEqualToConstant: 80).isActive = true
         messageInputBar.sendButton.configure {
             $0.layer.cornerRadius = 20
             $0.backgroundColor = .init(hex: 0x242729)
