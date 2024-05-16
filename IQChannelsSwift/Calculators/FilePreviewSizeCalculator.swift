@@ -37,7 +37,7 @@ final class FilePreviewSizeCalculator: MessageSizeCalculator {
         attributedText.append(.init(string: IQFileSize.unit(with: chatMessage.file?.size ?? 0), attributes: [
             .font: UIFont.systemFont(ofSize: 15)
         ]))
-        let labelSize = labelSize(for: attributedText, considering: maxWidth - 32 + 8)
+        let labelSize = labelSize(for: attributedText, considering: maxWidth - 32 - 8 - 24)
         var height = max(labelSize.height, 18) + (cellInsets(for: message).top + cellInsets(for: message).bottom)
         if chatMessage.replyToMessage != nil {
             height += 49
