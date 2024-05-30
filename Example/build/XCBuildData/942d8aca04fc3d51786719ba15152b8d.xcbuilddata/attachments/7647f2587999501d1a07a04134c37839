@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Debug-iphoneos/IQChannelsSwift/IQChannelsSwift.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Debug-iphoneos/IQChannelsSwift/IQChannelsSwift.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "IQChannelsSwift-Swift.h",
+      'external-contents': "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/unextended-interface-header.h",
+    }]
+    }]
+}

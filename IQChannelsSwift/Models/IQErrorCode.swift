@@ -1,6 +1,13 @@
+//
+//  IQErrorCode.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 10.05.2024.
+//
+
 import Foundation
 
-enum IQErrorCode: String {
+enum IQErrorCode: String, Decodable {
     case unknown = ""
     case internalError = "internal_server_error"
     case badRequest = "bad_request"

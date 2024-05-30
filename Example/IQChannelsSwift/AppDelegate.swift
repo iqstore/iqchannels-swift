@@ -2,12 +2,11 @@
 //  AppDelegate.swift
 //  IQChannelsSwift
 //
-//  Created by Daulet Tokmukhanbet on 03/13/2024.
+//  Created by Daulet Tokmukhanbet on 05/05/2024.
 //  Copyright (c) 2024 Daulet Tokmukhanbet. All rights reserved.
 //
 
 import UIKit
-import IQChannelsSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,27 +14,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.backgroundColor = UIColor.white
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
         window?.overrideUserInterfaceStyle = .light
-        window?.makeKeyAndVisible()
-        window?.rootViewController = LoginViewController()
-        
         return true
-    }
-    
-    private func setNavigationBarAppearance(){
-        let appearance = UINavigationBarAppearance()
-        appearance.backgroundColor = .white
-        appearance.shadowColor = .white
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        UINavigationBar.appearance().compactAppearance = appearance
-        if #available(iOS 15.0, *) {
-            UINavigationBar.appearance().compactScrollEdgeAppearance = appearance
-        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

@@ -3,7 +3,6 @@ use_frameworks!
 platform :ios, '14.0'
 
 target 'IQChannelsSwift_Example' do
-
   pod 'IQChannelsSwift', :path => '../'
 
   target 'IQChannelsSwift_Tests' do
@@ -12,7 +11,6 @@ target 'IQChannelsSwift_Example' do
     
   end
 end
-
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

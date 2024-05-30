@@ -1,104 +1,85 @@
 import XCTest
-import CoreLocation
-import IQChannelsSwift
-import MessageKit
+@testable import IQChannelsSwift
 
 class Tests: XCTestCase {
     
-    // MARK: - PROPERTIES
-    private var layoutDelegate = MockLayoutDelegate()
-    private var controller: IQChannelMessagesViewController!
+    var library: IQLibraryConfiguration!
     
-    // MARK: - SETUP
     override func setUp() {
         super.setUp()
-        controller = IQChannelMessagesViewController()
-        controller.messagesCollectionView.messagesLayoutDelegate = layoutDelegate
-        controller.messagesCollectionView.messagesDisplayDelegate = layoutDelegate
-        _ = controller.view
-        controller.beginAppearanceTransition(true, animated: true)
-        controller.endAppearanceTransition()
-        controller.view.layoutIfNeeded()
+        let config = IQChannelsConfig(address: "https://sandbox.iqstore.ru/", channels: ["support", "finance"])
+        library = IQLibraryConfiguration()
+        library.configure(config)
+        
+        let loginType = IQLoginType.credentials("101")
+        library.login(loginType)
     }
     
     override func tearDown() {
-        controller = nil
+        library = nil
         super.tearDown()
     }
     
-    // MARK: - PRIVATE METHODS
-    private func makeMessages(for senders: [MockUser]) -> [MessageType] {
-        [
-            MockMessage(text: "Text 1", user: senders[0], messageId: "test_id_1"),
-            MockMessage(text: "Text 2", user: senders[1], messageId: "test_id_2"),
-        ]
+    // Test for getViewController method
+    func testGetViewController() {
+        let navigationController = library.getViewController()
+        XCTAssertNotNil(navigationController, "Navigation Controller should not be nil")
     }
     
-    // MARK: - TESTS
-    func testChannelConfigCopy() {
-        let config = IQChannelsConfig(address: "https://sandbox.iqstore.ru/",
-                                      channel: "support")
-        XCTAssertNotNil(config.copy() as? IQChannelsConfig)
-        XCTAssertNotEqual(config, config.copy() as! IQChannelsConfig)
+    // Test for configure method
+    func testConfigure() {
+        let config = IQChannelsConfig(address: "https://example2.com", channels: ["channel2"])
+        library.configure(config)
+        // Asserting configuration settings
+        XCTAssertEqual(config.address, "https://example2.com", "Configuration address should be https://example2.com")
     }
     
-    func testChannelConfigJson() {
-        let config = IQChannelsConfig(address: "https://sandbox.iqstore.ru/",
-                                      channel: "support")
-        XCTAssertNotNil(config.copy() as? IQChannelsConfig)
-        XCTAssertEqual(config.toJSONObject()["address"] as! String, "https://sandbox.iqstore.ru/")
-        XCTAssertEqual(config.toJSONObject()["channel"] as! String, "support")
-        XCTAssertEqual(config.toJSONObject()["disableUnreadBadge"] as! Bool, false)
+    // Test for setCustomHeaders method
+    func testSetCustomHeaders() {
+        let headers = ["Authorization": "Bearer token"]
+        library.setCustomHeaders(headers)
+        // Asserting headers are set
+        let networkManager = (library.channelManager as! IQChannelsManager).networkManagers.first?.value as! IQNetworkManager
+        XCTAssertEqual(networkManager.customHeaders?["Authorization"], "Bearer token", "Custom headers should be set correctly")
+    }
+        
+    // Test for addUnread listener method
+    func testAddUnreadListener() {
+        let unreadListener = MockUnreadListener()
+        library.addUnread(listener: unreadListener)
+        let listeners = (library.channelManager as! IQChannelsManager).unreadListeners
+        XCTAssertTrue(listeners.contains { $0.id == unreadListener.id }, "Unread listener should be added")
     }
     
-    func testNumberOfSectionWithoutDataIsOne() {
-        let messagesDataSource = MockMessagesDataSource()
-        controller.messagesCollectionView.messagesDataSource = messagesDataSource
-        
-        XCTAssertEqual(controller.messagesCollectionView.numberOfSections, 1)
+    // Test for removeUnread listener method
+    func testRemoveUnreadListener() {
+        let unreadListener = MockUnreadListener()
+        library.addUnread(listener: unreadListener)
+        library.removeUnread(listener: unreadListener)
+        let listeners = (library.channelManager as! IQChannelsManager).unreadListeners
+        XCTAssertFalse(listeners.contains { $0.id == unreadListener.id }, "Unread listener should be removed")
     }
     
-    func testNumberOfSectionIsNumberOfMessages() {
-        let messagesDataSource = MockMessagesDataSource()
-        controller.messagesCollectionView.messagesDataSource = messagesDataSource
-        messagesDataSource.messages = makeMessages(for: messagesDataSource.senders)
-        
-        controller.messagesCollectionView.reloadData()
-        
-        let count = controller.messagesCollectionView.numberOfSections
-        let expectedCount = messagesDataSource.numberOfSections(in: controller.messagesCollectionView)
-        
-        XCTAssertEqual(count, expectedCount)
+    // Test for pushToken method
+    func testPushToken() {
+        let token = Data([0x01, 0x02, 0x03, 0x04])
+        library.pushToken(token)
+        // Add assertions based on expected behavior after pushing token
     }
     
-    func testNumberOfItemInSectionIsOne() {
-        let messagesDataSource = MockMessagesDataSource()
-        controller.messagesCollectionView.messagesDataSource = messagesDataSource
-        messagesDataSource.messages = makeMessages(for: messagesDataSource.senders)
-        
-        controller.messagesCollectionView.reloadData()
-        
-        XCTAssertEqual(controller.messagesCollectionView.numberOfItems(inSection: 0), 1)
-        XCTAssertEqual(controller.messagesCollectionView.numberOfItems(inSection: 1), 1)
+    // Test for logout method
+    func testLogout() {
+        library.logout()
+        // Add assertions based on expected behavior after logout
     }
+
 }
 
-
-private class MockLayoutDelegate: MessagesLayoutDelegate, MessagesDisplayDelegate {
-    func heightForLocation(message _: MessageType, at _: IndexPath, with _: CGFloat, in _: MessagesCollectionView) -> CGFloat {
-        0.0
-    }
-    
-    func heightForMedia(message _: MessageType, at _: IndexPath, with _: CGFloat, in _: MessagesCollectionView) -> CGFloat {
-        10.0
-    }
-    
-    func snapshotOptionsForLocation(
-        message _: MessageType,
-        at _: IndexPath,
-        in _: MessagesCollectionView)
-    -> LocationMessageSnapshotOptions
-    {
-        LocationMessageSnapshotOptions()
+// Mock Unread Listener
+class MockUnreadListener: IQChannelsUnreadListenerProtocol {
+    var id: String = UUID().uuidString
+        
+    func iqChannelsUnreadDidChange(_ unread: Int) {
+        // Mock implementation
     }
 }
