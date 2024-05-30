@@ -1,20 +1,42 @@
-# IQChannelsSwift
-## Список библиотек, используемых в проекте и их назначение
+IQChannelsSwift iOS SDK
+==================
+SDK для айфона сделано как библиотека для Cocoapods.
 
-1. **TRVSEventSource**: Для обработки серверных событий (Server-Sent Events).
-2. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
+Зависимости:
+* SDWebImage
+> Используется для эффективной загрузки изображений в SDK и оптимизации процесса отображения изображений для пользователей.
 
-## Руководство по установке
+* TRVSEventSource
+> Используется для работы с сервер-отправляемыми событиями (Server-Sent Events), обеспечивая реактивное обновление данных для ваших пользователей.
 
-IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
+* MessageKit
+> Библиотека предназначенная для создания интерфейса чата. Используется для реализации функциональности чата в SDK.
 
-```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0'
+* InputBarAccessoryView
+> Это зависимость MessageKit, компонент пользовательского интерфейса, который предоставляет удобную панель ввода для чатов и мессенджеров. 
+
+* SnapKit
+> Используется для написания констрейнтов (ограничений) в коде с помощью DSL (Domain-Specific Language).
+
+* SwiftMessages
+> Это библиотека для отображения красивых и анимированных сообщений в SDK. Используется для вывода уведомлений, сообщений об ошибках или других важных сообщений в SDK.
+
+Структура:
+* `IQChannels.podspec` - спецификация для Cocoapods.
+* `IQChannelsSwift` - исходный код SDK.
+* `Example` - пример работающего приложения.
+
+
+Установка
+---------
+Добавить `IQChannelsSwift` в зависимости в `Podfile` проекта:
+```
+# Podfile
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-beta2'
 ```
 
-Затем выполните команду:
-
-```bash
+Установить зависимости:
+```
 pod install
 ```
 
@@ -25,33 +47,34 @@ pod install
 <plist version="1.0">
 <dict>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Описание использования галереи</string>
+    <string>Описание использования фотоко</string>
     <key>NSCameraUsageDescription</key>
     <string>Описание использования камеры</string>
 </dict>
 </plist>
 ```
 
-## Примеры использования SDK
-
 
 Инициализация
 -------------
+Приложение разделено на два основных класса: `IQChannels` и `IQChannelMessagesViewController`.
+Первый представляет собой библиотеку, которая реализуюет бизнес-логику SDK. Второй - это вью-контроллер
+для сообщений, который написан по образу и подобию iMessages.
+
+Обычно SDK будет инициализированно в `AppDelegate` приложения:
 
 ```swift
-class AppDelegate: UIResponder, UIApplicationDelegate {
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    // Создаем объект конфигурации, заполняем адрес и название канала (чата).
+    // Канал создается в панеле управления IQChannels.
+    let config = IQChannelsConfig(address: "server", channel: "support")
     
-    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1", "channel2"])
-        configurationManager.configure(config)
-        
-        return true
-    }
+    // Конфигурируем SDK.
+    IQChannels.configure(config)
+    return true
 }
 ```
+
 
 Логин
 -----
@@ -59,12 +82,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 Для логина требуется вызвать в любом месте приложения:
 
 ```swift
-configurationManager.login(.credentials("myLoginToken"))
+IQChannels.login("myLoginToken")
 ```
 
 Для логаута:
 ```swift
-configurationManager.logout()
+IQChannels.logout()
 ```
 
 После логина внутри SDK создается сессия пользователя и начинается бесконечный цикл, который подключается
@@ -77,54 +100,57 @@ configurationManager.logout()
 Чат может использоваться в анонимном режиме. Для этого после конфигурации нужно вызвать: 
 
 ```swift
-configurationManager.login(.anonymous)
+IQChannels.loginAnonymous()
 ```
 
 Для логаута:
 ```swift
-configurationManager.logout()
+IQChannels.logout()
 ```
 
 Анонимный логин автоматически зарегистрирует нового анонимного пользователя, если нужно,
 а потом его авторизует.
 
-Отображение чата
---------------
 
-Метод getViewController предназначен для получения основного навигационного контроллера (UINavigationController) библиотеки IQChannelsSwift. Этот контроллер используется как корневой контроллер для отображения пользовательского интерфейса библиотеки.
+Интерфейс чата
+--------------
+Интерфес чата построен на основе MessagesViewController(MessageKit). Интерфейс чата корректно обрабатывает логины/логаут,
+обнуляет сообщения.
+
+Это обычный ViewController, который можно наследовать и использовать всеми стандартными способами
+в приложении для айоса. Например:
 
 ```swift
 func showMessages() {
-    if let navigationController = configuration.getViewController() {
-        present(navigationController, animated: true)
+    let vc = IQChannelMessagesViewController()
+    let nc = UINavigationController(rootViewController: vc)
+    if let viewController = UIApplication.shared.windows.first?.rootViewController {
+        viewController.present(nc, animated: true, completion: nil)
     }
 }
 ```
 
+
 Отображение непрочитанных сообщений
 -----------------------------------
 Для отображения непрочитанных сообщений нужно добавить слушателя, в который будет присылаться текущее количество
-новых непрочитанных сообщений `в текущем чате`. Слушателя можно добавлять в любой момент времени, в т.ч. и до конфигурации
+новых непрочитанных сообщений. Слушателя можно добавлять в любой момент времени, в т.ч. и до конфигурации
 и логина.
 
 Пример с таббаром:
 ```swift
-class IQTabbarController: UITabBarController, IQChannelsUnreadListenerProtocol {
+class IQTabbarController: UITabBarController, IQChannelsUnreadListener {
     
-    var id: String {
-        UUID().uuidString
-    }
-    
-    let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+    var unreadSub: IQChannelsUnreadSubscription?
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        configuration.addUnread(listener: self)
+        unreadSub = IQChannels.unread(self)
     }
     
-    // MARK: - IQChannelsUnreadListenerProtocol
-    func iqChannelsUnreadDidChange(_ unread: Int) {
+    // MARK: - IQChannelsUnreadListener
+    func iq_unreadChanged(_ unread: Int) {
         if unread == 0 {
             self.messages?.tabBarItem.badgeValue = nil
         } else {
@@ -134,18 +160,17 @@ class IQTabbarController: UITabBarController, IQChannelsUnreadListenerProtocol {
 }
 ```
 
+
 Отправка пуш-токенов
 --------------------
 Для поддержки пуш-уведомлений требуется при старте приложения запросить у пользователя возможность
-отправлять ему уведомления, а потом передать токен в библиотеку. Токен можно передавать в любой момент, 
+отправлять ему уведомления, а потом передать токен в IQChannels. Токен можно передавать в любой момент, 
 в т.ч. до конфигурации и логина.
 
 Пример реализации `UIApplicationDelegate`:
 ```swift
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         registerForNotifications(application)
@@ -165,8 +190,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        configuration.pushToken(deviceToken)
+        IQChannels.pushToken(deviceToken)
     }
 }
 ```
-
