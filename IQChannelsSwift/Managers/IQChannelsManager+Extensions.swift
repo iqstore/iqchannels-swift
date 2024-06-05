@@ -54,6 +54,12 @@ extension IQChannelsManager {
         }.store(in: &subscriptions)
     }
     
+    func setupImageManager(){
+        SDWebImageManager.shared.optionsProcessor = SDWebImageOptionsProcessor(block: { url, options, context in
+            SDWebImageOptionsResult(options: .allowInvalidSSLCertificates, context: context)
+        })
+    }
+    
     private func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
@@ -66,10 +72,9 @@ extension IQChannelsManager {
     
     func getChatItems(from results: [AuthResult]) -> [IQChatItemModel] {
         results.map { (channel, auth) -> [IQChatItemModel] in
-            guard let client = auth.client,
-                  let chatInfo = client.multiChatsInfo else { return [] }
+            guard let client = auth.client else { return [] }
             
-            return client.chatTypes.map { .init(channel: channel, info: chatInfo, chatType: $0) }
+            return client.chatTypes.map { .init(channel: channel, info: client.multiChatsInfo, chatType: $0) }
         }.flatMap {$0}
     }
     
@@ -83,6 +88,7 @@ extension IQChannelsManager {
         self.detailViewModel = nil
         self.readMessages = []
         self.lastLocalID = 0
+        self.unsentMessages = []
         self.typingTimer?.invalidate()
         self.typingTimer = nil
         self.typingSentDate = nil
@@ -106,10 +112,9 @@ extension IQChannelsManager {
             guard let self else { return }
             
             if error != nil {
-                currentNetworkManager?.stopListenToEvents()
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    self.listenToEvents()
+                DispatchQueue.main.async { [weak self] in
+                    self?.currentNetworkManager?.stopListenToEvents()
+                    self?.listenToEvents()
                 }
             } else {
                 applyEvents(events ?? [])
@@ -254,7 +259,9 @@ extension IQChannelsManager {
         case "Postback", "Say something":
             let message = IQMessage(action: action, chatType: selectedChat.chatType, localID: nextLocalId())
             messages.append(message)
-            sendMessage(message)
+            Task {
+                await sendMessage(message)
+            }
         case "Open URL":
             guard let url = URL(string: action.url ?? "") else { return }
             
@@ -269,7 +276,9 @@ extension IQChannelsManager {
         
         let message = IQMessage(choice: choice, chatType: selectedChat.chatType, localID: nextLocalId())
         messages.append(message)
-        sendMessage(message)
+        Task {
+            await sendMessage(message)
+        }
     }
     
     func sendText(_ text: String, replyToMessage: Int?) {
@@ -277,7 +286,9 @@ extension IQChannelsManager {
                 
         let message = IQMessage(text: text, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: replyToMessage)
         messages.append(message)
-        sendMessage(message)
+        Task {
+            await sendMessage(message)
+        }
     }
     
     func sendFiles(items: [(URL?, UIImage?)], replyToMessage: Int?) {
@@ -311,10 +322,6 @@ extension IQChannelsManager {
     
     private func sendFiles(_ files: [DataFile], replyToMessage: Int?) {
         guard let selectedChat else { return }
-        guard networkStatusManager.isReachable else {
-            detailViewModel?.errorListener.send(NSError.internetError)
-            return
-        }
         
         let newMessages = files.enumerated().map { index, file in
             IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: index == 0 ? replyToMessage : nil)
@@ -358,7 +365,9 @@ extension IQChannelsManager {
                   let index = indexOfMyMessage(localID: message.localID) {
             messages[index].file = file
             messages[index].fileID = file.id
-            sendMessage(messages[index])
+            Task {
+                await sendMessage(messages[index])
+            }
         }
     }
     
@@ -382,7 +391,7 @@ extension IQChannelsManager {
     private func markAsRead(_ messageID: Int ){
         guard !readMessages.contains(messageID),
               let message = messages.first(where: { $0.messageID == messageID }),
-              !(message.isRead ?? false), !(message.isMy ?? true) else { return }
+              !(message.isRead ?? false), !(message.isMy) else { return }
         
         readMessages.update(with: messageID)
         
@@ -399,21 +408,39 @@ extension IQChannelsManager {
         }
     }
     
-    private func sendMessage(_ message: IQMessage) {
-        Task {
-            guard let networkManager = currentNetworkManager else { return }
-            
-            let error = await networkManager.sendMessage(form: .init(message))
-            
-            if error != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
-                    self?.sendMessage(message)
+    private func sendMessage(_ message: IQMessage) async {
+        guard let networkManager = currentNetworkManager else { return }
+        
+        let error = await networkManager.sendMessage(form: .init(message))
+        
+        if error != nil {
+            if networkStatusManager.isReachable {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    Task {
+                        await self?.sendMessage(message)
+                    }
                 }
+            } else {
+                unsentMessages.append(message)
             }
+        } else {
+            unsentMessages.removeAll(where: { $0.id == message.id })
         }
     }
     
-    private func loadMessages(isNetworkReload: Bool = false) {
+    private func uploadUnsentMessages(){
+        guard !unsentMessages.isEmpty else { return }
+        
+        let messages = unsentMessages.sorted(by: { $0.createdDate < $1.createdDate })
+        Task {
+            for message in messages {
+                await sendMessage(message)
+            }
+            uploadUnsentMessages()
+        }
+    }
+    
+    private func loadMessages() {
         Task {
             guard let networkManager = currentNetworkManager, let selectedChat else { return }
             
@@ -422,7 +449,7 @@ extension IQChannelsManager {
             DispatchQueue.main.async { self.detailViewModel?.isLoading = true }
             let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType))
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
-            if let error = result.error, !isNetworkReload {
+            if let error = result.error {
                 baseViewModels.sendError(error)
                 return
             }
@@ -466,7 +493,6 @@ extension IQChannelsManager {
         
         guard message.eventID ?? 0 < event.id else { return }
         
-        message.eventID = event.id
         message.isRead = true
         message.eventID = event.id
         
@@ -581,7 +607,11 @@ extension IQChannelsManager {
             
             networkManagers[channel]?.token = token
             if type == .anonymous {
-                storageManager.anonymousTokens?.updateValue(token, forKey: channel)
+                if storageManager.anonymousTokens != nil {
+                    storageManager.anonymousTokens?.updateValue(token, forKey: channel)
+                } else {
+                    storageManager.anonymousTokens = [channel: token]
+                }
             }
         }
         authResults = results
@@ -608,13 +638,18 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
     func networkStatusChanged(_ status: IQNetworkStatus) {
         guard status != .notReachable else {
             state = .awaitingNetwork
+            currentNetworkManager?.stopListenToEvents()
+            currentNetworkManager?.stopUnreadListeners()
             return
         }
         
         if !authResults.isEmpty {
             state = .authenticated
-            loadMessages(isNetworkReload: true)
+            listenToEvents()
             listenToUnread()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.uploadUnsentMessages()
+            }
         } else if let loginType, state != .authenticating {
             authAttempt = 0
             auth(loginType)

@@ -5,6 +5,9 @@ struct ComposerInputView: UIViewRepresentable {
     @Binding var text: String
     @Binding var height: CGFloat
     
+    let textColor: UIColor
+    let fontSize: CGFloat
+    
     var currentHeight: CGFloat
     
     func makeUIView(context: Context) -> InputTextView {
@@ -15,6 +18,8 @@ struct ComposerInputView: UIViewRepresentable {
             inputTextView = InputTextView()
         }
         context.coordinator.textView = inputTextView
+        inputTextView.font = .systemFont(ofSize: fontSize)
+        inputTextView.textColor = textColor
         inputTextView.delegate = context.coordinator
         inputTextView.layoutManager.delegate = context.coordinator
         inputTextView.contentInsetAdjustmentBehavior = .never
@@ -103,8 +108,6 @@ class InputTextView: UITextView {
     open func setUpAppearance() {
         backgroundColor = .clear
         textContainer.lineFragmentPadding = 8
-        font = .systemFont(ofSize: 17)
-        textColor = UIColor(hex: "242729")
         textAlignment = .natural
         tintColor = UIColor(hex: "DD0A34")
     }

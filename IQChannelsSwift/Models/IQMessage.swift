@@ -15,13 +15,11 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var localID: Int?
     var fileID: String?
     var createdAt: Int?
-    var eventID: Int?
     var userID: Int?
     var clientID: Int?
     var ratingID: Int?
     var payload: IQMessagePayloadType?
     var text: String?
-    var isMy: Bool?
     var author: IQAuthorType?
     var isRead: Bool?
     var replyToMessageID: Int?
@@ -33,16 +31,16 @@ struct IQMessage: Codable, Identifiable, Equatable {
     
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
-        case isMy = "my"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, createdAt, localID, eventID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
+        case payload, text, userID, clientID, fileID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
     }
 
     //MARK: - Custom
     /// ID for UI, dont use
     var id: String = UUID().uuidString
     var chatType: IQChatType?
-    
+    var eventID: Int?
+
     //MARK: - Relations
     var client: IQClient?
     var user: IQUser?
@@ -76,7 +74,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     var hasValidPayload: Bool {
-        payload != nil && payload != .invalid
+        payload != nil && payload != .invalid && file?.type != .invalid
     }
     
     var senderName: String {
@@ -92,6 +90,10 @@ struct IQMessage: Codable, Identifiable, Equatable {
         case nil:
             return ""
         }
+    }
+    
+    var isMy: Bool {
+        author == .client
     }
     
     var messageText: String {
@@ -147,7 +149,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     private init(localID: Int, chatType: IQChatType, replyMessageID: Int?) {
-        self.isMy = true
+        self.author = .client
         self.replyToMessageID = replyMessageID
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = localID
@@ -174,7 +176,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         copy.user = message.user
         copy.client = message.client
         copy.file = message.file
-        
+        copy.rating = message.rating
         return copy
     }
 

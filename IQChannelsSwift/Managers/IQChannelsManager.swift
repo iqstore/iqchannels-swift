@@ -25,6 +25,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var baseViewModels: [IQBaseViewModel] {
         [listViewModel, detailViewModel].compactMap { $0 }
     }
+    var unsentMessages = [IQMessage]()
     var readMessages = Set<Int>()
     var authAttempt = 0
     var lastLocalID = 0
@@ -56,6 +57,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         networkStatusManager.delegate = self
         
         setupCombine()
+        setupImageManager()
     }
     
     func setCustomHeaders(_ headers: [String: String]) {

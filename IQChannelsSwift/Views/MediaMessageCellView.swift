@@ -5,15 +5,22 @@ import SDWebImageSwiftUI
 struct MediaMessageCellView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let message: IQMessage
     private let replyMessage: IQMessage?
     private let onImageTapCompletion: (() -> Void)?
     private let onCancelImageSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let isSender: Bool
-    private let backgroundColor: Color
     
     @State private var showMessageLoading: Bool = false
+    
+    var backgroundColor: Color {
+        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient) ?? Color(hex: "242729")
+        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
     
     // MARK: - INIT
     init(message: IQMessage, 
@@ -26,8 +33,7 @@ struct MediaMessageCellView: View {
         self.onImageTapCompletion = onImageTapCompletion
         self.onCancelImageSendCompletion = onCancelImageSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
-        self.isSender = message.isMy ?? false
-        self.backgroundColor = self.isSender ? Color(hex: "242729") : Color(hex: "F4F4F8")
+        self.isSender = message.isMy
     }
     
     // MARK: - BODY
@@ -36,7 +42,7 @@ struct MediaMessageCellView: View {
         VStack(alignment: .leading, spacing: 4) {
             if let replyMessage {
                 MessageReplyView(message: replyMessage,
-                                 isMy: message.isMy ?? false,
+                                 isMy: message.isMy,
                                  onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)

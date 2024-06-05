@@ -7,7 +7,7 @@
 
 import Foundation
 
-class IQNetworkManager: IQNetworkManagerProtocol {
+class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
     var token: String?
     
@@ -18,7 +18,7 @@ class IQNetworkManager: IQNetworkManagerProtocol {
     let relationManager: IQRelationManager
     var eventsListener: IQEventSourceManager?
     var unreadListener: IQEventSourceManager?
-    let session = URLSession(configuration: .ephemeral)
+    lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
     
     init(address: String, channel: String) {
         self.address = address
@@ -34,6 +34,10 @@ class IQNetworkManager: IQNetworkManagerProtocol {
         Task {
             await session.allTasks.first(where: { $0.taskIdentifier == taskIdentifier } )?.cancel()
         }
+    }
+    
+    func isConnectedToEvents() -> Bool {
+        (eventsListener?.eventSource?.isOpen() ?? false)
     }
     
     func listenToEvents(request: IQListenEventsRequest, callback: @escaping ResponseCallbackClosure<[IQChatEvent]>) {
@@ -75,10 +79,12 @@ class IQNetworkManager: IQNetworkManagerProtocol {
     }
     
     func stopListenToEvents(){
+        eventsListener?.close()
         eventsListener = nil
     }
     
     func stopUnreadListeners(){
+        unreadListener?.close()
         unreadListener = nil
     }
     
@@ -163,7 +169,7 @@ class IQNetworkManager: IQNetworkManagerProtocol {
     }
     
     func clientsSignup() async -> ResponseCallback<IQClientAuth> {
-        let path = "/clients/signup"
+        let path = "/clients/anonymous/signup"
         let body = IQSignupRequest(channel: channel)
         let response = await post(path, body: body, responseType: IQClientAuth.self)
         

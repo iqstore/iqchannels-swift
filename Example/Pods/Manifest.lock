@@ -8,34 +8,25 @@ PODS:
     - IQChannelsSwift/ViewModels (= 0.1.0)
     - IQChannelsSwift/Views (= 0.1.0)
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Controllers (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Extensions (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Managers (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Models (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Protocols (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/ViewModels (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - IQChannelsSwift/Views (0.1.0):
     - SDWebImageSwiftUI (= 3.0.4)
-    - TRVSEventSource (= 0.0.8)
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
   - SDWebImageSwiftUI (3.0.4):
     - SDWebImage (~> 5.10)
-  - TRVSEventSource (0.0.8)
 
 DEPENDENCIES:
   - IQChannelsSwift (from `../`)
@@ -44,17 +35,15 @@ SPEC REPOS:
   trunk:
     - SDWebImage
     - SDWebImageSwiftUI
-    - TRVSEventSource
 
 EXTERNAL SOURCES:
   IQChannelsSwift:
     :path: "../"
 
 SPEC CHECKSUMS:
-  IQChannelsSwift: 0ef909f0bebeb398b735c4f9f2fc7c87300b8303
+  IQChannelsSwift: c2ee12e7b6d76646feb5516454612ad8a0a68008
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SDWebImageSwiftUI: 824628d8220906aa101f62b39a7492edd138449d
-  TRVSEventSource: 19fb940e0351ceb97125d46fd40cd55e339568d8
 
 PODFILE CHECKSUM: ee70ba7dbc3b90f5b6556e8ca35309367e3b50cb
 

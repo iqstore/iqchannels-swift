@@ -1,18 +1,55 @@
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct FilePreviewCellView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let message: IQMessage
     private let replyMessage: IQMessage?
     private let onFileTapCompletion: (() -> Void)?
     private let onCancelFileSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let isSender: Bool
-    private let tintColor: Color
-    private let backgroundColor: Color
     
     @State private var showMessageLoading: Bool = false
+    
+    var backgroundColor: Color {
+        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
+        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient) ?? Color(hex: "242729")
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
+    
+    var fileNameTextColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameClient?.color) ?? Color.white
+        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
+        return self.isSender ? clientColor : operatorColor
+    }
+    
+    var fileNameFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFilenameClient?.textSize ?? 17)
+        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        return self.isSender ? clientFontSize : operatorFontSize
+    }
+    
+    var fileIcon: URL? {
+        let clientFile = Style.model?.messagesFile?.iconFileClient
+        let operatorFile = Style.model?.messagesFile?.iconFileOperator
+        return self.isSender ? clientFile : operatorFile
+    }
+    
+    var fileSizeTextColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeClient?.color) ?? Color(hex: "919399")
+        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
+        return self.isSender ? clientColor : operatorColor
+    }
+    
+    var fileSizeFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeClient?.textSize ?? 15)
+        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        return self.isSender ? clientFontSize : operatorFontSize
+    }
     
     // MARK: - INIT
     init(message: IQMessage,
@@ -25,9 +62,7 @@ struct FilePreviewCellView: View {
         self.onFileTapCompletion = onFileTapCompletion
         self.onCancelFileSendCompletion = onCancelFileSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
-        self.isSender = message.isMy ?? false
-        self.tintColor = self.isSender ? Color.white : Color(hex: "242729")
-        self.backgroundColor = self.isSender ? Color(hex: "242729") : Color(hex: "F4F4F8")
+        self.isSender = message.isMy
     }
     
     // MARK: - BODY
@@ -36,7 +71,7 @@ struct FilePreviewCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let replyMessage {
                     MessageReplyView(message: replyMessage,
-                                     isMy: message.isMy ?? false,
+                                     isMy: message.isMy,
                                      onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                 }
                 
@@ -61,22 +96,31 @@ struct FilePreviewCellView: View {
                                 .onAppear { self.showMessageLoading = true }
                             }
                         } else {
-                            Image(name: "file")
-                                .renderingMode(.template)
-                                .resizable()
-                                .foregroundColor(tintColor)
-                                .frame(width: 32, height: 32)
+                            if let fileIcon {
+                                AnimatedImage(url: fileIcon)
+                                    .resizable()
+                                    .indicator(SDWebImageActivityIndicator.gray)
+                                    .transition(SDWebImageTransition.fade)
+                                    .scaledToFit()
+                                    .frame(width: 32, height: 32)
+                            } else {
+                                Image(name: "file")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .foregroundColor(fileNameTextColor)
+                                    .frame(width: 32, height: 32)
+                            }
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(file.name ?? "")
-                                .foregroundColor(tintColor)
-                                .font(.system(size: 17))
+                                .foregroundColor(fileNameTextColor)
+                                .font(.system(size: fileNameFontSize))
                                 .multilineTextAlignment(.leading)
                             
                             Text(file.convertedSize)
-                                .foregroundColor(Color(hex: "919399"))
-                                .font(.system(size: 15))
+                                .foregroundColor(fileSizeTextColor)
+                                .font(.system(size: fileSizeFontSize))
                         }
                     }
                 }

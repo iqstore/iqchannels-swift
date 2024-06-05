@@ -5,6 +5,8 @@ private let linkDetector = try! NSDataDetector(types: NSTextCheckingResult.Check
 struct TextMessageCellView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let message: IQMessage
     private let replyMessage: IQMessage?
     private let onLongPress: ((MessageControlInfo) -> Void)?
@@ -12,13 +14,29 @@ struct TextMessageCellView: View {
     
     private let text: String
     private let isSender: Bool
-    private let backgroundColor: Color
-    private let textColor: UIColor
     private let links: [NSTextCheckingResult]
     
     @State private var keyboardShown: Bool = false
     @State private var computeFrame = false
     @State private var frame: CGRect = .zero
+    
+    var backgroundColor: Color {
+        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
+        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient) ?? Color(hex: "242729")
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
+    
+    var textColor: UIColor {
+        let textOperator = Style.getUIColor(theme: Style.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
+        let textClient = Style.getUIColor(theme: Style.model?.messages?.textClient?.color) ?? UIColor.white
+        return self.isSender ? textClient : textOperator
+    }
+    
+    var fontSize: CGFloat {
+        let sizeOperator = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
+        let sizeClient = CGFloat(Style.model?.messages?.textClient?.textSize ?? 17)
+        return self.isSender ? sizeClient : sizeOperator
+    }
     
     // MARK: - INIT
     init (message: IQMessage,
@@ -30,9 +48,7 @@ struct TextMessageCellView: View {
         self.onLongPress = onLongPress
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.text = message.messageText
-        self.isSender = message.isMy ?? false
-        self.backgroundColor = self.isSender ? Color(hex: "242729") : Color(hex: "F4F4F8")
-        self.textColor = self.isSender ? UIColor.white : UIColor(hex: "242729")
+        self.isSender = message.isMy
         
         let nsText = text as NSString
         
@@ -46,11 +62,13 @@ struct TextMessageCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let replyMessage {
                     MessageReplyView(message: replyMessage,
-                                     isMy: message.isMy ?? false,
+                                     isMy: message.isMy,
                                      onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                 }
                 
-                let data = AttributeTextManager.shared.getString(from: text, textColor: textColor)
+                let data = AttributeTextManager.shared.getString(from: text,
+                                                                 textColor: textColor,
+                                                                 fontSize: fontSize)
                 TextLabel(text: data.0,
                           linkRanges: data.1)
                     .layoutPriority(1)

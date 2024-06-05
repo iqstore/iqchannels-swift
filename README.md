@@ -24,8 +24,13 @@ pod install
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Описание использования фотоко</string>
+    <string>Описание использования галереи</string>
     <key>NSCameraUsageDescription</key>
     <string>Описание использования камеры</string>
 </dict>
@@ -35,7 +40,7 @@ pod install
 ## Примеры использования SDK
 
 
-Инициализация
+Инициализация c несколькими каналами
 -------------
 
 ```swift
@@ -46,6 +51,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1", "channel2"])
+        configurationManager.configure(config)
+        
+        return true
+    }
+}
+```
+
+Инициализация c одним каналом
+-------------
+
+```swift
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"])
         configurationManager.configure(config)
         
         return true

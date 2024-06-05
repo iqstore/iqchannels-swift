@@ -54,6 +54,7 @@ class IQRelationManager {
             if let userId = event.userID { events[index].user = map?.users[userId] }
             if let chatId = event.chatID { events[index].chat = map?.chats[chatId] }
             if let messageId = event.messageID { events[index].message = map?.chatMessages[messageId] }
+            events[index].message?.eventID = event.id
         }
     }
     

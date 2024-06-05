@@ -10,8 +10,11 @@ enum CustomTextAreaConfig {
 struct ChatInputView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     @Binding var text: String
     @Binding var messageToReply: IQMessage?
+    
     let disableInput: Bool
     
     let onAttachmentCompletion: (() -> Void)?
@@ -58,39 +61,71 @@ struct ChatInputView: View {
             Button {
                 onAttachmentCompletion?()
             } label: {
-                Image(name: "attachment")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .padding(8)
-                    .background(Color(hex: "F4F4F8"))
-                    .clipShape(Circle())
+                if let iconClipUrl = Style.model?.toolsToMessage?.iconClip {
+                    AnimatedImage(url: iconClipUrl)
+                        .resizable()
+                        .indicator(SDWebImageActivityIndicator.gray)
+                        .transition(SDWebImageTransition.fade)
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .padding(8)
+                        .background(Color(hex: "F4F4F8"))
+                        .clipShape(Circle())
+                } else {
+                    Image(name: "attachment")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .padding(8)
+                        .background(Color(hex: "F4F4F8"))
+                        .clipShape(Circle())
+                }
             }
             
-            ComposerInputView(text: $text, height: $textAreaHeight, currentHeight: finalTextAreaHeight)
+            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat) ?? Color(hex: "F4F4F8")
+            let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textChat?.color) ?? UIColor(hex: "242729")
+            let fontSize = CGFloat(Style.model?.toolsToMessage?.textChat?.textSize ?? 17)
+            ComposerInputView(text: $text,
+                              height: $textAreaHeight,
+                              textColor: textColor,
+                              fontSize: fontSize,
+                              currentHeight: finalTextAreaHeight)
                 .frame(height: finalTextAreaHeight)
                 .placeholder(when: text.isEmpty) {
                     Text("Сообщение")
-                        .font(.system(size: 17))
+                        .font(.system(size: fontSize))
                         .foregroundColor(Color(hex: "919399"))
                         .padding(.leading, 8)
                 }
                 .padding(.horizontal, 8)
-                .background(Color(hex: "F4F4F8"))
+                .background(chatBackgroundColor)
                 .cornerRadius(CustomTextAreaConfig.minHeight / 2)
             
             Group {
                 if !text.isEmpty {
+                    let backgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundIcon) ?? Color(hex: "242729")
                     Button {
                         onSendCompletion?()
                     } label: {
-                        Image(name: "up_arrow")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                            .padding(8)
-                            .background(Color(hex: "242729"))
-                            .clipShape(Circle())
+                        if let iconSentUrl = Style.model?.toolsToMessage?.iconSent {
+                            AnimatedImage(url: iconSentUrl)
+                                .resizable()
+                                .indicator(SDWebImageActivityIndicator.gray)
+                                .transition(SDWebImageTransition.fade)
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                                .padding(8)
+                                .background(backgroundColor)
+                                .clipShape(Circle())
+                        } else {
+                            Image(name: "up_arrow")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                                .padding(8)
+                                .background(backgroundColor)
+                                .clipShape(Circle())
+                        }
                     }
                     .transition(.slide)
                 }
@@ -100,14 +135,15 @@ struct ChatInputView: View {
         .animation(.bouncy, value: text.isEmpty)
         .padding(.horizontal, 8)
         .padding(.vertical, 12)
-        .background(Color.white)
     }
     
     @ViewBuilder
     private func getReplyPreview(message: IQMessage) -> some View {
+        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.clear
         HStack(spacing: 8) {
+            let capsuleTintColor = Style.getColor(theme: Style.model?.answer?.leftLine) ?? Color(hex: "DD0A34")
             Capsule()
-                .fill(Color(hex: "DD0A34"))
+                .fill(capsuleTintColor)
                 .frame(width: 2, height: 32)
             
             if message.payload == .file,
@@ -122,14 +158,18 @@ struct ChatInputView: View {
             }
             
             VStack(alignment: .leading, spacing: 0) {
+                let senderTextColor = Style.getColor(theme: Style.model?.answer?.textSender?.color) ?? Color(hex: "919399")
+                let senderFontSize = CGFloat(Style.model?.answer?.textSender?.textSize ?? 13)
                 Text(message.senderName)
-                    .font(.system(size: 13))
-                    .foregroundColor(Color(hex: "919399"))
+                    .font(.system(size: senderFontSize))
+                    .foregroundColor(senderTextColor)
                     .lineLimit(1)
                 
+                let messageTextColor = Style.getColor(theme: Style.model?.answer?.textMessage?.color) ?? Color(hex: "242729")
+                let messageFontSize = CGFloat(Style.model?.answer?.textMessage?.textSize ?? 15)
                 Text(message.messageText)
-                    .font(.system(size: 15))
-                    .foregroundColor(Color(hex: "242729"))
+                    .font(.system(size: messageFontSize))
+                    .foregroundColor(messageTextColor)
                     .lineLimit(1)
             }
             
@@ -138,12 +178,21 @@ struct ChatInputView: View {
             Button {
                 messageToReply = nil
             } label: {
-                Image(name: "close_fill")
-                    .resizable()
-                    .frame(width: 24, height: 24)
+                if let iconCancelUrl = Style.model?.answer?.iconCancel {
+                    AnimatedImage(url: iconCancelUrl)
+                        .resizable()
+                        .indicator(SDWebImageActivityIndicator.gray)
+                        .transition(SDWebImageTransition.fade)
+                        .frame(width: 24, height: 24)
+                } else {
+                    Image(name: "close_fill")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
             }
         }
         .frame(height: 56)
         .padding(.horizontal, 8)
+        .background(backgroundColor)
     }
 }

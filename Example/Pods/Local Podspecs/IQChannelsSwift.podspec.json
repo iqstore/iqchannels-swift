@@ -18,7 +18,11 @@
   "platforms": {
     "ios": "14.0"
   },
-  "source_files": "IQChannelsSwift/IQLibraryConfiguration.swift",
+  "source_files": [
+    "IQChannelsSwift/IQLibraryConfiguration.swift",
+    "IQChannelsSwift/**/*.h",
+    "IQChannelsSwift/**/*.m"
+  ],
   "resource_bundles": {
     "IQChannelsSwift": [
       "IQChannelsSwift/Assets/Assets.xcassets",
@@ -27,9 +31,6 @@
   },
   "frameworks": "UIKit",
   "dependencies": {
-    "TRVSEventSource": [
-      "0.0.8"
-    ],
     "SDWebImageSwiftUI": [
       "3.0.4"
     ]

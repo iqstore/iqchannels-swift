@@ -7,7 +7,14 @@
 
 import Foundation
 
-extension IQNetworkManager {
+extension IQNetworkManager: URLSessionDelegate {
+    
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            return completionHandler(URLSession.AuthChallengeDisposition.useCredential, nil)
+        }
+        return completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: serverTrust))
+    }
     
     func sse<T: Decodable>(path: String, responseType: T.Type, callback: @escaping ResponseCallbackClosure<IQResult<T>>) -> IQEventSourceManager {
         let url = requestUrl(path)
@@ -38,8 +45,9 @@ extension IQNetworkManager {
     }
     
     func post<T: Decodable>(_ path: String,
-                                    body: Encodable?,
-                                    responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
+                            headers: [String: String] = [:],
+                            body: Encodable?,
+                            responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
         var parameter: Any?
         if let body,
            let encoded = try? JSONEncoder().encode(body),
@@ -47,14 +55,15 @@ extension IQNetworkManager {
             parameter = json
         }
         
-        return await post(path, body: parameter, responseType: responseType)
+        return await post(path, headers: headers, body: parameter, responseType: responseType)
     }
     
     func post<T: Decodable>(_ path: String,
-                                    body: Any?,
-                                    responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
+                            headers: [String: String] = [:],
+                            body: Any?,
+                            responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
         var error: NSError?
-        guard let request = self.request(path, json: body, error: &error),
+        guard let request = self.request(path, headers: headers, json: body, error: &error),
               error == nil else { return .init(error: error) }
         
         return await post(request: request, responseType: responseType)
@@ -64,6 +73,9 @@ extension IQNetworkManager {
         await withCheckedContinuation { continuation in
             let task = session.dataTask(with: request) { data, response, taskError in
                 let turtle = self.handleResponse(url: request.url, data: data, response: response, error: taskError, responseType: responseType)
+                if let taskError {
+                    print(taskError)
+                }
                 continuation.resume(returning: turtle)
             }
             task.resume()
@@ -71,7 +83,7 @@ extension IQNetworkManager {
         }
     }
     
-    func request(_ path: String, json: Any?, error: inout NSError?) -> URLRequest? {
+    func request(_ path: String, headers: [String: String], json: Any?, error: inout NSError?) -> URLRequest? {
         let url = requestUrl(path)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -87,6 +99,10 @@ extension IQNetworkManager {
             }
         }
         
+        for (key, value) in headers {
+            request.addValue(value, forHTTPHeaderField: key)
+        }
+
         guard let json = json else { return request }
         
         do {

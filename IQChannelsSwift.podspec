@@ -30,7 +30,7 @@ Pod::Spec.new do |s|
     
     s.ios.deployment_target = '14.0'
     
-    s.source_files = 'IQChannelsSwift/IQLibraryConfiguration.swift'
+    s.source_files = 'IQChannelsSwift/IQLibraryConfiguration.swift', 'IQChannelsSwift/**/*.h', 'IQChannelsSwift/**/*.m'
     
     s.subspec 'Controllers' do |spec|
         spec.source_files = 'IQChannelsSwift/Controllers/**/*'
@@ -65,7 +65,7 @@ Pod::Spec.new do |s|
     }
     
     s.frameworks = 'UIKit'
-    s.dependency 'TRVSEventSource', '0.0.8'
+#    s.dependency 'TRVSEventSource', '0.0.8'
     s.dependency 'SDWebImageSwiftUI', '3.0.4'
     # s.dependency 'AFNetworking', '~> 2.3'
 end

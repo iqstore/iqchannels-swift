@@ -15,8 +15,13 @@ struct ChatDetailView: View {
     
     // MARK: - PROPERTIES
     @EnvironmentObject var viewModel: IQChatDetailViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     weak var delegate: ChatDetailViewDelegate?
+    
+    var backgroundColor: Color {
+        return Style.getColor(theme: Style.model?.chat?.background) ?? .white
+    }
     
     // MARK: - BODY
     var body: some View {
@@ -44,6 +49,7 @@ struct ChatDetailView: View {
             .zIndex(1)
             .opacity(viewModel.isMessageCopied ? 1 : 0)
         }
+        .background(backgroundColor.ignoresSafeArea())
         .animation(.easeInOut(duration: 0.25), value: viewModel.messages)
         .animation(.easeInOut(duration: 0.25), value: viewModel.typingUser)
         .animation(.bouncy, value: viewModel.isMessageCopied)

@@ -3,6 +3,8 @@ import SwiftUI
 struct SingleChoicesView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     let message: IQMessage
     let displaySingleChoices: Bool
     let onSingleChoiceTapCompletion: ((IQSingleChoice) -> Void)?
@@ -23,15 +25,23 @@ struct SingleChoicesView: View {
                     Button {
                         onSingleChoiceTapCompletion?(singleChoice)
                     } label: {
+                        let textColor = Style.getColor(theme: Style.model?.singleChoice?.textIVR?.color) ?? Color(hex: "96BB5D")
+                        let fontSize = CGFloat(Style.model?.singleChoice?.textIVR?.textSize ?? 12)
+                        let borderColor = Style.getColor(theme: Style.model?.singleChoice?.borderIVR?.color) ?? Color(hex: "96BB5D")
+                        let lineWidth = CGFloat(Style.model?.singleChoice?.borderIVR?.size ?? 1)
+                        let borderRadius = CGFloat(Style.model?.singleChoice?.borderIVR?.borderRadius ?? 8)
+                        let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundIVR) ?? Color.clear
                         Text(singleChoice.title ?? "")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color(hex: "96BB5D"))
+                            .font(.system(size: fontSize))
+                            .foregroundColor(textColor)
                             .frame(height: 32)
                             .padding(.horizontal, 4)
+                            .background(backgroundColor)
+                            .cornerRadius(borderRadius)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .inset(by: 1)
-                                    .stroke(Color(hex: "96BB5D"), lineWidth: 1)
+                                RoundedRectangle(cornerRadius: borderRadius)
+                                    .inset(by: lineWidth / 2)
+                                    .stroke(borderColor, lineWidth: lineWidth)
                             )
                     }
                 }

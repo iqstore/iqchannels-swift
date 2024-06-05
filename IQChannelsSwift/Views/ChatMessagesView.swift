@@ -8,6 +8,7 @@ struct ChatMessagesView: View {
     weak var delegate: ChatDetailViewDelegate?
     
     @EnvironmentObject var viewModel: IQChatDetailViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     @State private var keyboardShown: Bool = false
     @State private var isScrollDownVisible: Bool = false
@@ -25,8 +26,8 @@ struct ChatMessagesView: View {
                             .modifier(FlippedUpsideDown())
                     }
                     
-                    ForEach(0..<messages.count, id: \.self) { index in
-                        let message = messages[index]
+                    ForEach(messages) { message in
+                        let index = messages.firstIndex(of: message) ?? 0
                         VStack(spacing: 8) {
                             if shouldDisplayMessageDate(index) {
                                 getDatePreviewView(date: message.createdDate.formatRelatively())
@@ -53,7 +54,6 @@ struct ChatMessagesView: View {
                                 delegate?.onMessageAppear(with: message.messageID)
                             }
                         }
-                        .id(message.id)
                         .modifier(FlippedUpsideDown())
                     }
                 }
@@ -73,6 +73,7 @@ struct ChatMessagesView: View {
             .modifier(HideKeyboardOnTapGesture(shouldAdd: keyboardShown))
             .overlay(getScrollDownButton(proxy: proxy), alignment: .bottomTrailing)
             .overlay(getLoadingView())
+            .onReceive(keyboardPublisher) { keyboardShown = $0 }
             .onChange(of: viewModel.scrollDown) { _ in
                 withAnimation(.easeInOut) {
                     proxy.scrollTo("last", anchor: .bottom)
@@ -86,21 +87,26 @@ struct ChatMessagesView: View {
     // MARK: - VIEWS
     @ViewBuilder
     private func getDatePreviewView(date: String) -> some View {
+        let color = Style.getColor(theme: Style.model?.chat?.dateText?.color) ?? Color(hex: "919399")
+        let fontSize = CGFloat(Style.model?.chat?.dateText?.textSize ?? 13)
         Text(date)
-            .font(.system(size: 13))
-            .foregroundColor(Color(hex: "919399"))
+            .font(.system(size: fontSize))
+            .foregroundColor(color)
             .padding(.vertical, 12)
     }
     
     @ViewBuilder
     private func getTypingView(user: IQUser) -> some View {
+        let backgroundColor = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
+        let textColor = Style.getColor(theme: Style.model?.typing?.text?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.typing?.text?.textSize ?? 17)
         ZStack {
             Text("\(user.displayName ?? "") печатает...")
-                .font(.system(size: 17))
-                .foregroundColor(Color(hex: "242729"))
+                .font(.system(size: fontSize))
+                .foregroundColor(textColor)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
-                .background(Color(hex: "F4F4F8"))
+                .background(backgroundColor)
                 .cornerRadius(12)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,7 +156,6 @@ struct ChatMessagesView: View {
                 ProgressView()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.white)
         }
     }
     

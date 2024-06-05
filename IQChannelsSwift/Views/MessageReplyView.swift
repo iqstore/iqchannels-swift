@@ -4,9 +4,35 @@ import SDWebImageSwiftUI
 struct MessageReplyView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     let message: IQMessage
     let isMy: Bool
     let onReplyMessageTapCompletion: ((Int) -> Void)?
+    
+    var textColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messages?.replyTextClient?.color) ?? Color(hex: "919399")
+        let operatorColor = Style.getColor(theme: Style.model?.messages?.replyTextOperator?.color) ?? Color(hex: "919399")
+        return isMy ? clientColor : operatorColor
+    }
+    
+    var textFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messages?.replyTextClient?.textSize ?? 15)
+        let operatorFontSize = CGFloat(Style.model?.messages?.replyTextOperator?.textSize ?? 15)
+        return isMy ? clientFontSize : operatorFontSize
+    }
+    
+    var senderTextColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messages?.replySenderTextClient?.color) ?? Color.white
+        let operatorColor = Style.getColor(theme: Style.model?.messages?.replySenderTextOperator?.color) ?? Color(hex: "242729")
+        return isMy ? clientColor : operatorColor
+    }
+    
+    var senderTextFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messages?.replySenderTextClient?.textSize ?? 13)
+        let operatorFontSize = CGFloat(Style.model?.messages?.replySenderTextOperator?.textSize ?? 13)
+        return isMy ? clientFontSize : operatorFontSize
+    }
     
     // MARK: - BODY
     var body: some View {
@@ -31,15 +57,14 @@ struct MessageReplyView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    let senderColor = isMy ? Color.white : Color(hex: "242729")
                     Text(message.senderName)
-                        .font(.system(size: 13))
-                        .foregroundColor(senderColor)
+                        .font(.system(size: senderTextFontSize))
+                        .foregroundColor(senderTextColor)
                         .lineLimit(1)
                     
                     Text(message.messageText)
-                        .font(.system(size: 15))
-                        .foregroundColor(Color(hex: "919399"))
+                        .font(.system(size: textFontSize))
+                        .foregroundColor(textColor)
                         .lineLimit(1)
                 }
             }

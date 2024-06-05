@@ -6,14 +6,13 @@
 //
 
 import UIKit
-import TRVSEventSource
 
 class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
     
     typealias Callback = (Data?, Error?) -> Void
     
     private var callback: Callback?
-    private var eventSource: TRVSEventSource?
+    private(set) var eventSource: TRVSEventSource?
 
     init(url: URL, authToken: String?, customHeaders: [String: String]? = nil, callback: @escaping Callback) {
         super.init()
@@ -31,6 +30,10 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
         eventSource = TRVSEventSource(url: url, sessionConfiguration: config)
         eventSource?.delegate = self
         eventSource?.open()
+    }
+    
+    deinit {
+        eventSource?.close()
     }
     
     func close() {

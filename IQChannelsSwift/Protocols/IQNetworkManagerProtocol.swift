@@ -10,6 +10,7 @@ import Foundation
 protocol IQNetworkManagerProtocol {
     var token: String? { get set }
 
+    func isConnectedToEvents() -> Bool
     func setCustomHeaders(_ headers: [String: String])
     func cancelTask(with taskIdentifier: Int)
     func listenToEvents(request: IQListenEventsRequest, callback: @escaping ResponseCallbackClosure<[IQChatEvent]>)

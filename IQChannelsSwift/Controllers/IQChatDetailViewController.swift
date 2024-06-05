@@ -11,7 +11,7 @@ class IQChatDetailViewController: IQViewController {
     private let output: IQChannelsManagerDetailOutput
     
     private lazy var titleStackView: UIStackView = {
-        let stackView: UIStackView = .init(arrangedSubviews: [titleLabel, statusLabel])
+        let stackView: UIStackView = .init(arrangedSubviews: [titleLabel, statusView])
         stackView.spacing = 0
         stackView.axis = .vertical
         stackView.alignment = .center
@@ -26,10 +26,25 @@ class IQChatDetailViewController: IQViewController {
         return label
     }()
     
+    private lazy var statusView: UIStackView = {
+        let stackView: UIStackView = .init(arrangedSubviews: [loadingView, statusLabel])
+        stackView.axis = .horizontal
+        stackView.spacing = 4
+        return stackView
+    }()
+    
+    private lazy var loadingView: UIActivityIndicatorView = {
+        let view: UIActivityIndicatorView = .init()
+        view.color = Style.getUIColor(theme: Style.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
+        view.hidesWhenStopped = true
+        view.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        return view
+    }()
+    
     private lazy var statusLabel: UILabel = {
         let label: UILabel = .init()
         label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        label.textColor = UIColor(hex: "919399")
+        label.textColor = Style.getUIColor(theme: Style.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
         return label
     }()
     
@@ -99,7 +114,18 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$state
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.statusLabel.text = state == .authenticated ? "На связи" : "Не удалось подключиться"
+                guard let self else { return }
+                UIView.transition(with: titleStackView,
+                                  duration: 0.25,
+                                  options: .transitionCrossDissolve,
+                                  animations: {
+                    let hasNetwork = state == .authenticated
+                    self.titleLabel.isHidden = !hasNetwork
+                    hasNetwork ? self.loadingView.stopAnimating() : self.loadingView.startAnimating()
+                    self.loadingView.isHidden = hasNetwork
+                    self.loadingView.alpha = hasNetwork ? 0 : 1
+                    self.statusLabel.text = state.description
+                }, completion: nil)
             }.store(in: &subscriptions)
     }
     
@@ -177,7 +203,7 @@ class IQChatDetailViewController: IQViewController {
             controller.modalTransitionStyle = .coverVertical
             present(controller, animated: true)
         } else if file.type == .file {
-            let controller: SFSafariViewController = .init(url: url)
+            let controller: FilePreviewController = .init(url: url)
             present(controller, animated: true)
         }
     }

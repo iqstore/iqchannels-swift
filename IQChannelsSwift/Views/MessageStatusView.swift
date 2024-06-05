@@ -5,17 +5,24 @@ struct MessageStatusView: View {
     // MARK: - PROPERTIES
     private let message: IQMessage
     private let isSender: Bool
-    private let tintColor: Color
     private let withBackground: Bool
     private let backgroundColor: Color
     
     @State private var showMessageLoading: Bool = false
     
+    var textColor: Color {
+        return Style.getColor(theme: Style.model?.messages?.textTime?.color) ?? Color(hex: "919399")
+    }
+    
+    var fontSize: CGFloat {
+        return CGFloat(Style.model?.messages?.textTime?.textSize ?? 13)
+    }
+    
     // MARK: - INIT
-    init(message: IQMessage, withBackground: Bool = false) {
+    init(message: IQMessage,
+         withBackground: Bool = false) {
         self.message = message
-        self.isSender = message.isMy ?? false
-        self.tintColor = Color(hex: "919399")
+        self.isSender = message.isMy
         self.withBackground = withBackground
         self.backgroundColor = Color(hex: "242729").opacity(0.7)
     }
@@ -37,8 +44,8 @@ struct MessageStatusView: View {
     private func getStatusView() -> some View {
         HStack(spacing: 2) {
             Text(message.createdDate.formatToTime())
-                .foregroundColor(tintColor)
-                .font(.system(size: 13))
+                .foregroundColor(textColor)
+                .font(.system(size: fontSize))
                 .fixedSize(horizontal: true, vertical: false)
             
             if isSender {
@@ -47,7 +54,7 @@ struct MessageStatusView: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(tintColor)
+                        .foregroundColor(textColor)
                         .frame(width: 12, height: 12)
                         .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
                         .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
@@ -58,7 +65,7 @@ struct MessageStatusView: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(tintColor)
+                        .foregroundColor(textColor)
                         .frame(width: 12, height: 16)
                 }
             }

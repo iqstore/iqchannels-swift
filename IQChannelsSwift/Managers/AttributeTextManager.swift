@@ -6,7 +6,7 @@ final class AttributeTextManager {
     
     private init() {}
     
-    func getString(from markdown: String, textColor: UIColor) -> (NSAttributedString, [Link]) {
+    func getString(from markdown: String, textColor: UIColor, fontSize: CGFloat) -> (NSAttributedString, [Link]) {
         var formattedMarkdown = markdown.replacingOccurrences(of: "\\n", with: "\n")
         if isList(formattedMarkdown) {
             formattedMarkdown = formatStringWithList(formattedMarkdown)
@@ -15,20 +15,20 @@ final class AttributeTextManager {
         let attributedString = NSMutableAttributedString(string: formattedMarkdown)
         var linkRanges: [Link] = []
         attributedString.setAttributes([
-            .font: UIFont.systemFont(ofSize: 17),
+            .font: UIFont.systemFont(ofSize: fontSize),
             .foregroundColor: textColor
         ], range: .init(location: 0, length: formattedMarkdown.count))
         
         // Define patterns for markdown
         let patterns: [(String, [NSAttributedString.Key: Any])] = [
-            ("\\\\\\*(.*?)\\\\\\*", [.font: UIFont.systemFont(ofSize: 17, weight: .bold)]),
-            ("\\\\\\_(.*?)\\\\\\_", [.font: UIFont.italicSystemFont(ofSize: 17)]),
+            ("\\\\\\*(.*?)\\\\\\*", [.font: UIFont.systemFont(ofSize: fontSize, weight: .bold)]),
+            ("\\\\\\_(.*?)\\\\\\_", [.font: UIFont.italicSystemFont(ofSize: fontSize)]),
             ("`(.*?)`", [.font: UIFont(name: "Courier", size: UIFont.systemFontSize)!]),
             ("\\[([^\\]]+)\\]\\(([^\\)]+)\\)", [:])
         ]
         
         let linkAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 17),
+            .font: UIFont.systemFont(ofSize: fontSize),
             .foregroundColor: textColor,
             .underlineColor: textColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue
@@ -41,7 +41,7 @@ final class AttributeTextManager {
                     if match.numberOfRanges == 3 {
                         let linkTextRange = match.range(at: 1)
                         let linkURLRange = match.range(at: 2)
-                        if let linkText = text.attributedSubstring(from: linkTextRange).string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                        if let _ = text.attributedSubstring(from: linkTextRange).string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
                            let linkURL = text.attributedSubstring(from: linkURLRange).string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
                             let urlString = linkURL.hasPrefix("http") ? linkURL : "http://\(linkURL)"
                             linkRanges.append((urlString, linkTextRange))

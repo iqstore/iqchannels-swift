@@ -13,14 +13,16 @@ enum IQChannelsState {
     case authenticating
     case authenticated
     
-    var description: String? {
+    var description: String {
         switch self {
-        case .loggedOut, .authenticated:
-            return nil
+        case .authenticated:
+            return "На связи"
         case .awaitingNetwork:
             return "Ожидание сети..."
         case .authenticating:
             return "Авторизация..."
+        case .loggedOut:
+            return "Не удалось подключиться"
         }
     }
 }

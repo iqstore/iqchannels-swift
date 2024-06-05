@@ -150,7 +150,7 @@ struct MessageControlOverlayView: View {
         let messageWidth = messageDisplayInfo.frame.width
         let message = messageDisplayInfo.message
         
-        if message.isMy ?? false {
+        if message.isMy {
             return messageWidth - messageActionsWidth
         } else {
             return 0

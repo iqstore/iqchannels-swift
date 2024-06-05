@@ -4,6 +4,8 @@ import SDWebImageSwiftUI
 struct ChatMessageCellView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     let message: IQMessage
     let replyMessage: IQMessage?
     let isGroupStart: Bool
@@ -17,9 +19,17 @@ struct ChatMessageCellView: View {
     
     @State private var dragAmountX: CGFloat = 0
     
+    var senderTextColor: Color {
+        return Style.getColor(theme: Style.model?.messages?.textUp?.color) ?? Color(hex: "919399")
+    }
+    
+    var senderFontSize: CGFloat {
+        return CGFloat(Style.model?.messages?.textUp?.textSize ?? 13)
+    }
+    
     // MARK: - BODY
     var body: some View {
-        let isSender = message.isMy ?? false
+        let isSender = message.isMy
         ZStack(alignment: .trailing) {
             getReplyView()
                 .opacity(-dragAmountX / 56)
@@ -36,8 +46,8 @@ struct ChatMessageCellView: View {
                     if !isSender,
                         isGroupStart {
                         Text(message.senderName)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color(hex: "919399"))
+                            .font(.system(size: senderFontSize))
+                            .foregroundColor(senderTextColor)
                             .padding(.leading, 12)
                     }
                     
