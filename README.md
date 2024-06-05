@@ -1,15 +1,14 @@
 # IQChannelsSwift
 ## Список библиотек, используемых в проекте и их назначение
 
-1. **TRVSEventSource**: Для обработки серверных событий (Server-Sent Events).
-2. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
+1. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
 
 ## Руководство по установке
 
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-beta4'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-beta5'
 ```
 
 Затем выполните команду:
