@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'Pods-IQChannelsSwift_Example' in project 'Pods'
+➜ Explicit dependency on target 'IQChannelsSwift' in project 'Pods'
+Target 'IQChannelsSwift' in project 'Pods' (no dependencies)

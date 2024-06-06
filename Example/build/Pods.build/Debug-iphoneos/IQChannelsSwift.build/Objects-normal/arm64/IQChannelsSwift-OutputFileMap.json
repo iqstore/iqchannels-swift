@@ -1,0 +1,18 @@
+{
+  "" : {
+    "diagnostics" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/IQChannelsSwift-master.dia",
+    "emit-module-dependencies" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/IQChannelsSwift-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/IQChannelsSwift-master-emit-module.dia",
+    "swift-dependencies" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/IQChannelsSwift-master.swiftdeps"
+  },
+  "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/IQChannelsSwift/Classes/ReplaceMe.swift" : {
+    "const-values" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.swiftconstvalues",
+    "dependencies" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.d",
+    "diagnostics" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.o",
+    "llvm-bc" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.bc",
+    "object" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.o",
+    "swift-dependencies" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe.swiftdeps",
+    "swiftmodule" : "/Users/aralbekmuhammed/Desktop/iqchannels-swift-sdk-2.0/Example/build/Pods.build/Debug-iphoneos/IQChannelsSwift.build/Objects-normal/arm64/ReplaceMe~partial.swiftmodule"
+  }
+}

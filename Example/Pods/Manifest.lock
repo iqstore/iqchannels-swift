@@ -1,105 +1,50 @@
 PODS:
-  - InputBarAccessoryView (4.3.3):
-    - InputBarAccessoryView/Core (= 4.3.3)
-  - InputBarAccessoryView/Core (4.3.3)
-  - IQChannelsSwift (1.0.0):
-    - IQChannelsSwift/Additional (= 1.0.0)
-    - IQChannelsSwift/Calculators (= 1.0.0)
-    - IQChannelsSwift/Cells (= 1.0.0)
-    - IQChannelsSwift/Extensions (= 1.0.0)
-    - IQChannelsSwift/Models (= 1.0.0)
-    - IQChannelsSwift/Networking (= 1.0.0)
-    - IQChannelsSwift/Protocols (= 1.0.0)
-    - IQChannelsSwift/Views (= 1.0.0)
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Additional (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Calculators (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Cells (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Extensions (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Models (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Networking (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Protocols (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - IQChannelsSwift/Views (1.0.0):
-    - MessageKit (= 3.1.1)
-    - SDWebImage (~> 5.10)
-    - SnapKit (= 5.6.0)
-    - SwiftMessages (= 9.0.9)
-    - TRVSEventSource (= 0.0.8)
-  - MessageKit (3.1.1):
-    - InputBarAccessoryView (~> 4.3.0)
+  - IQChannelsSwift (0.1.0):
+    - IQChannelsSwift/Controllers (= 0.1.0)
+    - IQChannelsSwift/Extensions (= 0.1.0)
+    - IQChannelsSwift/Managers (= 0.1.0)
+    - IQChannelsSwift/Models (= 0.1.0)
+    - IQChannelsSwift/Protocols (= 0.1.0)
+    - IQChannelsSwift/ViewModels (= 0.1.0)
+    - IQChannelsSwift/Views (= 0.1.0)
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Controllers (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Extensions (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Managers (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Models (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Protocols (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/ViewModels (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
+  - IQChannelsSwift/Views (0.1.0):
+    - SDWebImageSwiftUI (= 3.0.4)
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
-  - SnapKit (5.6.0)
-  - SwiftMessages (9.0.9):
-    - SwiftMessages/App (= 9.0.9)
-  - SwiftMessages/App (9.0.9)
-  - TRVSEventSource (0.0.8)
+  - SDWebImageSwiftUI (3.0.4):
+    - SDWebImage (~> 5.10)
 
 DEPENDENCIES:
   - IQChannelsSwift (from `../`)
 
 SPEC REPOS:
   trunk:
-    - InputBarAccessoryView
-    - MessageKit
     - SDWebImage
-    - SnapKit
-    - SwiftMessages
-    - TRVSEventSource
+    - SDWebImageSwiftUI
 
 EXTERNAL SOURCES:
   IQChannelsSwift:
     :path: "../"
 
 SPEC CHECKSUMS:
-  InputBarAccessoryView: 8e7fc09e9cba75e0fee5da13450e15c194806f69
-  IQChannelsSwift: 6459d104dfb9edae5a541243a7362fe6424cf5b5
-  MessageKit: a3e612a54a24f5d9ca0295760749b481afd3f2da
+  IQChannelsSwift: c2ee12e7b6d76646feb5516454612ad8a0a68008
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
-  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  SwiftMessages: 1a23aef303fa7bb26ad802880746cf8358e378fe
-  TRVSEventSource: 19fb940e0351ceb97125d46fd40cd55e339568d8
+  SDWebImageSwiftUI: 824628d8220906aa101f62b39a7492edd138449d
 
-PODFILE CHECKSUM: 952137cdb29ade3694d789d97aed00bf83cb241f
+PODFILE CHECKSUM: ee70ba7dbc3b90f5b6556e8ca35309367e3b50cb
 
 COCOAPODS: 1.15.2
