@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name             = 'IQChannelsSwift'
-    s.version          = '0.1.0'
+    s.version          = '1.0.0'
     s.summary          = 'A short description of IQChannelsSwift.'
     
     # This description is used to generate tags and improve search results.
@@ -21,11 +21,11 @@ Pod::Spec.new do |s|
     TODO: Add long description of the pod here.
     DESC
     
-    s.homepage         = 'https://github.com/Daulet Tokmukhanbet/IQChannelsSwift'
+    s.homepage         = 'https://github.com/iqstore/iqchannels-swift'
     # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'Daulet Tokmukhanbet' => '61043918+dato3@users.noreply.github.com' }
-    s.source           = { :git => 'https://github.com/Daulet Tokmukhanbet/IQChannelsSwift.git', :tag => s.version.to_s }
+    s.source           = { :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => s.version.to_s }
     # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
     
     s.ios.deployment_target = '14.0'
