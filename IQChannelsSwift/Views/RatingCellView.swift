@@ -83,17 +83,19 @@ struct RatingCellView: View {
                     onRateConversation?(selectedRating, rating.id)
                 }
             } label: {
-                let ratingTextColor = Style.getColor(theme: Style.model?.rating?.textRating?.color) ?? Color.white
-                let ratingFontSize = CGFloat(Style.model?.rating?.textRating?.textSize ?? 15)
-                let ratingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.color) ?? Color(hex: "DD0A34")
-                let borderRadius = CGFloat(Style.model?.rating?.sentRating?.borderRadius ?? 8)
+                let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
+                let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
+                let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
+                let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
+                let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.colorEnabled) ?? Color(hex: "DD0A34")
+                let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.colorDisabled) ?? Color(hex: "B7B7CA")
                 Text("Отправить")
-                    .foregroundColor(ratingTextColor)
-                    .font(.system(size: ratingFontSize))
+                    .foregroundColor(selectedRating == nil ? disabledRatingTextColor : enabledRatingTextColor)
+                    .font(.system(size: selectedRating == nil ? disabledRatingFontSize : enabledRatingFontSize))
                     .frame(height: 32)
                     .frame(maxWidth: .infinity)
-                    .background(selectedRating == nil ? Color(hex: "B7B7CA") : ratingBackgroundColor)
-                    .cornerRadius(borderRadius)
+                    .background(selectedRating == nil ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
+                    .cornerRadius(8)
             }
             .disabled(selectedRating == nil)
         }

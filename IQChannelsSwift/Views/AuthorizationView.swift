@@ -46,18 +46,13 @@ struct AuthorizationView: View {
         let descriptionColor = Style.getColor(theme: Style.model?.error?.textError?.color) ?? Color(hex: "242729")
         let descriptionFontSize = CGFloat(Style.model?.error?.textError?.textSize ?? 15)
         VStack(spacing: 20) {
-            if let iconErrorUrl = Style.model?.error?.iconError {
-                AnimatedImage(url: iconErrorUrl)
-                    .resizable()
-                    .indicator(SDWebImageActivityIndicator.gray)
-                    .transition(SDWebImageTransition.fade)
-                    .scaledToFit()
-                    .frame(width: 48, height: 48)
-            } else {
-                Image(name: "circle_error")
-                    .resizable()
-                    .frame(width: 48, height: 48)
-            }
+            AnimatedImage(url: Style.model?.error?.iconError, 
+                          placeholderImage: UIImage(name: "circle_error"))
+                .resizable()
+                .indicator(SDWebImageActivityIndicator.gray)
+                .transition(SDWebImageTransition.fade)
+                .scaledToFit()
+                .frame(width: 48, height: 48)
             
             VStack(spacing: 8) {
                 Text("Чат временно недоступен")

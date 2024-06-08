@@ -13,7 +13,6 @@ struct StyleModel: Decodable {
     let answer: AnswerStyle?
     let messagesFile: MessagesFileStyle?
     let rating: RatingStyle?
-    let typing: TypingStyle?
     let toolsToMessage: ToolsToMessageStyle?
     let error: ErrorStyle?
     let singleChoice: SingleChoiceStyle?
@@ -25,7 +24,6 @@ struct StyleModel: Decodable {
         case answer
         case messagesFile = "messages_file"
         case rating
-        case typing
         case toolsToMessage = "tools_to_message"
         case error
         case singleChoice = "single-choice"
@@ -118,7 +116,21 @@ struct StyleModel: Decodable {
         let textRating: TextStyle?
         let fullStar: URL?
         let emptyStar: URL?
-        let sentRating: BorderStyle?
+        let sentRating: SentRating?
+        
+        struct SentRating: Decodable {
+            let colorEnabled: Theme?
+            let colorDisabled: Theme?
+            let textEnabled: TextStyle?
+            let textDisabled: TextStyle?
+            
+            enum CodingKeys: String, CodingKey {
+                case colorEnabled = "color_enabled"
+                case colorDisabled = "color_disabled"
+                case textEnabled = "text_enabled"
+                case textDisabled = "text_disabled"
+            }
+        }
 
         enum CodingKeys: String, CodingKey {
             case backgroundContainer = "background_container"
@@ -127,14 +139,6 @@ struct StyleModel: Decodable {
             case fullStar = "full_star"
             case emptyStar = "empty_star"
             case sentRating = "sent_rating"
-        }
-    }
-
-    struct TypingStyle: Decodable {
-        let text: TextStyle?
-
-        enum CodingKeys: String, CodingKey {
-            case text
         }
     }
 

@@ -49,17 +49,21 @@ class IQChatDetailViewController: IQViewController {
     }()
     
     private lazy var backButton: UIButton = {
-        let btn: UIButton = .init(frame: .init(x: 0, y: 0, width: 32, height: 32))
-        btn.setImage(UIImage(name: "chevron_left"), for: [])
-        btn.imageView?.contentMode = .scaleAspectFill
+        let btn: UIButton = .init(frame: .init(x: 0, y: 0, width: 24, height: 24))
+        btn.setImage(UIImage(name: "chevron_left"), for: .normal)
+        btn.imageView?.contentMode = .scaleAspectFit
+        btn.contentVerticalAlignment = .fill
+        btn.contentHorizontalAlignment = .fill
         btn.addTarget(self, action: #selector(onTapBack), for: .touchUpInside)
         return btn
     }()
     
     private lazy var searchButton: UIButton = {
-        let btn: UIButton = .init(frame: .init(x: 0, y: 0, width: 32, height: 32))
+        let btn: UIButton = .init(frame: .init(x: 0, y: 0, width: 24, height: 24))
         btn.setImage(UIImage(name: "search"), for: [])
-        btn.imageView?.contentMode = .scaleAspectFill
+        btn.imageView?.contentMode = .scaleAspectFit
+        btn.contentVerticalAlignment = .fill
+        btn.contentHorizontalAlignment = .fill
         return btn
     }()
     
@@ -132,8 +136,13 @@ class IQChatDetailViewController: IQViewController {
     // MARK: - ACTIONS
     @objc
     private func onTapBack() {
-        output.detailControllerDidPop()
-        navigationController?.popViewController(animated: true)
+        if viewModel.backDismisses {
+            output.detailControllerDismissChat()
+            dismiss(animated: true)
+        } else {
+            output.detailControllerDidPop()
+            navigationController?.popViewController(animated: true)
+        }
     }
     
     // MARK: - PRIVATE METHODS

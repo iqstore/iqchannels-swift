@@ -63,7 +63,7 @@ extension IQChannelsManager {
     private func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
-        viewModel.hidesBackButton = authResults.count == 1
+        viewModel.backDismisses = authResults.count == 1
         viewModel.state = state
         viewModel.client = chat.auth.auth.client
         viewModel.messages = messages.reversed()
@@ -356,9 +356,16 @@ extension IQChannelsManager {
         }
         
         if response.error != nil {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                Task {
-                    await self?.uploadFileMessage(message)
+            if let error = response.error, error.iqAppError != nil {
+                if let index = indexOfMyMessage(localID: message.localID) {
+                    messages.remove(at: index)
+                    baseViewModels.sendError(error)
+                }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    Task {
+                        await self?.uploadFileMessage(message)
+                    }
                 }
             }
         } else if let file = response.result,
@@ -440,6 +447,24 @@ extension IQChannelsManager {
         }
     }
     
+    private func loadMessagesAndMerge() async {
+        guard let networkManager = currentNetworkManager, let selectedChat else { return }
+        
+        networkManager.stopListenToEvents()
+        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType))
+        let newMessages = (result.result ?? [])
+            .filter { $0.hasValidPayload }
+            .filter { indexOfMessage(messageID: $0.messageID) == nil }
+        print("Missed messages: ", newMessages.map { $0.text })
+        if !newMessages.isEmpty {
+            var messages = self.messages
+            messages.append(contentsOf: newMessages)
+            messages.sort(by: { $0.createdDate < $1.createdDate })
+            self.messages = messages
+        }
+        listenToEvents()
+    }
+    
     private func loadMessages() {
         Task {
             guard let networkManager = currentNetworkManager, let selectedChat else { return }
@@ -504,7 +529,7 @@ extension IQChannelsManager {
         
         if let index = indexOfMyMessage(localID: message.localID){
             messages[index] = messages[index].merged(with: message)
-        } else if message.hasValidPayload {
+        } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
             messages.append(message)
             markAsReceived([message.messageID])
             DispatchQueue.main.async {
@@ -636,23 +661,25 @@ extension IQChannelsManager {
 extension IQChannelsManager: IQNetworkStatusManagerDelegate {
     
     func networkStatusChanged(_ status: IQNetworkStatus) {
-        guard status != .notReachable else {
-            state = .awaitingNetwork
-            currentNetworkManager?.stopListenToEvents()
-            currentNetworkManager?.stopUnreadListeners()
-            return
-        }
-        
-        if !authResults.isEmpty {
-            state = .authenticated
-            listenToEvents()
-            listenToUnread()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                self?.uploadUnsentMessages()
+        Task {
+            guard status != .notReachable else {
+                state = .awaitingNetwork
+                currentNetworkManager?.stopListenToEvents()
+                currentNetworkManager?.stopUnreadListeners()
+                return
             }
-        } else if let loginType, state != .authenticating {
-            authAttempt = 0
-            auth(loginType)
+            
+            if !authResults.isEmpty {
+                state = .authenticated
+                await loadMessagesAndMerge()
+                listenToUnread()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    self?.uploadUnsentMessages()
+                }
+            } else if let loginType, state != .authenticating {
+                authAttempt = 0
+                auth(loginType)
+            }
         }
     }
     

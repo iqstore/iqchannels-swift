@@ -17,7 +17,7 @@ final class AttributeTextManager {
         attributedString.setAttributes([
             .font: UIFont.systemFont(ofSize: fontSize),
             .foregroundColor: textColor
-        ], range: .init(location: 0, length: formattedMarkdown.count))
+        ], range: .init(location: 0, length: (formattedMarkdown as NSString).length))
         
         // Define patterns for markdown
         let patterns: [(String, [NSAttributedString.Key: Any])] = [
@@ -96,16 +96,15 @@ final class AttributeTextManager {
         
         // Handle generic links
         let linkPatterns = [
-            "(https?:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*))",
-            "(www\\.[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*))"
+            "((http|https)://)?((www\\.)?)+[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(\\:[0-9]{1,5})?(\\/.*)?"
         ]
         
         for pattern in linkPatterns {
             do {
                 let regex = try NSRegularExpression(pattern: pattern, options: [])
-                let matches = regex.matches(in: attributedString.string, options: [], range: NSRange(location: 0, length: attributedString.length))
+                let matches = regex.matches(in: attributedString.string, options: [], range: NSRange(location: 0, length: (attributedString.string as NSString).length))
                 for match in matches.reversed() {
-                    let linkRange = match.range(at: 1)
+                    let linkRange = match.range(at: 0)
                     let linkText = attributedString.attributedSubstring(from: linkRange).string
                     let urlString = linkText.hasPrefix("http") ? linkText : "http://\(linkText)"
                     linkRanges.append((urlString, linkRange))
