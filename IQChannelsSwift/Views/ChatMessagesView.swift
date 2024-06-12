@@ -98,8 +98,8 @@ struct ChatMessagesView: View {
     @ViewBuilder
     private func getTypingView(user: IQUser) -> some View {
         let backgroundColor = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
-        let textColor = Style.getColor(theme: Style.model?.typing?.text?.color) ?? Color(hex: "242729")
-        let fontSize = CGFloat(Style.model?.typing?.text?.textSize ?? 17)
+        let textColor = Style.getColor(theme: Style.model?.messages?.textOperator?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
         ZStack {
             Text("\(user.displayName ?? "") печатает...")
                 .font(.system(size: fontSize))

@@ -10,6 +10,7 @@ import PhotosUI
 
 protocol IQChannelsManagerDetailOutput {
     func detailControllerIsTyping()
+    func detailControllerDismissChat()
     func detailControllerDidPop()
     func detailController(didCancelUpload message: IQMessage)
     func detailController(didDisplayMessageWith id: Int)

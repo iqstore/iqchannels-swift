@@ -30,6 +30,10 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
         sendFiles(items: items, replyToMessage: replyToMessage)
     }
     
+    func detailControllerDismissChat() {
+        logout()
+    }
+
     func detailControllerDidPop() {
         closeCurrentChat()
     }

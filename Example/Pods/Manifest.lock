@@ -1,26 +1,26 @@
 PODS:
-  - IQChannelsSwift (0.1.0):
-    - IQChannelsSwift/Controllers (= 0.1.0)
-    - IQChannelsSwift/Extensions (= 0.1.0)
-    - IQChannelsSwift/Managers (= 0.1.0)
-    - IQChannelsSwift/Models (= 0.1.0)
-    - IQChannelsSwift/Protocols (= 0.1.0)
-    - IQChannelsSwift/ViewModels (= 0.1.0)
-    - IQChannelsSwift/Views (= 0.1.0)
+  - IQChannelsSwift (1.0.0):
+    - IQChannelsSwift/Controllers (= 1.0.0)
+    - IQChannelsSwift/Extensions (= 1.0.0)
+    - IQChannelsSwift/Managers (= 1.0.0)
+    - IQChannelsSwift/Models (= 1.0.0)
+    - IQChannelsSwift/Protocols (= 1.0.0)
+    - IQChannelsSwift/ViewModels (= 1.0.0)
+    - IQChannelsSwift/Views (= 1.0.0)
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Controllers (0.1.0):
+  - IQChannelsSwift/Controllers (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Extensions (0.1.0):
+  - IQChannelsSwift/Extensions (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Managers (0.1.0):
+  - IQChannelsSwift/Managers (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Models (0.1.0):
+  - IQChannelsSwift/Models (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Protocols (0.1.0):
+  - IQChannelsSwift/Protocols (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/ViewModels (0.1.0):
+  - IQChannelsSwift/ViewModels (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - IQChannelsSwift/Views (0.1.0):
+  - IQChannelsSwift/Views (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
@@ -41,7 +41,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  IQChannelsSwift: c2ee12e7b6d76646feb5516454612ad8a0a68008
+  IQChannelsSwift: 6aeb239ad22f474599d22e0326b2dfdb9b1909d0
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   SDWebImageSwiftUI: 824628d8220906aa101f62b39a7492edd138449d
 
