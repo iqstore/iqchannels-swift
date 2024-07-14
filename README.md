@@ -9,7 +9,7 @@
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-beta6'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-rc2'
 ```
 
 Затем выполните команду:
@@ -69,6 +69,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"])
+        configurationManager.configure(config)
+        
+        return true
+    }
+}
+```
+
+Инициализация c определенным чатом
+-------------
+
+```swift
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com",
+                                      channels: ["channel1", "channel2"],
+                                      chatToOpen: ("channel1", IQChatType.manager)) // Чат который требуется открыть
         configurationManager.configure(config)
         
         return true

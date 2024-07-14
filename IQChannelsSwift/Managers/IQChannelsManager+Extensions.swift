@@ -18,7 +18,13 @@ extension IQChannelsManager {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     
-                    let items = self.getChatItems(from: results)
+                    var items = self.getChatItems(from: results)
+                    
+                    if let chatToOpen = config.chatToOpen,
+                       let item = items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }) {
+                        items = [item]
+                    }
+
                     if items.count == 1, let item = items.first,
                        let authResult = results.first(where: { $0.channel == item.channel } ){
                         self.selectedChat = (authResult, item.chatType)
@@ -356,7 +362,7 @@ extension IQChannelsManager {
         }
         
         if response.error != nil {
-            if let error = response.error, error.iqAppError != nil {
+            if let error = response.error {
                 if let index = indexOfMyMessage(localID: message.localID) {
                     messages.remove(at: index)
                     baseViewModels.sendError(error)
