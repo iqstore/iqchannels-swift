@@ -1,14 +1,15 @@
 # IQChannelsSwift
 ## Список библиотек, используемых в проекте и их назначение
 
-1. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
+1. **TRVSEventSource**: Для обработки серверных событий (Server-Sent Events).
+2. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
 
 ## Руководство по установке
 
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git’, :tag => '2.0.0-rc1'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.0-rc2'
 ```
 
 Затем выполните команду:
@@ -68,6 +69,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"])
+        configurationManager.configure(config)
+        
+        return true
+    }
+}
+```
+
+Инициализация c определенным чатом
+-------------
+
+```swift
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com",
+                                      channels: ["channel1", "channel2"],
+                                      chatToOpen: ("channel1", IQChatType.manager)) // Чат который требуется открыть
         configurationManager.configure(config)
         
         return true
