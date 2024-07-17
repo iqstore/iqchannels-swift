@@ -69,7 +69,7 @@ extension IQChannelsManager {
     private func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
-        viewModel.backDismisses = authResults.count == 1
+        viewModel.backDismisses = getChatItems(from: authResults).count == 1
         viewModel.state = state
         viewModel.client = chat.auth.auth.client
         viewModel.messages = messages.reversed()
