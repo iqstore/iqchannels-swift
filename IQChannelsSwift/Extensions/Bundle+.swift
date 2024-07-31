@@ -1,9 +1,16 @@
+//
+//  Bundle+.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 08.05.2024.
+//
+
 import Foundation
 
-internal extension Bundle {
+extension Bundle {
 
-    static func channelsAssetBundle() -> Bundle {
-        let podBundle = Bundle(for: IQChannelMessagesViewController.self)
+    static func libraryBundle() -> Bundle {
+        let podBundle = Bundle(for: IQViewController.self)
         
         guard let resourceBundleUrl = podBundle.url(forResource: "IQChannelsSwift", withExtension: "bundle") else {
             fatalError("Could not create a bundle")
@@ -17,4 +24,3 @@ internal extension Bundle {
     }
 
 }
-

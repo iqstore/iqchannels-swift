@@ -1,18 +1,12 @@
+//
+//  IQClientAuthRequest.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 10.05.2024.
+//
+
 import Foundation
 
-class IQClientAuthRequest: IQJSONEncodable {
-    
-    var token: String?
-    
-    init(token: String? = nil) {
-        self.token = token
-    }
-    
-    func toJSONObject() -> [String: Any] {
-        var dict: [String: Any] = [:]
-        if let token {
-            dict["token"] = token
-        }
-        return dict
-    }
+struct IQClientAuthRequest: Encodable {
+    let token: String
 }

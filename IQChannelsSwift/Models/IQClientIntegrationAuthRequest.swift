@@ -1,18 +1,14 @@
+//
+//  IQClientIntegrationAuthRequest.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 11.05.2024.
+//
+
 import Foundation
 
-class IQClientIntegrationAuthRequest: IQJSONEncodable {
-    
-    var credentials: String?
-    var channel: String?
-    
-    func toJSONObject() -> [String: Any] {
-        var dict = [String: Any]()
-        if let credentials = self.credentials {
-            dict["credentials"] = credentials
-        }
-        if let channel = self.channel {
-            dict["channel"] = channel
-        }
-        return dict
-    }
+struct IQClientIntegrationAuthRequest: Encodable {
+    let credentials: String
+    let channel: String
 }
+

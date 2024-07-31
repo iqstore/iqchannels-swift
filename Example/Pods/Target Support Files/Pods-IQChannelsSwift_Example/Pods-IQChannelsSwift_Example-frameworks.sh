@@ -177,21 +177,13 @@ code_sign_if_enabled() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/IQChannelsSwift/IQChannelsSwift.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/InputBarAccessoryView/InputBarAccessoryView.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/MessageKit/MessageKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SwiftMessages/SwiftMessages.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TRVSEventSource/TRVSEventSource.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImageSwiftUI/SDWebImageSwiftUI.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/IQChannelsSwift/IQChannelsSwift.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/InputBarAccessoryView/InputBarAccessoryView.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/MessageKit/MessageKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SwiftMessages/SwiftMessages.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TRVSEventSource/TRVSEventSource.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImageSwiftUI/SDWebImageSwiftUI.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

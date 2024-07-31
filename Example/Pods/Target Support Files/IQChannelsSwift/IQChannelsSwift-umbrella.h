@@ -10,6 +10,12 @@
 #endif
 #endif
 
+#import "TRVSEventSource.h"
+#import "TRVSEventSourceDelegate.h"
+#import "TRVSServerSentEvent.h"
+#import "TRVSEventSource.h"
+#import "TRVSEventSourceDelegate.h"
+#import "TRVSServerSentEvent.h"
 
 FOUNDATION_EXPORT double IQChannelsSwiftVersionNumber;
 FOUNDATION_EXPORT const unsigned char IQChannelsSwiftVersionString[];

@@ -1,9 +1,9 @@
 {
   "name": "IQChannelsSwift",
   "version": "1.0.0",
-  "summary": "IQChannelsSwift SDK",
-  "description": "IQChannelsSwift iOS SDK",
-  "homepage": "https://github.com/dato3/iqchannels-swift-sdk",
+  "summary": "A short description of IQChannelsSwift.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/iqstore/iqchannels-swift",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,67 +12,57 @@
     "Daulet Tokmukhanbet": "61043918+dato3@users.noreply.github.com"
   },
   "source": {
-    "git": "https://github.com/dato3/iqchannels-swift-sdk.git",
+    "git": "https://github.com/iqstore/iqchannels-swift.git",
     "tag": "1.0.0"
   },
   "platforms": {
     "ios": "14.0"
   },
-  "source_files": "IQChannelsSwift/Classes/**/*",
+  "source_files": [
+    "IQChannelsSwift/IQLibraryConfiguration.swift",
+    "IQChannelsSwift/**/*.h",
+    "IQChannelsSwift/**/*.m"
+  ],
   "resource_bundles": {
     "IQChannelsSwift": [
-      "IQChannelsSwift/Assets/Assets.xcassets"
+      "IQChannelsSwift/Assets/Assets.xcassets",
+      "IQChannelsSwift/PrivacyInfo.xcprivacy"
     ]
   },
+  "frameworks": "UIKit",
   "dependencies": {
-    "SDWebImage": [
-      "~>5.10"
-    ],
-    "TRVSEventSource": [
-      "0.0.8"
-    ],
-    "MessageKit": [
-      "3.1.1"
-    ],
-    "SnapKit": [
-      "5.6.0"
-    ],
-    "SwiftMessages": [
-      "9.0.9"
+    "SDWebImageSwiftUI": [
+      "3.0.4"
     ]
   },
   "subspecs": [
     {
-      "name": "Additional",
-      "source_files": "IQChannelsSwift/Additional/**/*"
+      "name": "Controllers",
+      "source_files": "IQChannelsSwift/Controllers/**/*"
     },
     {
-      "name": "Calculators",
-      "source_files": "IQChannelsSwift/Calculators/**/*"
-    },
-    {
-      "name": "Cells",
-      "source_files": "IQChannelsSwift/Cells/**/*"
-    },
-    {
-      "name": "Extensions",
-      "source_files": "IQChannelsSwift/Extensions/**/*"
+      "name": "Views",
+      "source_files": "IQChannelsSwift/Views/**/*"
     },
     {
       "name": "Models",
       "source_files": "IQChannelsSwift/Models/**/*"
     },
     {
-      "name": "Networking",
-      "source_files": "IQChannelsSwift/Networking/**/*"
+      "name": "ViewModels",
+      "source_files": "IQChannelsSwift/ViewModels/**/*"
+    },
+    {
+      "name": "Managers",
+      "source_files": "IQChannelsSwift/Managers/**/*"
     },
     {
       "name": "Protocols",
       "source_files": "IQChannelsSwift/Protocols/**/*"
     },
     {
-      "name": "Views",
-      "source_files": "IQChannelsSwift/Views/**/*"
+      "name": "Extensions",
+      "source_files": "IQChannelsSwift/Extensions/**/*"
     }
   ]
 }

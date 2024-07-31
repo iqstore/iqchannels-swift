@@ -1,16 +1,23 @@
+//
+//  IQResult.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 10.05.2024.
+//
+
 import Foundation
 
-class IQResult {
+struct IQResult<T: Decodable> {
     
-    let value: Any?
+    let value: T?
     let relations: IQRelationMap?
 
-    init(value: Any?, relations: IQRelationMap?) {
+    init(value: T?, relations: IQRelationMap?) {
         self.value = value
         self.relations = relations
     }
 
-    convenience init() {
+    init() {
         self.init(value: nil, relations: IQRelationMap())
     }
 }

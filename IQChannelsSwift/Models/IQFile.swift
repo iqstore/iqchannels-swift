@@ -1,78 +1,63 @@
+//
+//  IQFile.swift
+//  Pods
+//
+//  Created by Muhammed Aralbek on 19.05.2024.
+//  
+//
+
 import Foundation
 
-class IQFile {
+struct IQFile: Decodable, Equatable {
     
+    // MARK: - PROPERTIES
     var id: String?
     var type: IQFileType?
-    var owner: IQFileOwnerType?
-    var ownerClientId: Int?
-    var actor: IQActorType?
-    var actorClientId: Int?
-    var actorUserId: Int?
     var name: String?
-    var path: String?
+    var state: IQFileState?
     var size: Int = 0
     var imageWidth: Int?
     var imageHeight: Int?
-    var contentType: String?
-    var createdAt: Int = 0
     
-    // Local
+    // MARK: - LOCAL
+    var dataFile: DataFile?
+    var taskIdentifier: Int?
     var url: URL?
     var imagePreviewUrl: URL?
     
-    init () { }
-    
-    init(image: UIImage, filename: String) {
+    // MARK: - INIT
+    init(dataFile: DataFile) {
         id = UUID().uuidString
-        type = .image
-        name = filename
+        type = dataFile.filename.contains("image.jpeg") ? .image : .file
+        self.dataFile = dataFile
+        name = dataFile.filename
+        size = dataFile.data.count
     }
     
-    init(data: Data, filename: String) {
-        id = UUID().uuidString
-        type = .file
-        name = filename
-        size = data.count
-    }
-}
 
-extension IQFile {
-    
-    static func fromJSONObject(_ object: Any?) -> IQFile? {
-        guard let jsonObject = object as? [String: Any] else {
-            return nil
-        }
-
-        let file = IQFile()
-        file.id = IQJSON.string(from: jsonObject, key: "Id")
-        file.type = IQFileType(rawValue: IQJSON.string(from: jsonObject, key: "Type") ?? "")
-        file.owner = IQFileOwnerType(rawValue: IQJSON.string(from: jsonObject, key: "Owner") ?? "")
-        file.ownerClientId = IQJSON.int(from: jsonObject, key: "OwnerClientId")
-        file.actor = IQActorType(rawValue: IQJSON.string(from: jsonObject, key: "Actor") ?? "")
-        file.actorClientId = IQJSON.int(from: jsonObject, key: "ActorClientId")
-        file.actorUserId = IQJSON.int(from: jsonObject, key: "ActorUserId")
-        file.name = IQJSON.string(from: jsonObject, key: "Name")
-        file.path = IQJSON.string(from: jsonObject, key: "Path")
-        file.size = IQJSON.int(from: jsonObject, key: "Size") ?? 0
-        file.imageWidth = IQJSON.int(from: jsonObject, key: "ImageWidth")
-        file.imageHeight = IQJSON.int(from: jsonObject, key: "ImageHeight")
-        file.contentType = IQJSON.string(from: jsonObject, key: "ContentType")
-        file.createdAt = IQJSON.int(from: jsonObject, key: "CreatedAt") ?? 0
-        return file
+    // MARK: - COMPUTED
+    var isFile: Bool {
+        type == .file
     }
     
-    static func fromJSONArray(_ array: Any?) -> [IQFile] {
-        guard let array = array as? [[String: Any]] else {
-            return []
+    var isImage: Bool {
+        type == .image
+    }
+    
+    var isLoading: Bool {
+        url == nil
+    }
+    
+    var convertedSize: String {
+        let units = ["байт", "KБ", "MБ", "ГБ", "TБ", "ПБ"]
+        var sizef = Double(size)
+        var unit = 0
+
+        while sizef >= 1024 && unit < (units.count - 1) {
+            unit += 1
+            sizef /= 1024
         }
 
-        var files: [IQFile] = []
-        for item in array {
-            if let file = IQFile.fromJSONObject(item) {
-                files.append(file)
-            }
-        }
-        return files
+        return String(format: "%.01f %@", sizef, units[unit])
     }
 }

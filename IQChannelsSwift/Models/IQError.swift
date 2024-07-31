@@ -1,21 +1,13 @@
+//
+//  IQError.swift
+//  IQChannelsSwift
+//
+//  Created by Muhammed Aralbek on 10.05.2024.
+//
+
 import Foundation
 
-class IQError {
-    
+struct IQError: Decodable {
     var code: IQErrorCode?
     var text: String?
-}
-
-extension IQError {
-    
-    static func fromJSONObject(_ object: Any?) -> IQError? {
-        guard let jsonObject = object as? [String: Any] else {
-            return nil
-        }
-
-        let error = IQError()
-        error.code = IQErrorCode(rawValue: IQJSON.string(from: jsonObject, key: "Code") ?? "")
-        error.text = IQJSON.string(from: jsonObject, key: "Text")
-        return error
-    }
 }
