@@ -35,6 +35,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var typingSentDate: Date?
     var didSendAttachments = false
     var fileLimit: IQFileConfig?
+    var eventListener: IQChannelsEventListenerProtocol?
     var unreadListeners: [IQChannelsUnreadListenerProtocol] = []
     var subscriptions = Set<AnyCancellable>()
     
@@ -75,7 +76,15 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         listViewModel?.chatsInfo = getChatItems(from: authResults)
     }
     
-    func unread(listener: IQChannelsUnreadListenerProtocol) {
+    func addEvent(listener: any IQChannelsEventListenerProtocol) {
+        eventListener = listener
+    }
+    
+    func removeEventListener() {
+        eventListener = nil
+    }
+    
+    func addUnread(listener: IQChannelsUnreadListenerProtocol) {
         unreadListeners.append(listener)
     }
     

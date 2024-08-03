@@ -98,6 +98,8 @@ extension IQChannelsManager {
     func closeCurrentChat() {
         guard let networkManager = currentNetworkManager else { return }
         
+        listViewModel?.popListener.send(())
+        
         networkManager.stopUnreadListeners()
         networkManager.stopListenToEvents()
         self.messages = []

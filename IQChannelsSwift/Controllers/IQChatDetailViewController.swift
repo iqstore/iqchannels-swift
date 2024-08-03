@@ -138,10 +138,10 @@ class IQChatDetailViewController: IQViewController {
     private func onTapBack() {
         if viewModel.backDismisses {
             output.detailControllerDismissChat()
-            dismiss(animated: true)
+//            dismiss(animated: true)
         } else {
             output.detailControllerDidPop()
-            navigationController?.popViewController(animated: true)
+//            navigationController?.popViewController(animated: true)
         }
     }
     

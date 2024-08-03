@@ -13,6 +13,8 @@ protocol IQChannelsManagerProtocol {
     func setCustomHeaders(_ headers: [String: String])
     func setListViewModel(_ viewModel: IQChatListViewModel?)
     func pushToken(_ data: Data?)
-    func unread(listener: IQChannelsUnreadListenerProtocol)
+    func addEvent(listener: IQChannelsEventListenerProtocol)
+    func removeEventListener()
+    func addUnread(listener: IQChannelsUnreadListenerProtocol)
     func removeUnread(listener: IQChannelsUnreadListenerProtocol)
 }

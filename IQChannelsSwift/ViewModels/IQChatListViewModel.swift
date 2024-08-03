@@ -12,4 +12,5 @@ class IQChatListViewModel: IQBaseViewModel {
     @Published var chatsInfo: [IQChatItemModel] = []
     var chatToPresentListener = PassthroughSubject<IQChatDetailViewController, Never>()
     var dismissListener = PassthroughSubject<Void, Never>()
+    var popListener = PassthroughSubject<Void, Never>()
 }

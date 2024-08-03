@@ -10,6 +10,8 @@ import PhotosUI
 
 extension IQChannelsManager: IQChannelsManagerListOutput {
     func listControllerDismissChat() {
+        guard eventListener?.iqChannelsShouldCloseModule() ?? true else { return }
+        
         logout()
     }
     
@@ -31,10 +33,14 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     }
     
     func detailControllerDismissChat() {
+        guard eventListener?.iqChannelsShouldCloseModule() ?? true else { return }
+        
         logout()
     }
 
     func detailControllerDidPop() {
+        guard eventListener?.iqChannelsShouldCloseChat() ?? true else { return }
+        
         closeCurrentChat()
     }
     
