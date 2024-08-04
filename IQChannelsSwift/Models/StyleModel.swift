@@ -65,6 +65,7 @@ struct StyleModel: Decodable {
         let textFileStateOnChecking: TextStyle?
         let textFileStateSentForChecking: TextStyle?
         let textFileStateCheckError: TextStyle?
+        let text_file_state_sent_for_checking: TextStyle?
 
         enum CodingKeys: String, CodingKey {
             case backgroundOperator = "background_operator"
@@ -81,6 +82,7 @@ struct StyleModel: Decodable {
             case textFileStateOnChecking = "text_file_state_on_checking"
             case textFileStateSentForChecking = "text_file_state_sent_for_checking"
             case textFileStateCheckError = "text_file_state_check_error"
+            case textFileStateSentForChecking = "text_file_state_sent_for_checking"
         }
     }
 
