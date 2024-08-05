@@ -61,11 +61,14 @@ struct StyleModel: Decodable {
         let replySenderTextOperator: TextStyle?
         let textTime: TextStyle?
         let textUp: TextStyle?
-        let textFileStateRejected: TextStyle?
-        let textFileStateOnChecking: TextStyle?
-        let textFileStateSentForChecking: TextStyle?
-        let textFileStateCheckError: TextStyle?
-        let text_file_state_sent_for_checking: TextStyle?
+        let textFileStateRejectedClient: TextStyle?
+        let textFileStateOnCheckingClient: TextStyle?
+        let textFileStateSentForCheckingClient: TextStyle?
+        let textFileStateCheckErrorClient: TextStyle?
+        let textFileStateRejectedOperator: TextStyle?
+        let textFileStateOnCheckingOperator: TextStyle?
+        let textFileStateSentForCheckingOperator: TextStyle?
+        let textFileStateCheckErrorOperator: TextStyle?
 
         enum CodingKeys: String, CodingKey {
             case backgroundOperator = "background_operator"
@@ -78,11 +81,14 @@ struct StyleModel: Decodable {
             case replySenderTextOperator = "reply_sender_text_operator"
             case textTime = "text_time"
             case textUp = "text_up"
-            case textFileStateRejected = "text_file_state_rejected"
-            case textFileStateOnChecking = "text_file_state_on_checking"
-            case textFileStateSentForChecking = "text_file_state_sent_for_checking"
-            case textFileStateCheckError = "text_file_state_check_error"
-            case textFileStateSentForChecking = "text_file_state_sent_for_checking"
+            case textFileStateRejectedClient = "text_file_state_rejected_client"
+            case textFileStateOnCheckingClient = "text_file_state_on_checking_client"
+            case textFileStateSentForCheckingClient = "text_file_state_sent_for_checking_client"
+            case textFileStateCheckErrorClient = "text_file_state_check_error_client"
+            case textFileStateRejectedOperator = "text_file_state_rejected_operator"
+            case textFileStateOnCheckingOperator = "text_file_state_on_checking_operator"
+            case textFileStateSentForCheckingOperator = "text_file_state_sent_for_checking_operator"
+            case textFileStateCheckErrorOperator = "text_file_state_check_error_operator"
         }
     }
 

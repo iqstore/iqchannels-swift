@@ -76,10 +76,14 @@ struct FilePreviewCellView: View {
                 }
                 
                 if let file = message.file {
-                    if file.state == .approved || file.state == nil {
-                        getApprovedStateView(file)
+                    if let state = file.state {
+                        if state == .approved {
+                            getApprovedStateView(file)
+                        } else {
+                            getNotApprovedStateView(state)
+                        }
                     } else {
-                        getNotApprovedStateView(file)
+                        getApprovedStateView(file)
                     }
                 }
             }
@@ -149,11 +153,11 @@ struct FilePreviewCellView: View {
     }
     
     @ViewBuilder
-    private func getNotApprovedStateView(_ file: IQFile) -> some View {
-        let textColor: Color = file.state?.titleColor ?? Color.white
-        let fontSize: CGFloat = file.state?.titleFontSize ?? 17
+    private func getNotApprovedStateView(_ state: IQFileState) -> some View {
+        let textColor: Color = isSender ? state.titleClientColor : state.titleOperatorColor
+        let fontSize: CGFloat = isSender ? state.titleClientFontSize : state.titleOperatorFontSize
         
-        Text(file.state?.title ?? "")
+        Text(state.title)
             .foregroundColor(textColor)
             .font(.system(size: fontSize))
     }
