@@ -96,33 +96,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
-Инициализация c предзаполненными сообщениями 
--------------
-При передаче модели `IQAttachment`, переданный в нем чат открывается автоматический.
-
-```swift
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    
-    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let config = IQChannelsConfig(address: "https://example.com",
-                                      channels: ["channel1", "channel2"],
-                                      attachment: IQAttachment(channel: "channel1", // Канал в котором нужно отправить сообщения
-                                                               chatType: .chat, // Сегмент в котором нужно отправить сообщения
-                                                               attachments: [.text("Test message"), // Текстовое Сообщение
-                                                                             .file(data: file, filename: "test.word"), // Документ
-                                                                             .file(data: gif, filename: "test.gif")])) // Картинка
-
-        configurationManager.configure(config)
-        
-        return true
-    }
-}
-```
-
-
 Логин
 -----
 Логин/логаут пользователя осуществляется по внешнему токену/сессии, специфичному для конкретного приложения.
@@ -264,262 +237,263 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ```json
 {
-    "chat": {
-        "background": {
-            "light": "#FFFFFF",
-            "dark": "#FFFFE0"
-        },
-        "date_text": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 13
-        },
-        "chat_history": {
-            "light": "#008080",
-            "dark": "#008080"
-        },
-        "system_text": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        }
+  "chat": {                   //Общий чат:
+    "background": {           //Фон чата
+      "light": "#FFFFFF",     //Цвет для светлой темы
+      "dark": "#FFFFE0"       //Цвет для темной темы
     },
-    "messages": {
-        "background_operator": {
-            "light": "#FFFFE0",
-            "dark": "#808080"
-        },
-        "background_client": {
-            "light": "#242729",
-            "dark": "#808080"
-        },
-        "text_operator": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_client": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "reply_text_client": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "reply_sender_text_client": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "reply_text_operator": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "reply_sender_text_operator": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_time": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_up": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        }
+    "date_text": {            //Текст относительной даты чата (по середине)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 13         //Размер текста
     },
-    "answer": {
-        "text_sender": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_message": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "background_text_up_message": {
-            "light": "#FFFACD",
-            "dark": "#808080"
-        },
-        "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",
-        "left_line": {
-            "light": "#FF0000",
-            "dark": "#FF0000"
-        }
+    "chat_history": {         //Верхний индикатор загрузки предыдущих сообщений
+      "light": "#008080",
+      "dark": "#008080"
     },
-    "messages_file": {
-        "text_filename_client": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_filename_operator": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "icon_file_client": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
-        "icon_file_operator": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
-        "text_file_size_client": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "text_file_size_operator": {
-            "color": {
-                "light": "#ffffff",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        }
+    "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png",    //Иконка оператора - файл
+    "system_text": {          //Системные сообщения
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "messages": {               //Сообщение отправка текста (стили применяются ко всем производным сообщениям):
+    "background_operator": {  //Фон контейнера (оператор)
+      "light": "#FFFFE0",
+      "dark": "#808080"
     },
-    "rating": {
-        "background_container": {
-            "light": "#FFFACD",
-            "dark": "#808080"
-        },
-        "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",
-        "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png",
-        "sent_rating": {
-            "color_enabled": {
-                "light": "#008080",
-                "dark": "#008080"
-            },
-            "color_disabled": {
-                "light": "#B7B7CA",
-                "dark": "#B7B7CA"
-            },
-            "text_enabled": {
-                "color": {
-                    "light": "#FFFFFF",
-                    "dark": "#FFFFFF"
-                },
-                "text_size": 10
-            },
-            "text_disabled": {
-                "color": {
-                    "light": "#FFFFFF",
-                    "dark": "#FFFFFF"
-                },
-                "text_size": 10
-            }
-        }
+    "background_client": {    //Фон контейнера (клиент)
+      "light": "#242729",
+      "dark": "#808080"
     },
-    "tools_to_message": {
-        "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png",
-        "background_icon": {
-            "light": "#DEB887",
-            "dark": "#696969"
-        },
-        "background_chat": {
-            "light": "#DEB887",
-            "dark": "#696969"
-        },
-        "text_chat": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"
+    "text_operator": {        //Текст сообщения (оператор)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     },
-    "error": {
-        "title_error": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 16
-        },
-        "text_error": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"
+    "text_client": {          //Текст сообщения (клиент)
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     },
-    "single-choice": {
-        "background_button": {
-            "light": "#FFFF00",
-            "dark": "#00FFFF"
-        },
-        "border_button": {
-            "size": 3,
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "border-radius": 10
-        },
-        "text_button": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        },
-        "background_IVR": {
-            "light": "#FFFF00",
-            "dark": "#00FFFF"
-        },
-        "border_IVR": {
-            "size": 3,
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "border-radius": 10
-        },
-        "text_IVR": {
-            "color": {
-                "light": "#000000",
-                "dark": "#FFFFFF"
-            },
-            "text_size": 10
-        }
+    "reply_text_client": {    //Основной текст ответа со стороны клиента
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     },
-    "theme": "light"
+    "reply_sender_text_client": {   //Текст сообщения, на которое ответил клиент
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_text_operator": {        //Основной текст ответа со стороны оператора
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_sender_text_operator": { //Текст сообщения, на которое ответил оператор
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_time": {            //Текст времени доставки
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_up": {              //Текст над контейнером (Имя оператора/бота)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "answer": {                 //Ответ на сообщения:
+    "text_sender": {          //Текст сообщения над полем ввода
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_message": {         //Текст сообщения в отвеченном сообщении
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "background_text_up_message": {       //Фон текста сообщения над полем ввода
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",     //Кнопка закрыть/отменить – вид кнопки(изменяется с помощью файла с иконкой)
+    "left_line": {                        //Прямая вертикальная линия рядом с сообщением, на которе отвечаем - цвет
+      "light": "#FF0000",
+      "dark": "#FF0000"
+    }
+  },
+  "messages_file": {                      //Сообщение отправка файла:
+    "text_filename_client": {             //Цвет названия файла со стороны клиента
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_filename_operator": {           //Цвет названия файла со стороны оператора
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_file_client": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",      //Иконка файла со стороны клиента
+    "icon_file_operator": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",    //Иконка файла со стороны оператора
+    "text_file_size_client": {             //Цвет размера файла со стороны клиента
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_size_operator": {            //Цвет размера названия файла со стороны оператора
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "rating": {                             //Сообщение оценки качества:
+    "background_container": {             //Фон контейнера - по умолчанию как у сообщения
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",    //Закрашенная звезда – вид иконки(изменяется с помощью файла с иконкой)
+    "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png", //Незакрашенная звезда – вид иконки(изменяется с помощью файла с иконкой)
+    "sent_rating": {                      //Кнопка отправки оценки
+      "color_enabled": {                  //Цвет активной кнопки
+        "light": "#008080",
+        "dark": "#008080"
+      },
+      "color_disabled": {                 //Цвет неактивной кнопки
+        "light": "#B7B7CA",
+        "dark": "#B7B7CA"
+      },
+      "text_enabled": {                   //Текст на активной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      },
+      "text_disabled": {                  //Текст на неактивной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      }
+    }
+  },
+  "tools_to_message": {                   //Панель инструментов (для отправки сообщений):
+    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png", //Иконка-кнопка для отправки – вид кнопки(изменяется с помощью файла с иконкой)
+    "background_icon": {                  //Фон иконки для отправки
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "background_chat": {                  //Фон области ввода текста
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "text_chat": {                        //Текст в поле ввода
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
+  },
+  "error": {                              //Страница ошибки (для отправки сообщений):
+    "title_error": {                      //Заголовок
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 16
+    },
+    "text_error": {                       //Основной текст
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
+  },
+  "single-choice": {                    //Single-choice сообщение:
+    "background_button": {              //Фон кнопки Single-choice
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_button": {                  //Граница IVR кнопки Single-choice (isDropDown)
+      "size": 3,
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": 10
+    },
+    "text_button": {                    //Текст кнопки Single-choice
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "background_IVR": {                 //Фон IVR кнопки Single-choice (isDropDown)
+      "light": "#00000000",
+      "dark": "#00000000"
+    },
+    "border_IVR": {                     //Граница IVR кнопки Single-choice (isDropDown)
+      "size": 1,
+      "color": {
+        "light": "#74b928",
+        "dark": "#74b928"
+      },
+      "border-radius": 10
+    },
+    "text_IVR": {                       //Текст IVR кнопки Single-choice (isDropDown)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "theme": "light"                      //Выбранная тема (светлая/темная)
 }
 ```
 
