@@ -575,8 +575,8 @@ extension IQChannelsManager {
                 guard let self else { return }
                 
                 if let unreadMessage = messages.enumerated().first(where: { (index, message) -> Bool in
-                    guard let prev = self.messages[safe: index] else { return false }
-                    
+                    guard index > 0 else { return false }
+                    let prev = self.messages[index - 1]
                     return message.isRead == false && prev.isRead == true && message.author != .system && message.author != .client
                 }) {
                     detailViewModel?.idOfNewMessage = unreadMessage.element.messageID
