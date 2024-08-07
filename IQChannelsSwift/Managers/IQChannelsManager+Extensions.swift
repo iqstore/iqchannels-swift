@@ -123,6 +123,8 @@ extension IQChannelsManager {
     private func sendAttachmentsIfNeeded() {
         guard let attachment = config.attachment, !didSendAttachments else { return }
         
+        didSendAttachments = true
+        
         let texts = attachment.attachments.compactMap{ if case .text(let text) = $0 { text } else { nil } }
         let files = attachment.attachments.compactMap{ if case let .file(image, filename) = $0 { DataFile(data: image, filename: filename) } else { nil } }
         
@@ -130,8 +132,6 @@ extension IQChannelsManager {
             self.sendText($0, replyToMessage: nil)
         }
         sendFiles(files, replyToMessage: nil)
-        
-        didSendAttachments = true
     }
     
     private func listenToEvents(){
@@ -158,8 +158,7 @@ extension IQChannelsManager {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            // Used to open SSE channel
-            self?.sendTypingEvent()
+            self?.sendAttachmentsIfNeeded()
         }
     }
     
