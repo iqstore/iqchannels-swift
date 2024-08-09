@@ -99,6 +99,7 @@ class IQChatDetailViewController: IQViewController {
             }.store(in: &subscriptions)
         
         viewModel.$inputText
+            .dropFirst()
             .sink { [weak self] _ in
                 self?.output.detailControllerIsTyping()
             }.store(in: &subscriptions)
