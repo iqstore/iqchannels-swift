@@ -28,6 +28,11 @@ extension IQChannelsManager {
                     if items.count == 1, let item = items.first,
                        let authResult = results.first(where: { $0.channel == item.channel } ){
                         self.selectedChat = (authResult, item.chatType)
+                    } else if let attachment = config.attachment,
+                              let authResult = results.first(where: { $0.channel == attachment.channel }),
+                              items.contains(where: { $0.channel == attachment.channel && $0.chatType == attachment.chatType }) {
+                        self.listViewModel?.chatsInfo = items
+                        self.selectedChat = (authResult, attachment.chatType)
                     } else {
                         self.listViewModel?.chatsInfo = items
                     }
@@ -60,6 +65,12 @@ extension IQChannelsManager {
         }.store(in: &subscriptions)
     }
     
+    func setupFileLimits() {
+        Task {
+            fileLimit = try? await IQNetworkManager.getFileConfig(address: config.address)
+        }
+    }
+    
     func setupImageManager(){
         SDWebImageManager.shared.optionsProcessor = SDWebImageOptionsProcessor(block: { url, options, context in
             SDWebImageOptionsResult(options: .allowInvalidSSLCertificates, context: context)
@@ -87,6 +98,8 @@ extension IQChannelsManager {
     func closeCurrentChat() {
         guard let networkManager = currentNetworkManager else { return }
         
+        listViewModel?.popListener.send(())
+        
         networkManager.stopUnreadListeners()
         networkManager.stopListenToEvents()
         self.messages = []
@@ -103,7 +116,22 @@ extension IQChannelsManager {
     func clear() {
         closeCurrentChat()
         clearAuth()
+        didSendAttachments = false
         (SDWebImageManager.shared.imageCache as? SDImageCache)?.clearMemory()
+    }
+    
+    private func sendAttachmentsIfNeeded() {
+        guard let attachment = config.attachment, !didSendAttachments else { return }
+        
+        didSendAttachments = true
+        
+        let texts = attachment.attachments.compactMap{ if case .text(let text) = $0 { text } else { nil } }
+        let files = attachment.attachments.compactMap{ if case let .file(image, filename) = $0 { DataFile(data: image, filename: filename) } else { nil } }
+        
+        texts.forEach {
+            self.sendText($0, replyToMessage: nil)
+        }
+        sendFiles(files, replyToMessage: nil)
     }
     
     private func listenToEvents(){
@@ -114,7 +142,9 @@ extension IQChannelsManager {
             query.lastEventID = message.eventID
         }
         
-        currentNetworkManager?.listenToEvents(request: query) { [weak self] events, error in
+        currentNetworkManager?.listenToEvents(request: query, onOpen: { [weak self] in
+            self?.sendAttachmentsIfNeeded()
+        }) { [weak self] events, error in
             guard let self else { return }
             
             if error != nil {
@@ -125,6 +155,10 @@ extension IQChannelsManager {
             } else {
                 applyEvents(events ?? [])
             }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            self?.sendAttachmentsIfNeeded()
         }
     }
     
@@ -139,6 +173,8 @@ extension IQChannelsManager {
                 messageRead(event)
             case .deleteMessages:
                 messagesRemoved(event)
+            case .fileStatusUpdated:
+                fileStatusUpdated(event)
             default: break
             }
         }
@@ -298,13 +334,13 @@ extension IQChannelsManager {
     }
     
     func sendFiles(items: [(URL?, UIImage?)], replyToMessage: Int?) {
-        let files: [DataFile] = items.prefix(10).compactMap { (url, image) in
+        let files: [DataFile] = items.prefix(10).compactMap { (url, image) -> DataFile? in
             if let url {
                 defer { url.stopAccessingSecurityScopedResource() }
                 guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
                 return .init(data: data, filename: url.lastPathComponent)
             } else if let image {
-                guard let data = image.dataRepresentation() else { return nil }
+                guard let data = image.dataRepresentation(withMaxSizeMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return nil }
                 return .init(data: data, filename: "image.jpeg")
             }
             return nil
@@ -317,7 +353,7 @@ extension IQChannelsManager {
         Task {
             var files = [DataFile]()
             await result.asyncForEach {
-                guard let data = await $0.data() else { return }
+                guard let data = await $0.data(maxSizeInMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return }
                 let isGif = $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier)
                 files.append(.init(data: data, filename: isGif ? "image.gif" : "image.jpeg"))
             }
@@ -329,8 +365,13 @@ extension IQChannelsManager {
     private func sendFiles(_ files: [DataFile], replyToMessage: Int?) {
         guard let selectedChat else { return }
         
-        let newMessages = files.enumerated().map { index, file in
-            IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: index == 0 ? replyToMessage : nil)
+        var hasNonValidatedFiles = false
+        let newMessages = files.enumerated().compactMap { index, file -> IQMessage? in
+            if !validate(file, with: fileLimit) {
+                hasNonValidatedFiles = true
+                return nil
+            }
+            return IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: index == 0 ? replyToMessage : nil)
         }
         messages.append(contentsOf: newMessages)
         
@@ -339,6 +380,41 @@ extension IQChannelsManager {
                 await uploadFileMessage(message)
             }
         }
+        
+        if hasNonValidatedFiles {
+            DispatchQueue.main.async {
+                self.detailViewModel?.errorListener.send(NSError.clientError("Некоторые файлы не соответствуют установленным лимитам."))
+            }
+        }
+    }
+    
+    private func validate(_ file: DataFile, with limits: IQFileConfig?) -> Bool {
+        guard let limits else { return true }
+        
+        let dataMB = file.data.count / 1024 / 1024
+        if let size = limits.maxFileSizeMb, dataMB > size {
+            return false
+        }
+        
+        if let maxImageHeight = limits.maxImageHeight,
+           let maxImageWidth = limits.maxImageWidth,
+           let image = UIImage(data: file.data),
+           Int(image.size.height) > maxImageHeight || Int(image.size.width) > maxImageWidth {
+            return false
+        }
+        
+        if let fileExtensions = file.filename.components(separatedBy: ".")[safe: 1] {
+            if let allowedExtensions = limits.allowedExtensions,
+               !allowedExtensions.contains(fileExtensions) {
+                return false
+            }
+            if let forbiddenExtensions = limits.forbiddenExtensions,
+               forbiddenExtensions.contains(fileExtensions) {
+                return false
+            }
+        }
+        
+        return true
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
@@ -394,7 +470,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.scrollDotHidden = true
             }
         }
-        
+
         if !isLoadingOldMessages,
            index <= 15 {
             loadOldMessages()
@@ -422,6 +498,10 @@ extension IQChannelsManager {
     }
     
     private func sendMessage(_ message: IQMessage) async {
+        DispatchQueue.main.async { [self] in
+            detailViewModel?.idOfNewMessage = nil
+        }
+        
         guard let networkManager = currentNetworkManager else { return }
         
         let error = await networkManager.sendMessage(form: .init(message))
@@ -488,6 +568,21 @@ extension IQChannelsManager {
             let results = (result.result ?? []).filter { $0.hasValidPayload }
             messages = results
             listenToEvents()
+            
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                
+                if let unreadMessage = messages.enumerated().first(where: { (index, message) -> Bool in
+                    guard index > 0 else { return false }
+                    let prev = self.messages[index - 1]
+                    return message.isRead == false && prev.isRead == true && message.author != .system && message.author != .client
+                }) {
+                    detailViewModel?.idOfNewMessage = unreadMessage.element.messageID
+                } else {
+                    detailViewModel?.idOfNewMessage = nil
+                }
+            }
         }
     }
     
@@ -540,6 +635,20 @@ extension IQChannelsManager {
             markAsReceived([message.messageID])
             DispatchQueue.main.async {
                 self.detailViewModel?.scrollDotHidden = false
+            }
+        }
+    }
+    
+    private func fileStatusUpdated(_ event: IQChatEvent) {
+        Task {
+            guard let messageID = event.messageID,
+                  var message = message(with: messageID),
+                  let fileID = message.fileID,
+                  let newFile = try? await currentNetworkManager?.getFile(id: fileID) else { return }
+            
+            if let index = indexOfMessage(messageID: messageID) {
+                message.file = newFile
+                self.messages[index] = message
             }
         }
     }

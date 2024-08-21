@@ -12,12 +12,13 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
     typealias Callback = (Data?, Error?) -> Void
     
     private var callback: Callback?
+    private var onOpen: (() -> Void)
     private(set) var eventSource: TRVSEventSource?
 
-    init(url: URL, authToken: String?, customHeaders: [String: String]? = nil, callback: @escaping Callback) {
-        super.init()
-        
+    init(url: URL, authToken: String?, customHeaders: [String: String]? = nil, onOpen: @escaping (() -> Void), callback: @escaping Callback) {
         self.callback = callback
+        self.onOpen = onOpen
+        super.init()
         
         var additionalHeaders = ["Authorization": "Client \(authToken ?? "")"]
         if let customHeaders = customHeaders {
@@ -41,7 +42,7 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
     }
 
     func eventSourceDidOpen(_ eventSource: TRVSEventSource) {
-        callback?(nil, nil)
+        onOpen()
     }
     
     func eventSourceDidClose(_ eventSource: TRVSEventSource) {

@@ -8,7 +8,7 @@
 import PhotosUI
 
 extension PHPickerResult {
-    func data() async -> Data? {
+    func data(maxSizeInMB: CGFloat = 10.0) async -> Data? {
         await withUnsafeContinuation { continuation in
             let itemProvider = itemProvider
             
@@ -19,7 +19,7 @@ extension PHPickerResult {
             } else if itemProvider.canLoadObject(ofClass: UIImage.self) {
                 itemProvider.loadObject(ofClass: UIImage.self) { object, error in
                     if let image = object as? UIImage {
-                        continuation.resume(returning: image.dataRepresentation())
+                        continuation.resume(returning: image.dataRepresentation(withMaxSizeMB: maxSizeInMB))
                     } else {
                         continuation.resume(returning: nil)
                     }
@@ -30,7 +30,7 @@ extension PHPickerResult {
                         continuation.resume(returning: nil)
                         return
                     }
-                    continuation.resume(returning: image.dataRepresentation())
+                    continuation.resume(returning: image.dataRepresentation(withMaxSizeMB: maxSizeInMB))
                 }
             } else {
                 continuation.resume(returning: nil)

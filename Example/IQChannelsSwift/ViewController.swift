@@ -30,7 +30,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     private lazy var channelsField: UITextField = {
         let field = UITextField()
         field.borderStyle = .roundedRect
-        field.text = "support finance"
+        field.text = "support"
         field.addToolbar()
         return field
     }()
@@ -93,7 +93,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         ])
         
         emailField.delegate = self
-        setServer(server: "https://sandbox.iqstore.ru/")
+        setServer(server: "https://iqchannels.isimplelab.com")
+//        setServer(server: nil)
     }
 
     func setServer(server: String?) {

@@ -40,13 +40,23 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         (eventsListener?.eventSource?.isOpen() ?? false)
     }
     
-    func listenToEvents(request: IQListenEventsRequest, callback: @escaping ResponseCallbackClosure<[IQChatEvent]>) {
+    static func getFileConfig(address: String) async throws -> IQFileConfig {
+        let networkManager = IQNetworkManager(address: address, channel: "")
+        let path = "/files/config"
+        let result = await networkManager.get(path, responseType: IQFileConfig.self)
+        if let value = result.result?.value {
+            return value
+        }
+        throw result.error ?? NSError.clientError()
+    }
+    
+    func listenToEvents(request: IQListenEventsRequest, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<[IQChatEvent]>) {
         var path = "/sse/chats/channel/events/\(channel)"
         path += "?ChatType=\(request.chatType.rawValue)"
         if let lastEventId = request.lastEventID {
             path += "&LastEventId=\(lastEventId)"
         }
-        eventsListener = sse(path: path, responseType: [IQChatEvent].self) { result, error in
+        eventsListener = sse(path: path, responseType: [IQChatEvent].self, onOpen: onOpen) { result, error in
             if let error = error {
                 callback(nil, error)
                 return
@@ -64,7 +74,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>) {
         let path = "/sse/chats/channel/unread/\(channel)"
-        unreadListener = sse(path: path, responseType: Int.self){ result, error in
+        unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
             if let error = error {
                 callback(nil, error)
                 return
@@ -112,6 +122,15 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let path = "/chats/channel/typing/\(channel)"
         let result = await post(path, body: nil, responseType: IQEmptyResponse.self)
         return result.error
+    }
+    
+    func getFile(id: String) async throws -> IQFile? {
+        let path = "/files/get_file/\(id)"
+        let result = await get(path, responseType: IQFile.self)
+        if let error = result.error {
+            throw error
+        }
+        return result.result?.value
     }
     
     func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<[IQMessage]> {

@@ -18,6 +18,10 @@ public protocol IQLibraryConfigurationProtocol {
     func login(_ loginType: IQLoginType)
     /// Logs out the current user and closes chat.
     func logout()
+    /// Adds event listener to handle events
+    func addEvent(listener: IQChannelsEventListenerProtocol)
+    /// Removes event listener that handles events
+    func removeEventListener()
     /// Adds a listener to receive unread message notifications.
     func addUnread(listener: IQChannelsUnreadListenerProtocol)
     /// Removes a listener from receiving unread message notifications.

@@ -55,8 +55,16 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         channelManager?.logout()
     }
     
+    public func addEvent(listener: any IQChannelsEventListenerProtocol) {
+        channelManager?.addEvent(listener: listener)
+    }
+    
+    public func removeEventListener() {
+        channelManager?.removeEventListener()
+    }
+
     public func addUnread(listener: any IQChannelsUnreadListenerProtocol) {
-        channelManager?.unread(listener: listener)
+        channelManager?.addUnread(listener: listener)
     }
     
     public func removeUnread(listener: any IQChannelsUnreadListenerProtocol) {

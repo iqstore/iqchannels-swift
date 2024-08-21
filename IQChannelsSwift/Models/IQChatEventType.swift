@@ -12,6 +12,7 @@ enum IQChatEventType: String, Decodable {
     case chatCreated = "chat_created"
     case chatOpened = "chat_opened"
     case chatClosed = "chat_closed"
+    case fileStatusUpdated = "file_updated"
     case typing
     case messageCreated = "message_created"
     case systemMessageCreated = "system_message_created"

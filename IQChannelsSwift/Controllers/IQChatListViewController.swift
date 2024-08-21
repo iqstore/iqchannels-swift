@@ -55,11 +55,18 @@ class IQChatListViewController: IQViewController {
             .sink { [unowned self] _ in
                 dismiss(animated: true)
             }.store(in: &subscriptions)
+        
+        viewModel.popListener
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] _ in
+                navigationController?.popViewController(animated: true)
+            }.store(in: &subscriptions)
     }
     
     // MARK: - ACTIONS
     @objc
     private func onTapClose() {
-        dismiss(animated: true)
+        output.listControllerDismissChat()
+//        dismiss(animated: true)
     }
 }

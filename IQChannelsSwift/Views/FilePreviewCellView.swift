@@ -76,52 +76,14 @@ struct FilePreviewCellView: View {
                 }
                 
                 if let file = message.file {
-                    HStack(spacing: 8) {
-                        if file.isLoading {
-                            Button {
-                                onCancelFileSendCompletion?()
-                            } label: {
-                                ZStack {
-                                    Image(name: "loading")
-                                        .resizable()
-                                        .frame(width: 32, height: 32)
-                                        .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
-                                    
-                                    Image(name: "xmark")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 12, height: 12)
-                                }
-                                .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
-                                .onAppear { self.showMessageLoading = true }
-                            }
+                    if let state = file.state {
+                        if state == .approved {
+                            getApprovedStateView(file)
                         } else {
-                            if let fileIcon {
-                                AnimatedImage(url: fileIcon)
-                                    .resizable()
-                                    .indicator(SDWebImageActivityIndicator.gray)
-                                    .transition(SDWebImageTransition.fade)
-                                    .scaledToFit()
-                                    .frame(width: 32, height: 32)
-                            } else {
-                                Image(name: "file")
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .foregroundColor(fileNameTextColor)
-                                    .frame(width: 32, height: 32)
-                            }
+                            getNotApprovedStateView(state)
                         }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(file.name ?? "")
-                                .foregroundColor(fileNameTextColor)
-                                .font(.system(size: fileNameFontSize))
-                                .multilineTextAlignment(.leading)
-                            
-                            Text(file.convertedSize)
-                                .foregroundColor(fileSizeTextColor)
-                                .font(.system(size: fileSizeFontSize))
-                        }
+                    } else {
+                        getApprovedStateView(file)
                     }
                 }
             }
@@ -136,5 +98,67 @@ struct FilePreviewCellView: View {
         .onTapGesture {
             onFileTapCompletion?()
         }
+    }
+    
+    // MARK: - VIEWS
+    @ViewBuilder
+    private func getApprovedStateView(_ file: IQFile) -> some View {
+        HStack(spacing: 8) {
+            if file.isLoading {
+                Button {
+                    onCancelFileSendCompletion?()
+                } label: {
+                    ZStack {
+                        Image(name: "loading")
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                        
+                        Image(name: "xmark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                    }
+                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                    .onAppear { self.showMessageLoading = true }
+                }
+            } else {
+                if let fileIcon {
+                    AnimatedImage(url: fileIcon)
+                        .resizable()
+                        .indicator(SDWebImageActivityIndicator.gray)
+                        .transition(SDWebImageTransition.fade)
+                        .scaledToFit()
+                        .frame(width: 32, height: 32)
+                } else {
+                    Image(name: "file")
+                        .renderingMode(.template)
+                        .resizable()
+                        .foregroundColor(fileNameTextColor)
+                        .frame(width: 32, height: 32)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(file.name ?? "")
+                    .foregroundColor(fileNameTextColor)
+                    .font(.system(size: fileNameFontSize))
+                    .multilineTextAlignment(.leading)
+                
+                Text(file.convertedSize)
+                    .foregroundColor(fileSizeTextColor)
+                    .font(.system(size: fileSizeFontSize))
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func getNotApprovedStateView(_ state: IQFileState) -> some View {
+        let textColor: Color = isSender ? state.titleClientColor : state.titleOperatorColor
+        let fontSize: CGFloat = isSender ? state.titleClientFontSize : state.titleOperatorFontSize
+        
+        Text(state.title)
+            .foregroundColor(textColor)
+            .font(.system(size: fontSize))
     }
 }

@@ -43,4 +43,9 @@ extension Array {
         
         return removedElements
     }
+    
+    subscript (safe index: Int) -> Element? {
+        return self.indices ~= index ? self[index] : nil
+    }
+    
 }

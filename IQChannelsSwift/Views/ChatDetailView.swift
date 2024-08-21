@@ -27,7 +27,7 @@ struct ChatDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                ChatMessagesView(messages: viewModel.messages, delegate: delegate)
+                ChatMessagesView(delegate: delegate)
                 ChatInputView(text: $viewModel.inputText,
                               messageToReply: $viewModel.messageToReply,
                               disableInput: viewModel.messages.first?.disableFreeText ?? false,

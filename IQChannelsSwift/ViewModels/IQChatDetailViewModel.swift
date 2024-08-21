@@ -11,6 +11,7 @@ import Combine
 class IQChatDetailViewModel: IQBaseViewModel {
     
     // MARK: - PROPERTIES
+    @Published var idOfNewMessage: Int?
     @available(*, deprecated, message: "Replace then delete")
     @Published var hidesBackButton = false
     @Published var backDismisses = false

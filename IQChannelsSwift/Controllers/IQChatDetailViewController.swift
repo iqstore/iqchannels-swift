@@ -99,6 +99,7 @@ class IQChatDetailViewController: IQViewController {
             }.store(in: &subscriptions)
         
         viewModel.$inputText
+            .dropFirst()
             .sink { [weak self] _ in
                 self?.output.detailControllerIsTyping()
             }.store(in: &subscriptions)
@@ -138,10 +139,10 @@ class IQChatDetailViewController: IQViewController {
     private func onTapBack() {
         if viewModel.backDismisses {
             output.detailControllerDismissChat()
-            dismiss(animated: true)
+//            dismiss(animated: true)
         } else {
             output.detailControllerDidPop()
-            navigationController?.popViewController(animated: true)
+//            navigationController?.popViewController(animated: true)
         }
     }
     

@@ -14,6 +14,7 @@ struct IQFile: Decodable, Equatable {
     var id: String?
     var type: IQFileType?
     var name: String?
+    var state: IQFileState?
     var size: Int = 0
     var imageWidth: Int?
     var imageHeight: Int?

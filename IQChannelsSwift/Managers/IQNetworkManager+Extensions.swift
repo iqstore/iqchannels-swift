@@ -16,10 +16,10 @@ extension IQNetworkManager: URLSessionDelegate {
         return completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: serverTrust))
     }
     
-    func sse<T: Decodable>(path: String, responseType: T.Type, callback: @escaping ResponseCallbackClosure<IQResult<T>>) -> IQEventSourceManager {
+    func sse<T: Decodable>(path: String, responseType: T.Type, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<IQResult<T>>) -> IQEventSourceManager {
         let url = requestUrl(path)
         
-        return IQEventSourceManager(url: url, authToken: token, customHeaders: customHeaders) { data, error in
+        return IQEventSourceManager(url: url, authToken: token, customHeaders: customHeaders, onOpen: onOpen) { data, error in
             guard error == nil else {
                 callback(nil, error)
                 return
@@ -63,11 +63,21 @@ extension IQNetworkManager: URLSessionDelegate {
                             body: Any?,
                             responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
         var error: NSError?
-        guard let request = self.request(path, headers: headers, json: body, error: &error),
+        guard let request = self.request(path, method: "POST", headers: headers, json: body, error: &error),
               error == nil else { return .init(error: error) }
         
         return await post(request: request, responseType: responseType)
     }
+    
+    func get<T: Decodable>(_ path: String,
+                           headers: [String: String] = [:],
+                           responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
+       var error: NSError?
+       guard let request = self.request(path, method: "GET", headers: headers, json: nil, error: &error),
+             error == nil else { return .init(error: error) }
+       
+       return await post(request: request, responseType: responseType)
+   }
     
     func post<T: Decodable>(request: URLRequest, taskIdentifierCallback: TaskIdentifierCallback? = nil, responseType: T.Type) async -> ResponseCallback<IQResult<T>> {
         await withCheckedContinuation { continuation in
@@ -83,10 +93,10 @@ extension IQNetworkManager: URLSessionDelegate {
         }
     }
     
-    func request(_ path: String, headers: [String: String], json: Any?, error: inout NSError?) -> URLRequest? {
+    func request(_ path: String, method: String, headers: [String: String], json: Any?, error: inout NSError?) -> URLRequest? {
         let url = requestUrl(path)
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = method
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if let token {

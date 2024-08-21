@@ -3,12 +3,10 @@ import SwiftUI
 struct ChatMessagesView: View {
     
     // MARK: - PROPERTIES
-    let messages: [IQMessage]
-    
-    weak var delegate: ChatDetailViewDelegate?
-    
     @EnvironmentObject var viewModel: IQChatDetailViewModel
     @Environment(\.colorScheme) var colorScheme
+    
+    weak var delegate: ChatDetailViewDelegate?
     
     @State private var keyboardShown: Bool = false
     @State private var isScrollDownVisible: Bool = false
@@ -26,14 +24,18 @@ struct ChatMessagesView: View {
                             .modifier(FlippedUpsideDown())
                     }
                     
-                    ForEach(messages) { message in
-                        let index = messages.firstIndex(of: message) ?? 0
+                    ForEach(viewModel.messages) { message in
+                        let index = viewModel.messages.firstIndex(of: message) ?? 0
                         VStack(spacing: 8) {
                             if shouldDisplayMessageDate(index) {
                                 getDatePreviewView(date: message.createdDate.formatRelatively())
                             }
                             
-                            let isLastMessage = message == messages.first
+                            if message.messageID == viewModel.idOfNewMessage {
+                                getNewMessagesView()
+                            }
+                            
+                            let isLastMessage = message == viewModel.messages.first
                             ChatMessageCellView(message: message,
                                                 replyMessage: viewModel.getMessage(with: message.replyToMessageID),
                                                 isGroupStart: isGroupStart(index),
@@ -77,6 +79,13 @@ struct ChatMessagesView: View {
             .onChange(of: viewModel.scrollDown) { _ in
                 withAnimation(.easeInOut) {
                     proxy.scrollTo("last", anchor: .bottom)
+                }
+            }
+            .onChange(of: viewModel.idOfNewMessage) { messageId in
+                guard let messageId,
+                      let messageUiId = viewModel.messages.first(where: { $0.messageID == messageId })?.id else { return }
+                withAnimation(.easeOut) {
+                    proxy.scrollTo(messageUiId, anchor: .bottom)
                 }
             }
             .animation(.bouncy, value: isScrollDownVisible)
@@ -159,22 +168,34 @@ struct ChatMessagesView: View {
         }
     }
     
+    @ViewBuilder
+    private func getNewMessagesView() -> some View {
+        Text("Новые сообщения")
+            .foregroundColor(.gray)
+            .font(.system(size: 14))
+            .frame(height: 24)
+            .frame(maxWidth: .infinity)
+            .background(Color(hex: "F4F4F8"))
+            .padding(.vertical, 12)
+            .padding(.horizontal, -16)
+    }
+    
     // MARK: - METHODS
     private func isGroupStart(_ index: Int) -> Bool {
-        guard index < messages.count - 1 else { return true }
+        guard index < viewModel.messages.count - 1 else { return true }
         
-        let message = messages[index]
-        let prev = messages[index + 1]
+        let message = viewModel.messages[index]
+        let prev = viewModel.messages[index + 1]
         return prev.isMy != message.isMy
         || (prev.userID != nil && prev.userID != message.userID)
         || ((message.createdAt ?? 0) - (prev.createdAt ?? 0)) > 60000
     }
     
     private func shouldDisplayMessageDate(_ index: Int) -> Bool {
-        guard index < messages.count - 1 else { return true }
+        guard index < viewModel.messages.count - 1 else { return true }
         
-        let message = messages[index]
-        let prev = messages[index + 1]
+        let message = viewModel.messages[index]
+        let prev = viewModel.messages[index + 1]
         let calendar = Calendar.current
         let messageDateComponents = calendar.dateComponents([.year, .month, .day], from: message.createdDate)
         let prevDateComponents = calendar.dateComponents([.year, .month, .day], from: prev.createdDate)

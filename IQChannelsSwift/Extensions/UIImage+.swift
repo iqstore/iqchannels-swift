@@ -14,19 +14,18 @@ extension UIImage {
     }
 
     func dataRepresentation(withMaxSizeMB maxSizeMB: CGFloat = 10.0) -> Data? {
-        let maxSizeBytes = maxSizeMB * 1024 * 1024
-        var compressionQuality: CGFloat = 0.7
-        var imageData = self.jpegData(compressionQuality: compressionQuality)
-        
-        while let data = imageData, CGFloat(data.count) > maxSizeBytes && compressionQuality > 0 {
-            compressionQuality -= 0.1
-            imageData = self.jpegData(compressionQuality: compressionQuality)
+        guard let originalImageData = self.jpegData(compressionQuality: 1) else {
+            return nil
         }
-                
-        return imageData
+        
+        let maxSizeBytes = maxSizeMB * 1024 * 1024
+        let imageSizeBytes = CGFloat(originalImageData.count)
+        
+        if imageSizeBytes <= maxSizeBytes {
+            return originalImageData
+        } else {
+            let requiredQuality = maxSizeBytes / imageSizeBytes
+            return self.jpegData(compressionQuality: requiredQuality)
+        }
     }
-}
-
-extension Data {
-    
 }
