@@ -212,6 +212,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 ```
+## Пример использования перехватчика событий
+
+Чтобы обработать событие при нажатии кнопки "Назад" и при необходимости отменить его, нужно реализовать методы протокола IQChannelsEventListenerProtocol.
+
+``` swift
+class AppDelegate: UIResponder, UIApplicationDelegate, IQChannelsEventListenerProtocol {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"])
+        configurationManager.configure(config)
+        configuration.addEvent(listener: self)
+
+        return true
+    }
+
+    func iqChannelsShouldCloseModule() -> Bool {
+        // Вызывается при попытке закрыть модуль, вернуть `false`, чтобы предотвратить закрытие
+        return true
+    }
+
+    func iqChannelsShouldCloseChat() -> Bool {
+        // Вызывается при попытке закрыть чат, вернуть `false`, чтобы предотвратить закрытие
+        return true
+    }
+}
+```
 
 ## Пример использования стилизации
 
