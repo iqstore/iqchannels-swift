@@ -244,7 +244,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, IQChannelsEventListenerPr
 
 ## Пример использования стилизации
 
-Для того чтобы поменять стили элементов внутри SDK, нужно передать поддерживаемый JSON файл при инициализации как в примере ниже:
+Для переключения темы следует использовать метод IQChannelsConfig.setTheme
+
+<details>
+  <summary>Пример переключения темы</summary>
+  
+```swift
+let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"], styleJson: json)
+config.setTheme(.dark)
+configurationManager.configure(config)
+```
+</details>
+
+<details>
+  <summary>Поддерживаемые темы (IQTheme)</summary>
+  
+```swift
+public enum IQTheme {
+    /** Принудительно темная */ case dark
+    /** Принудительно светлая */ case light
+    /** Автоматически меняется вместе с темой устройства */ case system
+}
+```
+</details>
+
+Для того чтобы поменять стили элементов внутри SDK, нужно передать поддерживаемый JSON файл. Его можно передать как при инициализации, так и после нее, channelManager при этом не переопределяется
+
+<details>
+  <summary>Пример подгрузки темы из Json</summary>
+  
 ```swift
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
@@ -260,11 +288,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 ```
+</details>
 
-Пример JSON для передачи в SDK
 --------------------
 
-```json
+<details>
+  <summary>Пример JSON для передачи в SDK</summary>
+
+```js
 {
   "chat": {                   //Общий чат:
     "background": {           //Фон чата
@@ -525,4 +556,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   "theme": "light"                      //Выбранная тема (светлая/темная)
 }
 ```
-
+</details>
