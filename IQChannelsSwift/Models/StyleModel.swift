@@ -16,7 +16,7 @@ struct StyleModel: Decodable {
     let toolsToMessage: ToolsToMessageStyle?
     let error: ErrorStyle?
     let singleChoice: SingleChoiceStyle?
-    let theme: Apperance?
+    var theme: Apperance?
 
     enum CodingKeys: String, CodingKey {
         case chat

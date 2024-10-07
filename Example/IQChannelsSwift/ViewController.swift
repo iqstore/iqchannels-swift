@@ -39,8 +39,38 @@ class ViewController: UIViewController, UITextFieldDelegate {
         let button = UIButton()
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 12
-        button.setTitle("Выбрать стиль", for: .normal)
+        button.setTitle("Загрузить стили", for: .normal)
         button.addTarget(self, action: #selector(styleDidTap), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var styleDark: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Выбрать темный стиль", for: .normal)
+        button.addTarget(self, action: #selector(styleDarkTap), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var styleLight: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Выбрать светлый стиль", for: .normal)
+        button.addTarget(self, action: #selector(styleLightTap), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private lazy var styleSystem: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Выбрать системный стиль", for: .normal)
+        button.addTarget(self, action: #selector(styleSystemTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -66,7 +96,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var stackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, loginButton, anonButton, styleButton
+            serverField, emailField, channelsField, loginButton, anonButton, styleButton, styleDark, styleLight, styleSystem
         ])
         view.spacing = 16
         view.distribution = .fillEqually
@@ -134,8 +164,39 @@ class ViewController: UIViewController, UITextFieldDelegate {
         present(picker, animated: true)
     }
     
+    @objc func styleDarkTap() {
+        if selectedStyle == nil {
+            showAlert(title: "Ошибка", message: "Сначала установите стили через кнопку \"Загрузить стили\"")
+            return
+        }
+        configuration.setTheme(.dark)
+        showAlert(title: "", message: "Установлена темная тема")
+    }
+    
+    @objc func styleLightTap() {
+        if selectedStyle == nil {
+            showAlert(title: "Ошибка", message: "Сначала установите стили через кнопку \"Загрузить стили\"")
+            return
+        }
+        configuration.setTheme(.light)
+        showAlert(title: "", message: "Установлена светлая тема")
+    }
+    
+    @objc func styleSystemTap() {
+        if selectedStyle == nil {
+            showAlert(title: "Ошибка", message: "Сначала установите стили через кнопку \"Загрузить стили\"")
+            return
+        }
+        configuration.setTheme(.system)
+        showAlert(title: "", message: "Установлена системная тема")
+    }
+    
     @objc func loginDidTap() {
-        setServer(server: serverField.text)
+        if selectedStyle == nil {
+            setServer(server: serverField.text)
+            loginWithEmail(emailField.text)
+            return
+        }
         loginWithEmail(emailField.text)
     }
     
@@ -150,6 +211,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
+    
+    private func showAlert(title: String, message: String) {
+            let alert: UIAlertController = .init(title: title,
+                                                 message: message,
+                                                 preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true, completion: nil)
+        }
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)
@@ -166,6 +235,7 @@ extension ViewController: UIDocumentPickerDelegate {
         
         selectedStyle = try? Data(contentsOf: url)
         url.stopAccessingSecurityScopedResource()
+        setServer(server: serverField.text)
     }
 
 }

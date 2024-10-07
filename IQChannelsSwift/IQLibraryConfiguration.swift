@@ -44,7 +44,13 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
     
     public func configure(_ config: IQChannelsConfig) {        
         Style.configure(config.styleJson)
-        channelManager = IQChannelsManager(config: config)
+        if channelManager == nil {
+            channelManager = IQChannelsManager(config: config)
+        }
+    }
+    
+    public func setNewJSON(_ json: Data?) {
+        Style.configure(json)
     }
     
     public func login(_ loginType: IQLoginType) {
@@ -73,6 +79,10 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
     
     public func pushToken(_ token: Data?) {
         channelManager?.pushToken(token)
+    }
+    
+    public func setTheme(_ styleType: IQTheme) {
+        Style.newTheme(styleType)
     }
     
 }

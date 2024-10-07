@@ -22,6 +22,17 @@ class Style {
         self.model = try? JSONDecoder().decode(StyleModel.self, from: data)
     }
     
+    static func newTheme(_ styleType: IQTheme) {
+        switch styleType {
+        case .dark:
+            self.model?.theme = .dark
+        case .light:
+            self.model?.theme = .light
+        case .system:
+            self.model?.theme = .system
+        }
+    }
+    
     static func getColor(theme: Theme?) -> Color? {
         guard let theme,
               let light = theme.light,

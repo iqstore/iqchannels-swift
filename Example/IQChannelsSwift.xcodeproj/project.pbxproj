@@ -40,6 +40,8 @@
 		607FACE51AFB9204008FA782 /* IQChannelsSwift_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IQChannelsSwift_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		77B894F62CB45C3F001F2873 /* configFile.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = configFile.json; sourceTree = "<group>"; };
+		77B894F72CB45C3F001F2873 /* configFile2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = configFile2.json; sourceTree = "<group>"; };
 		884ED6A9805B47D5B74F5BCF /* Pods-IQChannelsSwift_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IQChannelsSwift_Tests.release.xcconfig"; path = "Target Support Files/Pods-IQChannelsSwift_Tests/Pods-IQChannelsSwift_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		9DD75796E73F7FC3306FACA0 /* IQChannelsSwift.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = IQChannelsSwift.podspec; path = ../IQChannelsSwift.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		A858D8C831E246BB98307EAF /* Pods-IQChannelsSwift_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IQChannelsSwift_Example.release.xcconfig"; path = "Target Support Files/Pods-IQChannelsSwift_Example/Pods-IQChannelsSwift_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -116,6 +118,8 @@
 		607FACD31AFB9204008FA782 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				77B894F62CB45C3F001F2873 /* configFile.json */,
+				77B894F72CB45C3F001F2873 /* configFile2.json */,
 				607FACD41AFB9204008FA782 /* Info.plist */,
 			);
 			name = "Supporting Files";

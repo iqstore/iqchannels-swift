@@ -28,4 +28,6 @@ public protocol IQLibraryConfigurationProtocol {
     func removeUnread(listener: IQChannelsUnreadListenerProtocol)
     /// Pushes the device token for push notifications.
     func pushToken(_ token: Data?)
+    /// Set theme
+    func setTheme(_ styleType: IQTheme)
 }
