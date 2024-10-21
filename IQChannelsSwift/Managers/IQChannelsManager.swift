@@ -20,7 +20,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     @Published var state: IQChannelsState = .awaitingNetwork
     @Published var messages: [IQMessage] = []
     @Published var detailViewModel: IQChatDetailViewModel?
-    let config: IQChannelsConfig
+    var config: IQChannelsConfig
     var listViewModel: IQChatListViewModel?
     var baseViewModels: [IQBaseViewModel] {
         [listViewModel, detailViewModel].compactMap { $0 }
@@ -49,11 +49,11 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         return networkManagers[channel]
     }
     
-    init(config: IQChannelsConfig) {
-        self.config = config
+    init(configuration: IQChannelsConfig) {
+        self.config = configuration
         var networkManagers = [String: IQNetworkManagerProtocol]()
-        config.channels.forEach {
-            networkManagers.updateValue(IQNetworkManager(address: config.address, channel: $0), forKey: $0)
+        configuration.channels.forEach {
+            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0), forKey: $0)
         }
         self.networkManagers = networkManagers
         
@@ -62,6 +62,15 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         setupCombine()
         setupImageManager()
         setupFileLimits()
+    }
+    
+    func configure(configuration: IQChannelsConfig) {
+        self.config = configuration
+        var networkManagers = [String: IQNetworkManagerProtocol]()
+        configuration.channels.forEach {
+            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0), forKey: $0)
+        }
+        self.networkManagers = networkManagers
     }
     
     func setCustomHeaders(_ headers: [String: String]) {

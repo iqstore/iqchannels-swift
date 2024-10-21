@@ -45,7 +45,9 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
     public func configure(_ config: IQChannelsConfig) {        
         Style.configure(config.styleJson)
         if channelManager == nil {
-            channelManager = IQChannelsManager(config: config)
+            channelManager = IQChannelsManager(configuration: config)
+        } else {
+            channelManager?.configure(configuration: config)
         }
     }
     

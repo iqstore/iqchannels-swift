@@ -109,6 +109,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var selectedStyle: Data?
     
+    var serverString = ""
+    var channelsArray: [String] = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -124,14 +127,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         emailField.delegate = self
         setServer(server: "https://iqchannels.isimplelab.com")
-//        setServer(server: nil)
     }
 
     func setServer(server: String?) {
-        let server = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru/" : (server ?? "")
-        let channels = channelsField.text?.components(separatedBy: .whitespaces) ?? []
-        let config = IQChannelsConfig(address: server,
-                                      channels: channels,
+        serverString = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru/" : (server ?? "")
+        channelsArray = channelsField.text?.components(separatedBy: .whitespaces) ?? []
+        let config = IQChannelsConfig(address: serverString,
+                                      channels: channelsArray,
                                       styleJson: selectedStyle)
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)
@@ -142,13 +144,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         guard textField === emailField else { return true }
         
-        loginWithEmail(textField.text)
-        return true
-    }
-    
-    func loginWithEmail(_ email: String?) {
-        configuration.login(.credentials(email ?? ""))
+        configuration.login(.credentials(textField.text ?? ""))
         showMessages()
+        return true
     }
     
     func showMessages(){
@@ -192,12 +190,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func loginDidTap() {
-        if selectedStyle == nil {
-            setServer(server: serverField.text)
-            loginWithEmail(emailField.text)
-            return
-        }
-        loginWithEmail(emailField.text)
+        setServer(server: serverField.text)
+        configuration.login(.credentials(emailField.text ?? ""))
+        showMessages()
     }
     
     @objc func anonymousDidTap() {
@@ -235,7 +230,6 @@ extension ViewController: UIDocumentPickerDelegate {
         
         selectedStyle = try? Data(contentsOf: url)
         url.stopAccessingSecurityScopedResource()
-        setServer(server: serverField.text)
     }
 
 }

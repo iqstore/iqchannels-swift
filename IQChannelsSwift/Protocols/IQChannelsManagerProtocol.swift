@@ -8,6 +8,7 @@
 import Foundation
 
 protocol IQChannelsManagerProtocol {
+    func configure(configuration: IQChannelsConfig)
     func login(_ loginType: IQLoginType)
     func logout()
     func setCustomHeaders(_ headers: [String: String])
