@@ -65,6 +65,31 @@ extension IQChannelsManager {
         }.store(in: &subscriptions)
     }
     
+    func configureCombine(){
+        $selectedChat.sink { [weak self] (chat) in
+            Task { [weak self] in
+                DispatchQueue.main.async { [weak self] in
+                    if let self {
+                        listenToUnread()
+                        loadMessages()
+                    }
+                }
+            }
+        }.store(in: &subscriptions)
+        
+        $state.receive(on: DispatchQueue.main).sink { [weak self] state in
+            guard let self else { return }
+            
+            baseViewModels.setState(state)
+        }.store(in: &subscriptions)
+        
+        $messages.receive(on: DispatchQueue.main).sink { [weak self] messages in
+            guard let self else { return }
+            
+            detailViewModel?.messages = messages.reversed()
+        }.store(in: &subscriptions)
+    }
+    
     func setupFileLimits() {
         Task {
             fileLimit = try? await IQNetworkManager.getFileConfig(address: config.address)

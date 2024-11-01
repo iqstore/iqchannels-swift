@@ -65,12 +65,20 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     }
     
     func configure(configuration: IQChannelsConfig) {
+        logout()
+        
         self.config = configuration
         var networkManagers = [String: IQNetworkManagerProtocol]()
         configuration.channels.forEach {
             networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0), forKey: $0)
         }
         self.networkManagers = networkManagers
+        
+        networkStatusManager.delegate = self
+        
+        configureCombine()
+        setupImageManager()
+        setupFileLimits()
     }
     
     func setCustomHeaders(_ headers: [String: String]) {
