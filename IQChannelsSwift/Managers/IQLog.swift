@@ -14,7 +14,8 @@ class IQLog {
     static func configure(state: Bool) {
         isLoggingEnabled = state
     }
-
+    
+    // 
     static func debug(message: String) {
         if isLoggingEnabled {
             os_log("%{public}s", type: .debug, "[DEBUG]: \(message)")
