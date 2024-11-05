@@ -15,13 +15,14 @@ class IQLog {
         isLoggingEnabled = state
     }
     
-    // 
+    // Method for logging debug messages
     static func debug(message: String) {
         if isLoggingEnabled {
             os_log("%{public}s", type: .debug, "[DEBUG]: \(message)")
         }
     }
-
+    
+    // Method for logging error messages
     static func error(message: String) {
         if isLoggingEnabled {
             os_log("%{public}s", type: .error, "[ERROR]: \(message)")

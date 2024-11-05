@@ -49,6 +49,11 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         } else {
             channelManager?.configure(configuration: config)
         }
+        #if DEBUG
+            IQLog.configure(state: true)
+        #else
+            IQLog.configure(state: false)
+        #endif
     }
     
     public func setNewJSON(_ json: Data?) {

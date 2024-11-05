@@ -45,9 +45,12 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let path = "/files/config"
         let result = await networkManager.get(path, responseType: IQFileConfig.self)
         if let value = result.result?.value {
+            IQLog.debug(message: "getFileConfig: success")
             return value
         }
-        throw result.error ?? NSError.clientError()
+        let error = result.error ?? NSError.clientError()
+        IQLog.error(message: "getFileConfig: \(error)")
+        throw error
     }
     
     func listenToEvents(request: IQListenEventsRequest, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<[IQChatEvent]>) {
@@ -59,6 +62,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         eventsListener = sse(path: path, responseType: [IQChatEvent].self, onOpen: onOpen) { result, error in
             if let error = error {
                 callback(nil, error)
+                IQLog.error(message: "listenToEvents: \(error)")
                 return
             }
             guard let result else {
@@ -67,6 +71,9 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             }
             
             var events = result.value ?? []
+            
+            IQLog.debug(message: "listenToEvents: \(events)")
+            
             self.relationManager.chatEvents(&events, with: result.relations)
             callback(events, nil)
         }
@@ -77,12 +84,14 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
             if let error = error {
                 callback(nil, error)
+                IQLog.error(message: "listenToUnread: \(error)")
                 return
             }
             if result == nil {
                 callback(nil, nil)
                 return
             }
+            IQLog.debug(message: "listenToUnread: \(result?.value ?? 0)")
             
             callback(result?.value ?? 0, nil)
         }
@@ -101,46 +110,67 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     func pushToken(token: String) async -> Error? {
         let path = "/push/channel/apns/\(channel)"
         let params = ["Token": token]
-        
         let response = await post(path, body: params, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "pushToken: \n token: \(token) \n response: \(response)")
+        
         return response.error
     }
     
     func sendReceivedEvent(_ messageIDs: [Int]) async -> Error? {
         let path = "/chats/messages/received"
-        let result = await post(path, body: messageIDs, responseType: IQEmptyResponse.self)
-        return result.error
+        let response = await post(path, body: messageIDs, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "sendReceivedEvent: \n messageIDs: \(messageIDs) \n response: \(response)")
+        
+        return response.error
     }
     
     func sendReadEvent(_ messageIDs: [Int]) async -> Error? {
         let path = "/chats/messages/read"
-        let result = await post(path, body: messageIDs, responseType: IQEmptyResponse.self)
-        return result.error
+        let response = await post(path, body: messageIDs, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "sendReadEvent: \n messageIDs: \(messageIDs) \n response: \(response)")
+        
+        return response.error
     }
     
     func sendTypingEvent() async -> Error? {
         let path = "/chats/channel/typing/\(channel)"
-        let result = await post(path, body: nil, responseType: IQEmptyResponse.self)
-        return result.error
+        let response = await post(path, body: nil, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "sendTypingEvent: \(response)")
+        
+        return response.error
     }
     
     func getFile(id: String) async throws -> IQFile? {
         let path = "/files/get_file/\(id)"
-        let result = await get(path, responseType: IQFile.self)
-        if let error = result.error {
+        let response = await get(path, responseType: IQFile.self)
+        if let error = response.error {
+            IQLog.error(message: "getFile: \(error)")
             throw error
         }
-        return result.result?.value
+        
+        IQLog.debug(message: "getFile: success")
+        
+        return response.result?.value
     }
     
     func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<[IQMessage]> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
-        guard response.error == nil else { return .init(error: response.error) }
+        guard response.error == nil else {
+            IQLog.error(message: "loadMessages: \n request: \(request) \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
         guard let result = response.result, var value = result.value else { return .init(error: NSError.failedToParseModel([IQMessage].self)) }
         
         self.relationManager.chatMessages(&value, with: result.relations)
+        
+        IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
+        
         return .init(result: value)
     }
     
@@ -148,6 +178,9 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let path = "/ratings/rate"
         let params: [String: Any] = ["ratingId": ratingID, "rating": ["Value": value]]
         let response = await post(path, body: params, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "rate: \n params: \(params) \n response: \(response)")
+        
         return response.error
     }
     
@@ -163,8 +196,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         let response = await post(path, multipart: params, files: files, taskIdentifierCallback: taskIdentifierCallback, responseType: IQFile.self)
         
-        guard response.error == nil else { return .init(error: response.error) }
+        guard response.error == nil else {
+            IQLog.error(message: "uploadFile: \n params: \(params) \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
         guard let result = response.result, var file = result.value else { return .init(error: NSError.failedToParseModel([IQMessage].self)) }
+        
+        IQLog.debug(message: "uploadFile: \n params: \(params) \n success")
         
         relationManager.file(&file, with: result.relations)
         return .init(result: file)
@@ -172,8 +210,11 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     func sendMessage(form: IQMessageForm) async -> Error? {
         let path = "/chats/channel/send/\(channel)"
-        let result = await post(path, body: form, responseType: IQEmptyResponse.self)
-        return result.error
+        let response = await post(path, body: form, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "sendMessage: \n form: \(form) \n result: \(response)")
+        
+        return response.error
     }
     
     func clientsAuth(token: String) async -> ResponseCallback<IQClientAuth> {
@@ -181,8 +222,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let body = IQClientAuthRequest(token: token)
         let response = await post(path, body: body, responseType: IQClientAuth.self)
         
-        guard response.error == nil else { return .init(error: response.error) }
+        guard response.error == nil else {
+            IQLog.error(message: "Authenticating anonymous: \n body: \(body) \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
         guard let auth = response.result?.value else { return .init(error: NSError.failedToParseModel(IQClientAuth.self)) }
+        
+        IQLog.debug(message: "Authenticating anonymous: \n body: \(body) \n auth: \(auth)")
         
         return .init(result: auth)
     }
@@ -192,8 +238,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let body = IQSignupRequest(channel: channel)
         let response = await post(path, body: body, responseType: IQClientAuth.self)
         
-        guard response.error == nil else { return .init(error: response.error) }
+        guard response.error == nil else {
+            IQLog.error(message: "clientsSignup: \n body: \(body) \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
         guard let auth = response.result?.value else { return .init(error: NSError.failedToParseModel(IQClientAuth.self)) }
+        
+        IQLog.debug(message: "clientsSignup: \n body: \(body) \n auth: \(auth)")
         
         return .init(result: auth)
     }
@@ -203,8 +254,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let body = IQClientIntegrationAuthRequest(credentials: credentials, channel: channel)
         let response = await post(path, body: body, responseType: IQClientAuth.self)
         
-        guard response.error == nil else { return .init(error: response.error) }
+        guard response.error == nil else {
+            IQLog.error(message: "Authenticating: \n body: \(body) \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
         guard let auth = response.result?.value else { return .init(error: NSError.failedToParseModel(IQClientAuth.self)) }
+        
+        IQLog.debug(message: "Authenticating: \n body: \(body) \n auth: \(auth)")
         
         return .init(result: auth)
     }
