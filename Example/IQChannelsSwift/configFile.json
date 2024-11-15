@@ -47,6 +47,13 @@
       },
       "text_size": 10
     },
+    "text_system": {
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10
+    },
     "reply_text_client": {
       "color": {
         "light": "#ffffff",
