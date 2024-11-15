@@ -44,7 +44,12 @@ class IQRelationManager {
             if let userId = message.userID { messages[key].user = map?.users[userId] }
             if let fileId = message.fileID { messages[key].file = map?.files[fileId] }
             if let clientId = message.clientID { messages[key].client = map?.clients[clientId] }
-            if let ratingId = message.ratingID { messages[key].rating = map?.ratings[ratingId] }
+            if let ratingId = message.ratingID {
+                messages[key].rating = map?.ratings[ratingId]
+                if (messages[key].rating?.state == .rated){
+                    messages[key].isSystem = true
+                }
+            }
         }
     }
     

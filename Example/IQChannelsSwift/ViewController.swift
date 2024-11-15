@@ -126,11 +126,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         ])
         
         emailField.delegate = self
-        setServer(server: "https://iqchannels.isimplelab.com")
+        
+//        setServer(server: "https://iqchannels.isimplelab.com")
+        setServer(server: "https://sandbox.iqstore.ru")
     }
 
     func setServer(server: String?) {
-        serverString = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru/" : (server ?? "")
+        serverString = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru" : (server ?? "")
         channelsArray = channelsField.text?.components(separatedBy: .whitespaces) ?? []
         let config = IQChannelsConfig(address: serverString,
                                       channels: channelsArray,

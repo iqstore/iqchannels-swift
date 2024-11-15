@@ -26,6 +26,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var botpressPayload: String?
     var isDropDown: Bool?
     var disableFreeText: Bool?
+    var isSystem: Bool = false
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
     
@@ -109,7 +110,8 @@ struct IQMessage: Codable, Identifiable, Equatable {
             switch rating.state {
             case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
             case .ignored: return "Без оценки"
-            case .rated: return "Оценка принята! Спасибо, что помогаете нам стать лучше!"
+//            case .rated: return "Оценка принята! Спасибо, что помогаете нам стать лучше!" // В будущем оставить для оценки не оператора
+            case .rated: return "Оценка оператора \(rating.value ?? 0) из 5"
             default: return ""
             }
         }
