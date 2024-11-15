@@ -345,6 +345,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       },
       "text_size": 10
     },
+    "text_system": {          //Текст сообщения (Система)
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10
+    },
     "reply_text_client": {    //Основной текст ответа со стороны клиента
       "color": {
         "light": "#ffffff",
