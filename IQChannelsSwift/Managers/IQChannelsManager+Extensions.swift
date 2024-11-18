@@ -122,6 +122,7 @@ extension IQChannelsManager {
     
     func closeCurrentChat() {
         guard let networkManager = currentNetworkManager else { return }
+        IQLog.debug(message: "closeCurrentChat")
         
         listViewModel?.popListener.send(())
         
