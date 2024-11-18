@@ -127,7 +127,7 @@ struct ChatInputView: View {
                                 .clipShape(Circle())
                         }
                     }
-                    .transition(.slide)
+                    .transition(.move(edge: .trailing))
                 }
             }
             .opacity(text.isEmpty ? 0 : 1)
