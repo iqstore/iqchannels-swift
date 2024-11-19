@@ -488,7 +488,7 @@
 			baseConfigurationReference = AB500FBF36813F8F64C3DFCB /* Pods-IQChannelsSwift_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = TFCP6F78C7;
 				INFOPLIST_FILE = IQChannelsSwift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = IQChannelsSwift;
@@ -508,7 +508,7 @@
 			baseConfigurationReference = A858D8C831E246BB98307EAF /* Pods-IQChannelsSwift_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEVELOPMENT_TEAM = TFCP6F78C7;
 				INFOPLIST_FILE = IQChannelsSwift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = IQChannelsSwift;

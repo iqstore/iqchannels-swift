@@ -11,6 +11,7 @@ import Foundation
 struct IQRating: Codable, Equatable {
     var id: Int = 0
     var state: IQRatingState?
+    var value: Int?
 }
 
 enum IQRatingState: String, Codable {

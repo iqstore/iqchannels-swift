@@ -40,7 +40,7 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
 
     func detailControllerDidPop() {
         guard eventListener?.iqChannelsShouldCloseChat() ?? true else { return }
-        
+        IQLog.debug(message: "detailControllerDidPop")
         closeCurrentChat()
     }
     

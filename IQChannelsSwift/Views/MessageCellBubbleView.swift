@@ -43,10 +43,14 @@ struct MessageCellBubbleView: View {
                     delegate?.onRate(value: value, ratingId: ratingId)
                 }
             } else {
-                TextMessageCellView(message: message,
-                                    replyMessage: replyMessage,
-                                    onLongPress: onLongPress,
-                                    onReplyMessageTapCompletion: onReplyMessageTapCompletion)
+                if (message.rating != nil){
+                    SystemMessageCellView(message: message)
+                }else{
+                    TextMessageCellView(message: message,
+                                        replyMessage: replyMessage,
+                                        onLongPress: onLongPress,
+                                        onReplyMessageTapCompletion: onReplyMessageTapCompletion)
+                }
             }
         case .file:
             if let file = message.file {

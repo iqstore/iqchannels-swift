@@ -122,6 +122,7 @@ extension IQChannelsManager {
     
     func closeCurrentChat() {
         guard let networkManager = currentNetworkManager else { return }
+        IQLog.debug(message: "closeCurrentChat")
         
         listViewModel?.popListener.send(())
         
@@ -288,6 +289,8 @@ extension IQChannelsManager {
                   let index = self.messages.lastIndex(where: { $0.ratingID == ratingID }) else { return }
             
             messages[index].rating?.state = .rated
+            messages[index].rating?.value = value
+            messages[index].isSystem = true
         }
     }
     

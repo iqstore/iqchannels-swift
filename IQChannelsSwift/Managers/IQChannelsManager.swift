@@ -115,6 +115,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     }
     
     func logout() {
+        IQLog.debug(message: "logout")
         listViewModel?.dismissListener.send(())
         clear()
     }
