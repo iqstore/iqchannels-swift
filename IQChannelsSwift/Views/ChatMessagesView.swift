@@ -35,25 +35,48 @@ struct ChatMessagesView: View {
                                 getNewMessagesView()
                             }
                             
-                            let isLastMessage = message == viewModel.messages.first
-                            ChatMessageCellView(message: message,
-                                                replyMessage: viewModel.getMessage(with: message.replyToMessageID),
-                                                isGroupStart: isGroupStart(index),
-                                                isLastMessage: isLastMessage,
-                                                delegate: delegate,
-                                                onLongPress: { messageControlInfo in
-                                viewModel.showMessageControl(messageControlInfo)
-                            }, onReplyToMessage: { message in
-                                viewModel.messageToReply = message
-                            }, onReplyMessageTapCompletion: { messageId in
-                                if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
-                                    withAnimation(.easeInOut) {
-                                        proxy.scrollTo(id, anchor: .center)
+                            if let rating = message.rating {
+                                if(message.isPendingRatingMessage){
+                                    if (rating.state == .poll) {
+                                        if let ratingPoll = message.rating?.ratingPoll {
+                                            RatingPollCellView(rating: rating, ratingPoll: ratingPoll) { value, answers, ratingId, pollId, rated in
+                                                if(rated){
+                                                    delegate?.onSendPoll(value: value, answers: answers, ratingId: ratingId, pollId: pollId)
+                                                }else{
+                                                    delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
+                                                }
+                                            }
+                                        }
+                                        
+                                    } else{
+                                        RatingCellView(rating: rating) { value, ratingId in
+                                            delegate?.onRate(value: value, ratingId: ratingId)
+                                        }
                                     }
+                                }else{
+                                    SystemMessageCellView(message: message)
                                 }
-                            })
-                            .onAppear {
-                                delegate?.onMessageAppear(with: message.messageID)
+                            } else{
+                                let isLastMessage = message == viewModel.messages.first
+                                ChatMessageCellView(message: message,
+                                                    replyMessage: viewModel.getMessage(with: message.replyToMessageID),
+                                                    isGroupStart: isGroupStart(index),
+                                                    isLastMessage: isLastMessage,
+                                                    delegate: delegate,
+                                                    onLongPress: { messageControlInfo in
+                                    viewModel.showMessageControl(messageControlInfo)
+                                }, onReplyToMessage: { message in
+                                    viewModel.messageToReply = message
+                                }, onReplyMessageTapCompletion: { messageId in
+                                    if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
+                                        withAnimation(.easeInOut) {
+                                            proxy.scrollTo(id, anchor: .center)
+                                        }
+                                    }
+                                })
+                                .onAppear {
+                                    delegate?.onMessageAppear(with: message.messageID)
+                                }
                             }
                         }
                         .modifier(FlippedUpsideDown())

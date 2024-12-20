@@ -24,6 +24,8 @@ protocol IQNetworkManagerProtocol {
     func getFile(id: String) async throws -> IQFile?
     func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<[IQMessage]>
     func rate(value: Int, ratingID: Int) async -> Error?
+    func sendPoll(request: IQSendPollRequest) async -> Error?
+    func finishPoll(ratingId: Int, pollId: Int, rated: Bool) async -> Error?
     func uploadFile(file: DataFile, taskIdentifierCallback: TaskIdentifierCallback?) async -> ResponseCallback<IQFile>
     func sendMessage(form: IQMessageForm) async -> Error?
     func clientsAuth(token: String) async -> ResponseCallback<IQClientAuth>

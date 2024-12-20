@@ -46,9 +46,6 @@ class IQRelationManager {
             if let clientId = message.clientID { messages[key].client = map?.clients[clientId] }
             if let ratingId = message.ratingID {
                 messages[key].rating = map?.ratings[ratingId]
-                if (messages[key].rating?.state == .rated){
-                    messages[key].isSystem = true
-                }
             }
         }
     }

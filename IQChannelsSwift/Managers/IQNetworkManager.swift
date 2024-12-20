@@ -184,6 +184,25 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return response.error
     }
     
+    func sendPoll(request: IQSendPollRequest) async -> Error? {
+        let path = "/ratings/send_poll"
+        let response = await post(path, body: request, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "sendPoll: \n request: \(request) \n response: \(response)")
+        
+        return response.error
+    }
+    
+    func finishPoll(ratingId: Int, pollId: Int, rated: Bool) async -> Error? {
+        let path = "/ratings/finish_poll"
+        let params: [String: Any] = ["RatingId": ratingId, "RatingPollId": pollId, "Rated": rated]
+        let response = await post(path, need: false, body: params, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "finishPoll: \n params: \(params) \n response: \(response)")
+        
+        return response.error
+    }
+    
     func uploadFile(file: DataFile, taskIdentifierCallback: TaskIdentifierCallback? = nil) async -> ResponseCallback<IQFile> {
         let path = "/files/upload"
         let isImage = file.filename == "image.jpeg"

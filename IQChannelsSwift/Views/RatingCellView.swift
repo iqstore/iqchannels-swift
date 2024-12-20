@@ -11,12 +11,12 @@ struct RatingCellView: View {
     
     @State private var selectedRating: Int? = nil
     
-    var starWidth: CGFloat {
-        return min(36, UIScreen.screenWidth / 10)
+    var cellWidth: CGFloat {
+        return UIScreen.screenWidth - 50
     }
     
-    var cellWidth: CGFloat {
-        return starWidth * 5 + 8 * 4
+    var starWidth: CGFloat {
+        return min(50, (cellWidth - 50) / 5)
     }
     
     var backgroundColor: Color {
