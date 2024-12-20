@@ -67,7 +67,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     var isPendingRatingMessage: Bool {
-        return rating?.state == .pending
+        return rating?.state == .pending || rating?.state == .poll
     }
     
     var isMessageReplied: Bool {
@@ -107,11 +107,19 @@ struct IQMessage: Codable, Identifiable, Equatable {
         }
         
         if let rating {
+            
+            var toValue: Int?
+            if let questions = rating.ratingPoll?.questions {
+                toValue = questions
+                    .filter { $0.asTicketRating == true }
+                    .compactMap { $0.scale?.toValue }
+                    .first
+            }
+        
             switch rating.state {
             case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
-            case .ignored: return "Без оценки"
-//            case .rated: return "Оценка принята! Спасибо, что помогаете нам стать лучше!" // В будущем оставить для оценки не оператора
-            case .rated: return "Оценка оператора \(rating.value ?? 0) из 5"
+            case .ignored: return "Оценка не поставлена"
+            case .rated, .finished: return "Оценка оператора \(rating.value ?? 0) из \(toValue ?? 5)"
             default: return ""
             }
         }

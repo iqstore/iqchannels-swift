@@ -19,6 +19,7 @@ enum IQChatEventType: String, Decodable {
     case messageReceived = "message_received"
     case messageRead = "message_read"
     case deleteMessages = "delete-messages"
+    case ratingIgnored = "rating_ignored"
     
     init(from decoder: any Decoder) throws {
         self = try IQChatEventType(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .invalid

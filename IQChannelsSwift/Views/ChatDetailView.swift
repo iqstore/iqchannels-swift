@@ -9,6 +9,8 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onSendMessage(_ text: String)
     func onCancelUpload(_ message: IQMessage)
     func onRate(value: Int, ratingId: Int)
+    func onSendPoll(value: Int?, answers: [IQRatingPollClientAnswerInput], ratingId: Int, pollId: Int)
+    func onPollIgnored(ratingId: Int, pollId: Int)
 }
 
 struct ChatDetailView: View {

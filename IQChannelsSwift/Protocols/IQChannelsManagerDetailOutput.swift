@@ -18,6 +18,8 @@ protocol IQChannelsManagerDetailOutput {
     func detailController(didSelect choice: IQSingleChoice)
     func detailController(didSelect action: IQAction)
     func detailController(didRate value: Int, ratingID: Int)
+    func detailController(didSendPoll value: Int?, answers: [IQRatingPollClientAnswerInput], ratingID: Int, pollId: Int)
+    func detailController(didPollIgnored ratingID: Int, pollId: Int)
     func detailController(didSend text: String, replyToMessage: Int?)
     func detailController(didPick items: [(URL?, UIImage?)], replyToMessage: Int?)
     func detailController(didPick results: [PHPickerResult], replyToMessage: Int?)

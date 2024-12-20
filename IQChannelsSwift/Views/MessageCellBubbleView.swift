@@ -37,21 +37,10 @@ struct MessageCellBubbleView: View {
     var body: some View {
         switch message.payload {
         case .text:
-            if message.isPendingRatingMessage,
-               let rating = message.rating {
-                RatingCellView(rating: rating) { value, ratingId in
-                    delegate?.onRate(value: value, ratingId: ratingId)
-                }
-            } else {
-                if (message.rating != nil){
-                    SystemMessageCellView(message: message)
-                }else{
-                    TextMessageCellView(message: message,
-                                        replyMessage: replyMessage,
-                                        onLongPress: onLongPress,
-                                        onReplyMessageTapCompletion: onReplyMessageTapCompletion)
-                }
-            }
+            TextMessageCellView(message: message,
+                                replyMessage: replyMessage,
+                                onLongPress: onLongPress,
+                                onReplyMessageTapCompletion: onReplyMessageTapCompletion)
         case .file:
             if let file = message.file {
                 if file.isImage {

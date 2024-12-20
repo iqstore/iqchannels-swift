@@ -14,5 +14,6 @@ struct IQRelations: Decodable {
     var clients: [IQClient]? = nil
     var files: [IQFile]? = nil
     var ratings: [IQRating]? = nil
+    var ratingPolls: [IQRatingPoll]? = nil
     var users: [IQUser]? = nil
 }

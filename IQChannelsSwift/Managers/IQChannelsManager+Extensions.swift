@@ -287,12 +287,49 @@ extension IQChannelsManager {
             let error = await currentNetworkManager?.rate(value: value, ratingID: ratingID)
             guard error == nil,
                   let index = self.messages.lastIndex(where: { $0.ratingID == ratingID }) else { return }
-            
-            messages[index].rating?.state = .rated
-            messages[index].rating?.value = value
-            messages[index].isSystem = true
+            rated(index: index, value: value)
         }
     }
+    
+    func sendPoll(value: Int?, answers: [IQRatingPollClientAnswerInput], ratingID: Int, pollId: Int) {
+        Task {
+            let error = await currentNetworkManager?.sendPoll(request: .init(ratingPollClientAnswerInput: answers))
+            let errorFinish = await currentNetworkManager?.finishPoll(ratingId: ratingID, pollId: pollId, rated: true)
+            
+            guard error == nil, errorFinish == nil,
+                  let index = self.messages.lastIndex(where: { $0.ratingID == ratingID }) else { return }
+            rated(index: index, value: value)
+        }
+    }
+    
+    func pollIgnored(ratingID: Int, pollId: Int) {
+        Task {
+            let error = await currentNetworkManager?.finishPoll(ratingId: ratingID, pollId: pollId, rated: false)
+            
+            guard error == nil,
+                  let index = self.messages.lastIndex(where: { $0.ratingID == ratingID }) else { return }
+            ignored(index: index)
+        }
+    }
+    
+    func ratingIgnored(_ event: IQChatEvent) {
+        guard let index = self.messages.lastIndex(where: { $0.ratingID == event.message?.ratingID }) else { return }
+        ignored(index: index)
+    }
+    
+    
+    func rated(index: Int, value: Int?) {
+        messages[index].rating?.state = .rated
+        messages[index].rating?.value = value
+        messages[index].isSystem = true
+    }
+    
+    func ignored(index: Int) {
+        messages[index].rating?.state = .ignored
+        messages[index].isSystem = true
+    }
+    
+
     
 }
 
