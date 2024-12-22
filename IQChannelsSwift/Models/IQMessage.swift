@@ -138,9 +138,10 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.payload = .text
     }
     
-    init(dataFile: DataFile, chatType: IQChatType, localID: Int, replyMessageID: Int?) {
+    init(dataFile: DataFile, chatType: IQChatType, localID: Int, text: String?, replyMessageID: Int?) {
         self.init(localID: localID, chatType: chatType, replyMessageID: replyMessageID)
         self.payload = .file
+        self.text = text
         self.file = IQFile(dataFile: dataFile)
     }
     
@@ -156,6 +157,15 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.payload = .text
         self.text = choice.title
         self.botpressPayload = choice.value
+    }
+    
+    init(text: String, operatorName: String) {
+        self.author = .user
+        self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
+        self.localID = Int(Date().timeIntervalSince1970 * 1000)
+        self.text = text
+        self.payload = .text
+        self.user = IQUser(id: 0, displayName: operatorName)
     }
     
     private init(localID: Int, chatType: IQChatType, replyMessageID: Int?) {

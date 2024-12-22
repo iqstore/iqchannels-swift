@@ -11,5 +11,6 @@ import Foundation
 struct IQLoadMessageRequest: Encodable {
     var maxID: Int?
     var limit: Int?
+    var clientId: Int?
     let chatType: IQChatType
 }

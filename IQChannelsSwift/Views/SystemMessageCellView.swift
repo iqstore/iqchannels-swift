@@ -10,6 +10,8 @@ import SwiftUI
 struct SystemMessageCellView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let message: IQMessage
     
     var textColor: UIColor {
