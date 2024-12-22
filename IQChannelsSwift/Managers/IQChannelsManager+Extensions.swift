@@ -145,9 +145,9 @@ extension IQChannelsManager {
         let files = attachment.attachments.compactMap{ if case let .file(image, filename) = $0 { DataFile(data: image, filename: filename) } else { nil } }
         
         texts.forEach {
-            self.sendText($0, replyToMessage: nil)
+            sendMessage($0, files: nil, replyToMessage: nil)
         }
-        sendFiles(files, replyToMessage: nil)
+        sendMessage("", files: files, replyToMessage: nil)
     }
     
     private func listenToEvents(){
@@ -191,6 +191,8 @@ extension IQChannelsManager {
                 messagesRemoved(event)
             case .fileStatusUpdated:
                 fileStatusUpdated(event)
+            case .ratingIgnored:
+                ratingIgnored(event)
             default: break
             }
         }
@@ -378,17 +380,41 @@ extension IQChannelsManager {
         }
     }
     
-    func sendText(_ text: String, replyToMessage: Int?) {
+    func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
-                
-        let message = IQMessage(text: text, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: replyToMessage)
-        messages.append(message)
-        Task {
-            await sendMessage(message)
+        
+        if let files {
+            var hasNonValidatedFilesText: String? = nil
+            let newMessages = files.enumerated().compactMap { index, file -> IQMessage? in
+                hasNonValidatedFilesText = validate(file, with: fileLimit)
+                if(hasNonValidatedFilesText != nil){
+                    return nil
+                }
+                return IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), text: index == 0 ? text : nil, replyMessageID: index == 0 ? replyToMessage : nil)
+            }
+            messages.append(contentsOf: newMessages)
+    
+            Task {
+                for message in newMessages {
+                    await uploadFileMessage(message)
+                }
+            }
+    
+            if hasNonValidatedFilesText != nil {
+                DispatchQueue.main.async {
+                    self.detailViewModel?.errorListener.send(NSError.clientError(hasNonValidatedFilesText))
+                }
+            }
+        } else {
+            let message = IQMessage(text: text, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: replyToMessage)
+            messages.append(message)
+            Task {
+                await sendMessage(message)
+            }
         }
     }
     
-    func sendFiles(items: [(URL?, UIImage?)], replyToMessage: Int?) {
+    func sendFiles(items: [(URL?, UIImage?)]) {
         let files: [DataFile] = items.prefix(10).compactMap { (url, image) -> DataFile? in
             if let url {
                 defer { url.stopAccessingSecurityScopedResource() }
@@ -401,10 +427,10 @@ extension IQChannelsManager {
             return nil
         }
         
-        sendFiles(files, replyToMessage: replyToMessage)
+        selectFiles(files)
     }
     
-    func sendImages(result: [PHPickerResult], replyToMessage: Int?) {
+    func sendImages(result: [PHPickerResult]) {
         Task {
             var files = [DataFile]()
             await result.asyncForEach {
@@ -413,63 +439,45 @@ extension IQChannelsManager {
                 files.append(.init(data: data, filename: isGif ? "image.gif" : "image.jpeg"))
             }
             
-            sendFiles(files, replyToMessage: replyToMessage)
+            selectFiles(files)
         }
     }
     
-    private func sendFiles(_ files: [DataFile], replyToMessage: Int?) {
-        guard let selectedChat else { return }
-        
-        var hasNonValidatedFiles = false
-        let newMessages = files.enumerated().compactMap { index, file -> IQMessage? in
-            if !validate(file, with: fileLimit) {
-                hasNonValidatedFiles = true
-                return nil
-            }
-            return IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: index == 0 ? replyToMessage : nil)
-        }
-        messages.append(contentsOf: newMessages)
-        
-        Task {
-            for message in newMessages {
-                await uploadFileMessage(message)
-            }
-        }
-        
-        if hasNonValidatedFiles {
-            DispatchQueue.main.async {
-                self.detailViewModel?.errorListener.send(NSError.clientError("Некоторые файлы не соответствуют установленным лимитам."))
-            }
+    private func selectFiles(_ files: [DataFile]) {
+        DispatchQueue.main.async {
+            self.detailViewModel?.selectedFiles = files
         }
     }
     
-    private func validate(_ file: DataFile, with limits: IQFileConfig?) -> Bool {
-        guard let limits else { return true }
+    
+    
+    private func validate(_ file: DataFile, with limits: IQFileConfig?) -> String? {
+        guard let limits else { return nil }
         
         let dataMB = file.data.count / 1024 / 1024
         if let size = limits.maxFileSizeMb, dataMB > size {
-            return false
+            return "Превышен максимально допустимый размер файла"
         }
         
         if let maxImageHeight = limits.maxImageHeight,
            let maxImageWidth = limits.maxImageWidth,
            let image = UIImage(data: file.data),
            Int(image.size.height) > maxImageHeight || Int(image.size.width) > maxImageWidth {
-            return false
+            return "Слишком большая ширина или высота изображения"
         }
         
         if let fileExtensions = file.filename.components(separatedBy: ".")[safe: 1] {
             if let allowedExtensions = limits.allowedExtensions,
                !allowedExtensions.contains(fileExtensions) {
-                return false
+                return "Неподдерживаемый тип файла"
             }
             if let forbiddenExtensions = limits.forbiddenExtensions,
                forbiddenExtensions.contains(fileExtensions) {
-                return false
+                return "Запрещенный тип файла"
             }
         }
         
-        return true
+        return nil
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
@@ -592,8 +600,8 @@ extension IQChannelsManager {
         guard let networkManager = currentNetworkManager, let selectedChat else { return }
         
         networkManager.stopListenToEvents()
-        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType))
-        let newMessages = (result.result ?? [])
+        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType)).result
+        let newMessages = (result?.0 ?? [])
             .filter { $0.hasValidPayload }
             .filter { indexOfMessage(messageID: $0.messageID) == nil }
         print("Missed messages: ", newMessages.map { $0.text })
@@ -613,14 +621,17 @@ extension IQChannelsManager {
             messages = []
             networkManager.stopListenToEvents()
             DispatchQueue.main.async { self.detailViewModel?.isLoading = true }
-            let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType))
+            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType))
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             if let error = result.error {
                 baseViewModels.sendError(error)
                 return
             }
+            self.systemChat = result.result?.1 ?? false
+            let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
-            let results = (result.result ?? []).filter { $0.hasValidPayload }
+            print("self.systemChat    \(self.systemChat)")
+            
             messages = results
             listenToEvents()
             
@@ -662,7 +673,7 @@ extension IQChannelsManager {
                 return
             }
             
-            let newMessages = result.result?.filter { indexOfMessage(messageID: $0.messageID) == nil && $0.hasValidPayload } ?? []
+            let newMessages = result.result?.0.filter { indexOfMessage(messageID: $0.messageID) == nil && $0.hasValidPayload } ?? []
             messages.insert(contentsOf: newMessages, at: 0)
             markAsReceived(newMessages.map { $0.messageID })
         }

@@ -11,9 +11,23 @@ struct FilePreviewCellView: View {
     private let onFileTapCompletion: (() -> Void)?
     private let onCancelFileSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
+    private let text: String
     private let isSender: Bool
     
     @State private var showMessageLoading: Bool = false
+    
+    
+    var textColor: UIColor {
+        let textOperator = Style.getUIColor(theme: Style.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
+        let textClient = Style.getUIColor(theme: Style.model?.messages?.textClient?.color) ?? UIColor.white
+        return self.isSender ? textClient : textOperator
+    }
+    
+    var fontSize: CGFloat {
+        let sizeOperator = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
+        let sizeClient = CGFloat(Style.model?.messages?.textClient?.textSize ?? 17)
+        return self.isSender ? sizeClient : sizeOperator
+    }
     
     var backgroundColor: Color {
         let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
@@ -62,6 +76,7 @@ struct FilePreviewCellView: View {
         self.onFileTapCompletion = onFileTapCompletion
         self.onCancelFileSendCompletion = onCancelFileSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
+        self.text = message.text ?? ""
         self.isSender = message.isMy
     }
     
@@ -86,6 +101,15 @@ struct FilePreviewCellView: View {
                         getApprovedStateView(file)
                     }
                 }
+            }
+            
+            if(text != ""){
+                let data = AttributeTextManager.shared.getString(from: text,
+                                                                 textColor: textColor,
+                                                                 fontSize: fontSize)
+                TextLabel(text: data.0,
+                          linkRanges: data.1)
+                .layoutPriority(1)
             }
             
             MessageStatusView(message: message)

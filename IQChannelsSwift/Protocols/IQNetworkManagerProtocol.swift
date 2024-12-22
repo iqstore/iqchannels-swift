@@ -22,7 +22,7 @@ protocol IQNetworkManagerProtocol {
     func sendReadEvent(_ messageIDs: [Int]) async -> Error?
     func sendTypingEvent() async -> Error?
     func getFile(id: String) async throws -> IQFile?
-    func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<[IQMessage]>
+    func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<([IQMessage], Bool)>
     func rate(value: Int, ratingID: Int) async -> Error?
     func sendPoll(request: IQSendPollRequest) async -> Error?
     func finishPoll(ratingId: Int, pollId: Int, rated: Bool) async -> Error?

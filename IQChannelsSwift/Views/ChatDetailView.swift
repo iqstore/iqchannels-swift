@@ -32,6 +32,7 @@ struct ChatDetailView: View {
                 ChatMessagesView(delegate: delegate)
                 ChatInputView(text: $viewModel.inputText,
                               messageToReply: $viewModel.messageToReply,
+                              selectedFiles: $viewModel.selectedFiles,
                               disableInput: viewModel.messages.first?.disableFreeText ?? false,
                               onAttachmentCompletion: {
                     delegate?.onAttachmentTap()
@@ -39,6 +40,7 @@ struct ChatDetailView: View {
                     delegate?.onSendMessage(viewModel.inputText)
                     viewModel.inputText = ""
                     viewModel.messageToReply = nil
+                    viewModel.selectedFiles = nil
                 })
             }
             .zIndex(0)
