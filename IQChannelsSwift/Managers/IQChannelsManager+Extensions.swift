@@ -9,6 +9,7 @@ import PhotosUI
 import SDWebImage
 import Combine
 
+private var selectedChatSubscription: AnyCancellable?
 //MARK: - Private Methods
 extension IQChannelsManager {
     
@@ -66,17 +67,6 @@ extension IQChannelsManager {
     }
     
     func configureCombine(){
-        $selectedChat.sink { [weak self] (chat) in
-            Task { [weak self] in
-                DispatchQueue.main.async { [weak self] in
-                    if let self {
-                        listenToUnread()
-                        loadMessages()
-                    }
-                }
-            }
-        }.store(in: &subscriptions)
-        
         $state.receive(on: DispatchQueue.main).sink { [weak self] state in
             guard let self else { return }
             
