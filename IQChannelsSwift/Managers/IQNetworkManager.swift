@@ -242,7 +242,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     func finishPoll(ratingId: Int, pollId: Int, rated: Bool) async -> Error? {
         let path = "/ratings/finish_poll"
         let params: [String: Any] = ["RatingId": ratingId, "RatingPollId": pollId, "Rated": rated]
-        let response = await post(path, need: false, body: params, responseType: IQEmptyResponse.self)
+        let response = await post(path, body: params, responseType: IQEmptyResponse.self)
         
         IQLog.debug(message: "finishPoll: \n params: \(params) \n response: \(response)")
         
