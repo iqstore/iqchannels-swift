@@ -22,9 +22,9 @@ PODS:
     - SDWebImageSwiftUI (= 3.0.4)
   - IQChannelsSwift/Views (1.0.0):
     - SDWebImageSwiftUI (= 3.0.4)
-  - SDWebImage (5.19.1):
-    - SDWebImage/Core (= 5.19.1)
-  - SDWebImage/Core (5.19.1)
+  - SDWebImage (5.20.0):
+    - SDWebImage/Core (= 5.20.0)
+  - SDWebImage/Core (5.20.0)
   - SDWebImageSwiftUI (3.0.4):
     - SDWebImage (~> 5.10)
 
@@ -42,7 +42,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   IQChannelsSwift: 6aeb239ad22f474599d22e0326b2dfdb9b1909d0
-  SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
+  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
   SDWebImageSwiftUI: 824628d8220906aa101f62b39a7492edd138449d
 
 PODFILE CHECKSUM: ee70ba7dbc3b90f5b6556e8ca35309367e3b50cb
