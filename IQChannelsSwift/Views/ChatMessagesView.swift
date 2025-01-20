@@ -19,11 +19,6 @@ struct ChatMessagesView: View {
                     Color.clear.frame(height: 1)
                         .id("last")
                     
-                    if let typingUser = viewModel.typingUser {
-                        getTypingView(user: typingUser)
-                            .modifier(FlippedUpsideDown())
-                    }
-                    
                     ForEach(viewModel.messages) { message in
                         let index = viewModel.messages.firstIndex(of: message) ?? 0
                         VStack(spacing: 8) {
@@ -125,24 +120,6 @@ struct ChatMessagesView: View {
             .font(.system(size: fontSize))
             .foregroundColor(color)
             .padding(.vertical, 12)
-    }
-    
-    @ViewBuilder
-    private func getTypingView(user: IQUser) -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
-        let textColor = Style.getColor(theme: Style.model?.messages?.textOperator?.color) ?? Color(hex: "242729")
-        let fontSize = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
-        ZStack {
-            Text("\(user.displayName ?? "") печатает...")
-                .font(.system(size: fontSize))
-                .foregroundColor(textColor)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(backgroundColor)
-                .cornerRadius(12)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.leading, 48)
     }
     
     @ViewBuilder
