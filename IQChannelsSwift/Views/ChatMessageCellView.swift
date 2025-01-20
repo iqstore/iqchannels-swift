@@ -71,11 +71,12 @@ struct ChatMessageCellView: View {
             .padding(isSender ? .leading : .trailing, 48)
             .offset(x: dragAmountX)
             .animation(.bouncy, value: dragAmountX)
-            .simultaneousGesture(
-                DragGesture()
+            .background(Color(white: 1, opacity: 0.000001))
+            .gesture(
+                DragGesture(minimumDistance: 30, coordinateSpace: .local)
                     .onChanged { dragValue in
                         if dragValue.translation.width < 0,
-                           dragValue.translation.width > -(UIScreen.screenWidth / 3){
+                           dragValue.translation.width > -(UIScreen.main.bounds.width / 3) {
                             dragAmountX = dragValue.translation.width
                         }
                     }
@@ -84,7 +85,7 @@ struct ChatMessageCellView: View {
                             triggerHapticFeedback(style: .rigid)
                             onReplyToMessage?(message)
                         }
-                        
+
                         dragAmountX = 0
                     }
             )
