@@ -31,7 +31,7 @@ struct FCRView: View {
     var body: some View {
         let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
         let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.colorDisabled) ?? Color(hex: "B7B7CA")
+        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
         
         HStack() {
             ForEach(answers) { answer in

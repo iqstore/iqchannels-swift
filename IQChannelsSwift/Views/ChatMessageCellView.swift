@@ -19,6 +19,10 @@ struct ChatMessageCellView: View {
     
     @State private var dragAmountX: CGFloat = 0
     
+    var backgroundColor: Color {
+        return Style.getColor(theme: Style.model?.chat?.background) ?? Color(hex: "919399")
+    }
+    
     var senderTextColor: Color {
         return Style.getColor(theme: Style.model?.messages?.textUp?.color) ?? Color(hex: "919399")
     }

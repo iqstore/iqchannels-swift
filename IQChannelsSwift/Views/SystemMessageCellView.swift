@@ -25,7 +25,7 @@ struct SystemMessageCellView: View {
     }
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.backgroundContainer) ?? Color(hex: "F4F4F8")
+        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
     
     // MARK: - INIT

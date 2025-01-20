@@ -102,7 +102,7 @@ struct ChatInputView: View {
                 }
             }
             
-            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat) ?? Color(hex: "F4F4F8")
+            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat?.color) ?? Color(hex: "F4F4F8")
             let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textChat?.color) ?? UIColor(hex: "242729")
             let fontSize = CGFloat(Style.model?.toolsToMessage?.textChat?.textSize ?? 17)
             ComposerInputView(text: $text,
