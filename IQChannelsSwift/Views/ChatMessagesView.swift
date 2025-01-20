@@ -149,8 +149,10 @@ struct ChatMessagesView: View {
     private func getScrollDownButton(proxy: ScrollViewProxy) -> some View {
         if isScrollDownVisible {
             Button {
-                withAnimation(.easeInOut) {
-                    proxy.scrollTo("last", anchor: .bottom)
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo("last", anchor: .bottom)
+                    }
                 }
             } label: {
                 ZStack(alignment: .topTrailing) {
