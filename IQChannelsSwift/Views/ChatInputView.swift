@@ -38,6 +38,10 @@ struct ChatInputView: View {
     // MARK: - BODY
     var body: some View {
         VStack(spacing: 0) {
+            if let typingUser = viewModel.typingUser {
+                getTypingView(user: typingUser)
+            }
+            
             Group {
                 if let messageToReply {
                     VStack(spacing: 0) {
@@ -282,5 +286,21 @@ struct ChatInputView: View {
         .frame(height: 56)
         .padding(.horizontal, 8)
         .background(backgroundColor)
+    }
+    
+    @ViewBuilder
+    private func getTypingView(user: IQUser) -> some View {
+        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
+        ZStack {
+            Text("\(user.displayName ?? "") печатает...")
+                .font(.system(size: fontSize))
+                .foregroundColor(textColor)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 12)
+                .cornerRadius(12)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 48)
     }
 }
