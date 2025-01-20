@@ -18,6 +18,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     let relationManager: IQRelationManager
     var eventsListener: IQEventSourceManager?
     var unreadListener: IQEventSourceManager?
+    var unreadCount: Int?
+    
     lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
     
     init(address: String, channel: String) {
@@ -91,7 +93,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                 callback(nil, nil)
                 return
             }
-            IQLog.debug(message: "listenToUnread: \(result?.value ?? 0)")
+            self.unreadCount = result?.value ?? 0
+            IQLog.debug(message: "listenToUnread: \(String(describing: self.unreadCount))")
             
             callback(result?.value ?? 0, nil)
         }
@@ -211,6 +214,14 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                     operatorName: settings.operatorName
                 ))
             }
+        }
+        
+        let unreadMessagesCount = value.filter { $0.isRead == nil && $0.author == .user}.count
+        if(unreadMessagesCount > 0){
+            value.insert(
+                IQMessage(newMsgHeader: true),
+                at: value.count - unreadMessagesCount
+            )
         }
         
         self.relationManager.chatMessages(&value, with: result.relations)

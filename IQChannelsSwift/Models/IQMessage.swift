@@ -41,6 +41,8 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var id: String = UUID().uuidString
     var chatType: IQChatType?
     var eventID: Int?
+    var upload: String?
+    var newMsgHeader: Bool = false
 
     //MARK: - Relations
     var client: IQClient?
@@ -166,6 +168,15 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.text = text
         self.payload = .text
         self.user = IQUser(id: 0, displayName: operatorName)
+    }
+    
+    init(newMsgHeader: Bool) {
+        self.author = .system
+        self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
+        self.localID = 0
+        self.payload = .text
+        self.newMsgHeader = true
+        self.isSystem = true
     }
     
     private init(localID: Int, chatType: IQChatType, replyMessageID: Int?) {

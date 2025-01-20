@@ -31,7 +31,7 @@ struct ChatMessagesView: View {
                                 getDatePreviewView(date: message.createdDate.formatRelatively())
                             }
                             
-                            if message.messageID == viewModel.idOfNewMessage {
+                            if message.newMsgHeader {
                                 getNewMessagesView()
                             }
                             
@@ -195,11 +195,11 @@ struct ChatMessagesView: View {
     private func getNewMessagesView() -> some View {
         Text("Новые сообщения")
             .foregroundColor(.gray)
-            .font(.system(size: 14))
+            .font(.system(size: 18))
             .frame(height: 24)
             .frame(maxWidth: .infinity)
             .background(Color(hex: "F4F4F8"))
-            .padding(.vertical, 12)
+            .padding(.top, 12)
             .padding(.horizontal, -16)
     }
     
