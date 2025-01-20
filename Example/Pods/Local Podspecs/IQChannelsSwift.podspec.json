@@ -33,6 +33,9 @@
   "dependencies": {
     "SDWebImageSwiftUI": [
       "3.0.4"
+    ],
+    "SQLite.swift": [
+      "0.15.3"
     ]
   },
   "subspecs": [
@@ -63,6 +66,10 @@
     {
       "name": "Extensions",
       "source_files": "IQChannelsSwift/Extensions/**/*"
+    },
+    {
+      "name": "Database",
+      "source_files": "IQChannelsSwift/Database/**/*"
     }
   ]
 }

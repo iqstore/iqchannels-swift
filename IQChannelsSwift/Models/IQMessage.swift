@@ -14,6 +14,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var messageID: Int = 0
     var localID: Int?
     var fileID: String?
+    var chatID: Int?
     var createdAt: Int?
     var userID: Int?
     var clientID: Int?
@@ -33,7 +34,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
+        case payload, text, userID, clientID, fileID, chatID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
     }
 
     //MARK: - Custom
@@ -164,8 +165,9 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(text: String, operatorName: String) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
-        self.localID = Int(Date().timeIntervalSince1970 * 1000)
+        self.localID = 0
         self.text = text
+        self.isRead = true
         self.payload = .text
         self.user = IQUser(id: 0, displayName: operatorName)
     }

@@ -8,7 +8,7 @@
 import PhotosUI
 
 extension PHPickerResult {
-    func data(maxSizeInMB: CGFloat = 10.0) async -> Data? {
+    public func data(maxSizeInMB: CGFloat = 10.0) async -> Data? {
         await withUnsafeContinuation { continuation in
             let itemProvider = itemProvider
             

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct IQClient: Decodable, Equatable {
+struct IQClient: Equatable, Codable {
     var id: Int = 0
     var name: String?
     var integrationId: String?

@@ -226,6 +226,10 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         self.relationManager.chatMessages(&value, with: result.relations)
         
+        for message in value{
+            IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
+        }
+        
         IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
         
         return .init(result: (value, systemChat))

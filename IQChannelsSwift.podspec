@@ -60,6 +60,10 @@ Pod::Spec.new do |s|
         spec.source_files = 'IQChannelsSwift/Extensions/**/*'
     end
     
+    s.subspec 'Database' do |spec|
+        spec.source_files = 'IQChannelsSwift/Database/**/*'
+    end
+    
     s.resource_bundles = {
         'IQChannelsSwift' => ['IQChannelsSwift/Assets/Assets.xcassets', 'IQChannelsSwift/PrivacyInfo.xcprivacy']
     }
@@ -67,5 +71,6 @@ Pod::Spec.new do |s|
     s.frameworks = 'UIKit'
 #    s.dependency 'TRVSEventSource', '0.0.8'
     s.dependency 'SDWebImageSwiftUI', '3.0.4'
+    s.dependency 'SQLite.swift', '0.15.3'
     # s.dependency 'AFNetworking', '~> 2.3'
 end

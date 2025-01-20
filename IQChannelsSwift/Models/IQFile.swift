@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct IQFile: Decodable, Equatable {
+struct IQFile: Equatable, Codable {
     
     // MARK: - PROPERTIES
     var id: String?

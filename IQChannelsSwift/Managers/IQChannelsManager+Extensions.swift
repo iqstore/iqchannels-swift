@@ -380,7 +380,7 @@ extension IQChannelsManager {
         }
     }
     
-    func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
+    public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
         
         if let files {
@@ -392,6 +392,14 @@ extension IQChannelsManager {
                 }
                 return IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), text: index == 0 ? text : nil, replyMessageID: index == 0 ? replyToMessage : nil)
             }
+            
+            if hasNonValidatedFilesText != nil {
+                DispatchQueue.main.async {
+                    self.detailViewModel?.errorListener.send(NSError.clientError(hasNonValidatedFilesText))
+                }
+                return
+            }
+            
             messages.append(contentsOf: newMessages)
     
             Task {
@@ -400,11 +408,6 @@ extension IQChannelsManager {
                 }
             }
     
-            if hasNonValidatedFilesText != nil {
-                DispatchQueue.main.async {
-                    self.detailViewModel?.errorListener.send(NSError.clientError(hasNonValidatedFilesText))
-                }
-            }
         } else {
             let message = IQMessage(text: text, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: replyToMessage)
             messages.append(message)
@@ -444,8 +447,10 @@ extension IQChannelsManager {
     }
     
     private func selectFiles(_ files: [DataFile]) {
-        DispatchQueue.main.async {
-            self.detailViewModel?.selectedFiles = files
+        if (!files.isEmpty){
+            DispatchQueue.main.async {
+                self.detailViewModel?.selectedFiles = files
+            }
         }
     }
     
@@ -476,13 +481,13 @@ extension IQChannelsManager {
                 return "Запрещенный тип файла"
             }
         }
-        
         return nil
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
         if let messageIndex = indexOfMyMessage(localID: message.localID) {
             messages.remove(at: messageIndex)
+            IQDatabaseManager.shared.deleteMessageByLocalId(message.localID ?? 0)
         }
         if let taskID = message.file?.taskIdentifier {
             currentNetworkManager?.cancelTask(with: taskID)
@@ -494,6 +499,8 @@ extension IQChannelsManager {
               let dataFile = message.file?.dataFile,
               indexOfMyMessage(localID: message.localID) != nil else { return }
         
+        IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
+        
         let response = await networkManager.uploadFile(file: dataFile) { [weak self] taskIdentifier in
             if let index = self?.indexOfMyMessage(localID: message.localID) {
                 self?.messages[index].file?.taskIdentifier = taskIdentifier
@@ -503,7 +510,6 @@ extension IQChannelsManager {
         if response.error != nil {
             if let error = response.error {
                 if let index = indexOfMyMessage(localID: message.localID) {
-                    messages.remove(at: index)
                     baseViewModels.sendError(error)
                 }
             } else {
@@ -533,11 +539,6 @@ extension IQChannelsManager {
                 self.detailViewModel?.scrollDotHidden = true
             }
         }
-
-        if !isLoadingOldMessages,
-           index <= 15 {
-            loadOldMessages()
-        }
     }
     
     private func markAsRead(_ messageID: Int ){
@@ -561,6 +562,8 @@ extension IQChannelsManager {
     }
     
     private func sendMessage(_ message: IQMessage) async {
+        IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
+        
         DispatchQueue.main.async { [self] in
             detailViewModel?.idOfNewMessage = nil
         }
@@ -620,9 +623,12 @@ extension IQChannelsManager {
             
             messages = []
             networkManager.stopListenToEvents()
+            
             DispatchQueue.main.async { self.detailViewModel?.isLoading = true }
+            
             let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType))
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
+            
             if let error = result.error {
                 baseViewModels.sendError(error)
                 return
@@ -630,11 +636,11 @@ extension IQChannelsManager {
             self.systemChat = result.result?.1 ?? false
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
-            print("self.systemChat    \(self.systemChat)")
-            
             messages = results
             listenToEvents()
             
+            await sendUnsendMessages()
+            await sendPreFillMessages()
             
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -694,6 +700,7 @@ extension IQChannelsManager {
     private func messageCreated(_ event: IQChatEvent) {
         guard let message = event.message else { return }
         
+        IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
         if let index = indexOfMyMessage(localID: message.localID){
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
@@ -747,6 +754,38 @@ extension IQChannelsManager {
         return tempLocalId
     }
     
+    private func sendUnsendMessages() async {
+        let unsentMessagesFromLocalDatabase = IQDatabaseManager.shared.getAllMessages().filter { $0.messageID == 0 && $0.author == "\"client\""}
+        
+        print("неотправленные сообщения:   \(unsentMessagesFromLocalDatabase.count)")
+        
+        for unsentMessage in unsentMessagesFromLocalDatabase {
+            messages.append(IQMessage(from: unsentMessage))
+            if(unsentMessage.file != nil){
+                await uploadFileMessage(IQMessage(from: unsentMessage))
+            } else {
+                await sendMessage(IQMessage(from: unsentMessage))
+            }
+        }
+    }
+    
+    private func sendPreFillMessages() async {
+        guard let preFillMessages = config.preFillMessages else { return }
+        
+        print("preFillMessages    \(preFillMessages)")
+        
+        let texts = preFillMessages.textMsg
+        let files = preFillMessages.fileMsg
+        
+        if let texts {
+            for text in texts {
+                sendMessage(text, files: nil, replyToMessage: nil)
+            }
+        }
+        if let files {
+            sendMessage("", files: files, replyToMessage: nil)
+        }
+    }
 }
 
 //MARK: - Auth

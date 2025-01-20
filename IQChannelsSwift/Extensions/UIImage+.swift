@@ -13,7 +13,7 @@ extension UIImage {
         self.init(named: name, in: .libraryBundle(), compatibleWith: nil)
     }
 
-    func dataRepresentation(withMaxSizeMB maxSizeMB: CGFloat = 10.0) -> Data? {
+    public func dataRepresentation(withMaxSizeMB maxSizeMB: CGFloat = 10.0) -> Data? {
         guard let originalImageData = self.jpegData(compressionQuality: 1) else {
             return nil
         }

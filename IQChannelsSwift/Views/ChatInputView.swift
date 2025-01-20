@@ -10,6 +10,7 @@ enum CustomTextAreaConfig {
 struct ChatInputView: View {
     
     // MARK: - PROPERTIES
+    @EnvironmentObject var viewModel: IQChatDetailViewModel
     @Environment(\.colorScheme) var colorScheme
     
     @Binding var text: String
