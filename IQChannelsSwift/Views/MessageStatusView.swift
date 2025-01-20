@@ -11,11 +11,19 @@ struct MessageStatusView: View {
     @State private var showMessageLoading: Bool = false
     
     var textColor: Color {
-        return Style.getColor(theme: Style.model?.messages?.textTime?.color) ?? Color(hex: "919399")
+        if(message.isMy){
+            return Style.getColor(theme: Style.model?.messages?.textClient?.color) ?? Color(hex: "919399")
+        }else{
+            return Style.getColor(theme: Style.model?.messages?.textOperator?.color) ?? Color(hex: "919399")
+        }
     }
     
     var fontSize: CGFloat {
-        return CGFloat(Style.model?.messages?.textTime?.textSize ?? 13)
+        if(message.isMy){
+            return CGFloat(Style.model?.messages?.textClient?.textSize ?? 13)
+        }else{
+            return CGFloat(Style.model?.messages?.textOperator?.textSize ?? 13)
+        }
     }
     
     // MARK: - INIT

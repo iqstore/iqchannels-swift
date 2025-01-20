@@ -61,8 +61,8 @@ struct ScaleView: View {
         let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
         let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
         let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.colorEnabled) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.colorDisabled) ?? Color(hex: "B7B7CA")
+        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled) ?? Color(hex: "DD0A34")
+        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
         
         HStack(spacing: 5) {
             ForEach(minValue...maxValue, id: \.self) { i in
