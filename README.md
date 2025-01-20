@@ -9,7 +9,7 @@
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.0.5'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.0'
 ```
 
 Затем выполните команду:
@@ -297,17 +297,156 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ```json
 {
-  "chat": {                   //Общий чат:
-    "background": {           //Фон чата
+  "signup": {                 //Авторизация:
+    "background": {           //Фон
       "light": "#FFFFFF",     //Цвет для светлой темы
       "dark": "#FFFFE0"       //Цвет для темной темы
+    },
+    "title": {                //Заголовок
+      "color": {              //Цвета для светлой и темной темы
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,        //Размер текста
+      "text_align": "center", //Выравнивание текста
+      "text_style": {
+        "bold": true,         //Жирность
+        "italic": false       //Курсив
+      }
+    },
+    "subtitle": {             //Подзаголовок
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "input_background": {     //Фон области ввода имени
+      "color": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+      },
+      "border": {             //Обводка
+        "size": 0,            //Толщина
+        "color": {            //Цвета для светлой и темной темы
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0    //Скругление
+      }
+    },
+    "input_text": {           //Текст в поле ввода
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "left",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "check_box_text": {       //Текст возле чекбокса
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "left",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "button": {               //Кнопка входа
+      "background_enabled": { //Активная кнопка
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "background_disabled": { //Неактивная кнопка
+        "color": {
+          "light": "#555555",
+          "dark": "#555555"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "text_enabled": {       //Текст на активной кнопке
+        "color": {
+          "light": "#FFFFFF",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      },
+      "text_disabled": {      //Текст на неактивной кнопке
+        "color": {
+          "light": "#FFFFFF",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      }
+    },
+    "error_text": {           //Текст ошибки
+      "color": {
+        "light": "#c70037",
+        "dark": "#c70037"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
+  },
+  "chat": {                   //Общий чат:
+    "background": {           //Фон чата
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
     },
     "date_text": {            //Текст относительной даты чата (по середине)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 13         //Размер текста
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "chat_history": {         //Верхний индикатор загрузки предыдущих сообщений
       "light": "#008080",
@@ -324,133 +463,245 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#888888"
       },
       "text_size": 10,
-      "text_align": "center", //Выравнивание текста
+      "text_align": "center",
       "text_style": {
-        "bold": false,        //Жирность
-        "italic": true        //Курсив
+        "bold": false,
+        "italic": true
       }
     }
   },
   "messages": {               //Сообщение отправка текста (стили применяются ко всем производным сообщениям):
     "background_operator": {  //Фон контейнера (оператор)
-      "light": "#FFFFE0",
-      "dark": "#808080"
+      "color": {
+        "light": "#FFFFE0",
+        "dark": "#808080"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
     },
     "background_client": {    //Фон контейнера (клиент)
-      "light": "#242729",
-      "dark": "#808080"
+       "color": {
+        "light": "#242729",
+        "dark": "#808080"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
     },
     "text_operator": {        //Текст сообщения (оператор)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_client": {          //Текст сообщения (клиент)
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "reply_text_client": {    //Основной текст ответа со стороны клиента
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "reply_sender_text_client": {   //Текст сообщения, на которое ответил клиент
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "reply_text_operator": {        //Основной текст ответа со стороны оператора
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "reply_sender_text_operator": { //Текст сообщения, на которое ответил оператор
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
-    "text_time": {            //Текст времени доставки
+    "text_time_operator": {         //Текст времени доставки (Оператор)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
-    "text_up": {              //Текст над контейнером (Имя оператора/бота)
+    "text_time_client": {           //Текст времени доставки (Клиент)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "text_up": {                    //Текст над контейнером (Имя оператора/бота)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_rejected_operator": { // Текст файла от оператора при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_on_checking_operator": { // Текст файла от оператора при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_sent_for_checking_operator": { // Текст файла от оператора при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_check_error_operator": { // Текст файла от оператора при статусе check_error
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_rejected_client": { // Текст файла от клиента при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_on_checking_client": { // Текст файла от клиента при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_sent_for_checking_client": { // Текст файла от клиента при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_state_check_error_client": { // Текст файла от клиента при статусе check_error
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     }
   },
   "answer": {                 //Ответ на сообщения:
@@ -459,14 +710,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_message": {         //Текст сообщения в отвеченном сообщении
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "background_text_up_message": {       //Фон текста сообщения над полем ввода
       "light": "#FFFACD",
@@ -484,14 +745,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_filename_operator": {           //Цвет названия файла со стороны оператора
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "icon_file_client": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",      //Иконка файла со стороны клиента
     "icon_file_operator": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",    //Иконка файла со стороны оператора
@@ -500,45 +771,277 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_file_size_operator": {            //Цвет размера названия файла со стороны оператора
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     }
   },
   "rating": {                             //Сообщение оценки качества:
     "background_container": {             //Фон контейнера - по умолчанию как у сообщения
-      "light": "#FFFACD",
-      "dark": "#808080"
+      "color": {
+        "light": "#FFFACD",
+        "dark": "#808080"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "rating_title": {                     //Заголовок вопроса
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",    //Закрашенная звезда – вид иконки(изменяется с помощью файла с иконкой)
     "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png", //Незакрашенная звезда – вид иконки(изменяется с помощью файла с иконкой)
     "sent_rating": {                      //Кнопка отправки оценки
-      "color_enabled": {                  //Цвет активной кнопки
-        "light": "#008080",
-        "dark": "#008080"
+      "background_enabled": {             //Активная кнопка
+        "color": {
+          "light": "#008080",
+          "dark": "#008080"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
       },
-      "color_disabled": {                 //Цвет неактивной кнопки
-        "light": "#B7B7CA",
-        "dark": "#B7B7CA"
+      "background_disabled": {            //Неактивная кнопка
+        "color": {
+          "light": "#B7B7CA",
+          "dark": "#B7B7CA"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
       },
       "text_enabled": {                   //Текст на активной кнопке
         "color": {
           "light": "#ffffff",
           "dark": "#FFFFFF"
         },
-        "text_size": 10
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
       },
       "text_disabled": {                  //Текст на неактивной кнопке
         "color": {
           "light": "#ffffff",
           "dark": "#FFFFFF"
         },
-        "text_size": 10
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      }
+    },
+    "answer_button": {                    //Кнопки выбора в вопросе
+      "background_enabled": {             //Активная кнопка
+        "color": {
+          "light": "#008080",
+          "dark": "#008080"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "background_disabled": {            //Неактивная кнопка
+        "color": {
+          "light": "#B7B7CA",
+          "dark": "#B7B7CA"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "text_enabled": {                   //Текст на активной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      },
+      "text_disabled": {                  //Текст на неактивной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      }
+    },
+    "scale_button": {                     //Кнопки в вопросе типа "Scale"
+      "background_enabled": {             //Активная кнопка
+        "color": {
+          "light": "#008080",
+          "dark": "#008080"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "background_disabled": {            //Неактивная кнопка
+        "color": {
+          "light": "#B7B7CA",
+          "dark": "#B7B7CA"
+        },
+        "border": {
+          "size": 0,
+          "color": {
+            "light": "#000000",
+            "dark": "#000000"
+          },
+          "border-radius": 0
+        }
+      },
+      "text_enabled": {                   //Текст на активной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      },
+      "text_disabled": {                  //Текст на неактивной кнопке
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10,
+        "text_align": "center",
+        "text_style": {
+          "bold": false,
+          "italic": false
+        }
+      }
+    },
+    "scale_min_text": {                   //Текст низкой оценки (Scale)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "left",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "scale_max_text": {                   //Текст высокой оценки (Scale)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "right",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "input_background": {                 //Фон поля ввода в вопросе типа "Input"
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "input_text": {                       //Текст поля ввода в вопросе типа "Input"
+      "color": {
+        "light": "#000000",
+        "dark": "#000000"
+      },
+      "text_size": 10,
+      "text_align": "left",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "feedback_thanks_text": {             //Текст благодарности за прохождение опроса
+      "color": {
+        "light": "#000000",
+        "dark": "#000000"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
       }
     }
   },
@@ -549,15 +1052,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       "dark": "#696969"
     },
     "background_chat": {                  //Фон области ввода текста
-      "light": "#DEB887",
-      "dark": "#696969"
+      "color": {
+        "light": "#DEB887",
+        "dark": "#696969"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
     },
     "text_chat": {                        //Текст в поле ввода
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
   },
@@ -567,14 +1085,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 16
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "text_error": {                       //Основной текст
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
   },
@@ -596,7 +1124,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "background_IVR": {                 //Фон IVR кнопки Single-choice (isDropDown)
       "light": "#00000000",
@@ -615,7 +1148,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     }
   },
   "theme": "light"                      //Выбранная тема (светлая/темная)
