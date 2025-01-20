@@ -14,6 +14,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var messageID: Int = 0
     var localID: Int?
     var fileID: String?
+    var chatID: Int?
     var createdAt: Int?
     var userID: Int?
     var clientID: Int?
@@ -26,13 +27,14 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var botpressPayload: String?
     var isDropDown: Bool?
     var disableFreeText: Bool?
+    var isSystem: Bool = false
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
     
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
+        case payload, text, userID, clientID, fileID, chatID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author
     }
 
     //MARK: - Custom
@@ -40,6 +42,8 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var id: String = UUID().uuidString
     var chatType: IQChatType?
     var eventID: Int?
+    var upload: String?
+    var newMsgHeader: Bool = false
 
     //MARK: - Relations
     var client: IQClient?
@@ -66,7 +70,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     var isPendingRatingMessage: Bool {
-        return rating?.state == .pending
+        return rating?.state == .pending || rating?.state == .poll
     }
     
     var isMessageReplied: Bool {
@@ -106,10 +110,19 @@ struct IQMessage: Codable, Identifiable, Equatable {
         }
         
         if let rating {
+            
+            var toValue: Int?
+            if let questions = rating.ratingPoll?.questions {
+                toValue = questions
+                    .filter { $0.asTicketRating == true }
+                    .compactMap { $0.scale?.toValue }
+                    .first
+            }
+        
             switch rating.state {
             case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
-            case .ignored: return "Без оценки"
-            case .rated: return "Оценка принята! Спасибо, что помогаете нам стать лучше!"
+            case .ignored: return "Оценка не поставлена"
+            case .rated, .finished: return "Оценка оператора \(rating.value ?? 0) из \(toValue ?? 5)"
             default: return ""
             }
         }
@@ -128,9 +141,10 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.payload = .text
     }
     
-    init(dataFile: DataFile, chatType: IQChatType, localID: Int, replyMessageID: Int?) {
+    init(dataFile: DataFile, chatType: IQChatType, localID: Int, text: String?, replyMessageID: Int?) {
         self.init(localID: localID, chatType: chatType, replyMessageID: replyMessageID)
         self.payload = .file
+        self.text = text
         self.file = IQFile(dataFile: dataFile)
     }
     
@@ -146,6 +160,25 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.payload = .text
         self.text = choice.title
         self.botpressPayload = choice.value
+    }
+    
+    init(text: String, operatorName: String) {
+        self.author = .user
+        self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
+        self.localID = 0
+        self.text = text
+        self.isRead = true
+        self.payload = .text
+        self.user = IQUser(id: 0, displayName: operatorName)
+    }
+    
+    init(newMsgHeader: Bool) {
+        self.author = .system
+        self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
+        self.localID = 0
+        self.payload = .text
+        self.newMsgHeader = true
+        self.isSystem = true
     }
     
     private init(localID: Int, chatType: IQChatType, replyMessageID: Int?) {

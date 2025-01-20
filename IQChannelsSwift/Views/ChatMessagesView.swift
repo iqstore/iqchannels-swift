@@ -19,11 +19,6 @@ struct ChatMessagesView: View {
                     Color.clear.frame(height: 1)
                         .id("last")
                     
-                    if let typingUser = viewModel.typingUser {
-                        getTypingView(user: typingUser)
-                            .modifier(FlippedUpsideDown())
-                    }
-                    
                     ForEach(viewModel.messages) { message in
                         let index = viewModel.messages.firstIndex(of: message) ?? 0
                         VStack(spacing: 8) {
@@ -31,29 +26,52 @@ struct ChatMessagesView: View {
                                 getDatePreviewView(date: message.createdDate.formatRelatively())
                             }
                             
-                            if message.messageID == viewModel.idOfNewMessage {
+                            if message.newMsgHeader {
                                 getNewMessagesView()
                             }
                             
-                            let isLastMessage = message == viewModel.messages.first
-                            ChatMessageCellView(message: message,
-                                                replyMessage: viewModel.getMessage(with: message.replyToMessageID),
-                                                isGroupStart: isGroupStart(index),
-                                                isLastMessage: isLastMessage,
-                                                delegate: delegate,
-                                                onLongPress: { messageControlInfo in
-                                viewModel.showMessageControl(messageControlInfo)
-                            }, onReplyToMessage: { message in
-                                viewModel.messageToReply = message
-                            }, onReplyMessageTapCompletion: { messageId in
-                                if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
-                                    withAnimation(.easeInOut) {
-                                        proxy.scrollTo(id, anchor: .center)
+                            if let rating = message.rating {
+                                if(message.isPendingRatingMessage){
+                                    if (rating.state == .poll) {
+                                        if let ratingPoll = message.rating?.ratingPoll {
+                                            RatingPollCellView(rating: rating, ratingPoll: ratingPoll) { value, answers, ratingId, pollId, rated in
+                                                if(rated){
+                                                    delegate?.onSendPoll(value: value, answers: answers, ratingId: ratingId, pollId: pollId)
+                                                }else{
+                                                    delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
+                                                }
+                                            }
+                                        }
+                                        
+                                    } else{
+                                        RatingCellView(rating: rating) { value, ratingId in
+                                            delegate?.onRate(value: value, ratingId: ratingId)
+                                        }
                                     }
+                                }else{
+                                    SystemMessageCellView(message: message)
                                 }
-                            })
-                            .onAppear {
-                                delegate?.onMessageAppear(with: message.messageID)
+                            } else{
+                                let isLastMessage = message == viewModel.messages.first
+                                ChatMessageCellView(message: message,
+                                                    replyMessage: viewModel.getMessage(with: message.replyToMessageID),
+                                                    isGroupStart: isGroupStart(index),
+                                                    isLastMessage: isLastMessage,
+                                                    delegate: delegate,
+                                                    onLongPress: { messageControlInfo in
+                                    viewModel.showMessageControl(messageControlInfo)
+                                }, onReplyToMessage: { message in
+                                    viewModel.messageToReply = message
+                                }, onReplyMessageTapCompletion: { messageId in
+                                    if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
+                                        withAnimation(.easeInOut) {
+                                            proxy.scrollTo(id, anchor: .center)
+                                        }
+                                    }
+                                })
+                                .onAppear {
+                                    delegate?.onMessageAppear(with: message.messageID)
+                                }
                             }
                         }
                         .modifier(FlippedUpsideDown())
@@ -105,29 +123,13 @@ struct ChatMessagesView: View {
     }
     
     @ViewBuilder
-    private func getTypingView(user: IQUser) -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.messages?.backgroundOperator) ?? Color(hex: "F4F4F8")
-        let textColor = Style.getColor(theme: Style.model?.messages?.textOperator?.color) ?? Color(hex: "242729")
-        let fontSize = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
-        ZStack {
-            Text("\(user.displayName ?? "") печатает...")
-                .font(.system(size: fontSize))
-                .foregroundColor(textColor)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(backgroundColor)
-                .cornerRadius(12)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.leading, 48)
-    }
-    
-    @ViewBuilder
     private func getScrollDownButton(proxy: ScrollViewProxy) -> some View {
         if isScrollDownVisible {
             Button {
-                withAnimation(.easeInOut) {
-                    proxy.scrollTo("last", anchor: .bottom)
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo("last", anchor: .bottom)
+                    }
                 }
             } label: {
                 ZStack(alignment: .topTrailing) {
@@ -172,11 +174,11 @@ struct ChatMessagesView: View {
     private func getNewMessagesView() -> some View {
         Text("Новые сообщения")
             .foregroundColor(.gray)
-            .font(.system(size: 14))
+            .font(.system(size: 18))
             .frame(height: 24)
             .frame(maxWidth: .infinity)
             .background(Color(hex: "F4F4F8"))
-            .padding(.vertical, 12)
+            .padding(.top, 12)
             .padding(.horizontal, -16)
     }
     

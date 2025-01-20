@@ -8,7 +8,12 @@
 
 import Foundation
 
-struct DataFile: Codable, Equatable {
+public struct DataFile: Codable, Equatable {
     let data: Data
-    let filename: String
+    public let filename: String
+    
+    public init(data: Data, filename: String) {
+        self.data = data
+        self.filename = filename
+    }
 }

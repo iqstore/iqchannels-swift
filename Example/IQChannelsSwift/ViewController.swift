@@ -10,7 +10,6 @@ import UIKit
 import IQChannelsSwift
 
 class ViewController: UIViewController, UITextFieldDelegate {
-    
     private lazy var serverField: UITextField = {
         let field = UITextField()
         field.borderStyle = .roundedRect
@@ -94,9 +93,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return button
     }()
     
+    private lazy var preFilledMsgButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Предзаполненные сообщения", for: .normal)
+        button.addTarget(self, action: #selector(preFilledMsgDidTap), for: .touchUpInside)
+        return button
+    }()
+    
     private lazy var stackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, loginButton, anonButton, styleButton, styleDark, styleLight, styleSystem
+            serverField, emailField, channelsField, loginButton, anonButton, preFilledMsgButton, styleButton, styleDark, styleLight, styleSystem
         ])
         view.spacing = 16
         view.distribution = .fillEqually
@@ -108,6 +116,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
     
     var selectedStyle: Data?
+    var preFillMessages: IQPreFillMessages?
     
     var serverString = ""
     var channelsArray: [String] = []
@@ -117,6 +126,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         setDismissKeyboardOnTap()
         view.addSubview(stackView)
+        view.backgroundColor = .white
         
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -126,15 +136,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
         ])
         
         emailField.delegate = self
+        
         setServer(server: "https://iqchannels.isimplelab.com")
+//        setServer(server: "https://sandbox.iqstore.ru")
+//        setServer(server: "https://app3.iqstore.ru")
     }
 
     func setServer(server: String?) {
-        serverString = (server?.isEmpty ?? true) ? "https://sandbox.iqstore.ru/" : (server ?? "")
+        serverString = (server?.isEmpty ?? true) ? "" : (server ?? "")
         channelsArray = channelsField.text?.components(separatedBy: .whitespaces) ?? []
         let config = IQChannelsConfig(address: serverString,
                                       channels: channelsArray,
-                                      styleJson: selectedStyle)
+                                      styleJson: selectedStyle,
+                                      preFillMessages: preFillMessages)
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)
         configuration.setCustomHeaders(headers)
@@ -201,6 +215,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
         showMessages()
     }
     
+    @objc func preFilledMsgDidTap() {
+        setServer(server: serverField.text)
+        
+        let preFillMsgView = PreFillMsgView()
+        preFillMsgView.configuration = configuration
+        
+        preFillMsgView.setServer = { [weak self] preFillMessages in
+            self?.preFillMessages = preFillMessages
+            self?.setServer(server: self?.serverField.text)
+        }
+        
+        navigationController?.pushViewController(preFillMsgView, animated: true)
+    }
+    
     private func setDismissKeyboardOnTap() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
@@ -208,12 +236,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     private func showAlert(title: String, message: String) {
-            let alert: UIAlertController = .init(title: title,
-                                                 message: message,
-                                                 preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true, completion: nil)
-        }
+        let alert: UIAlertController = .init(title: title,
+                                             message: message,
+                                             preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true, completion: nil)
+    }
     
     @objc private func dismissKeyboard() {
         view.endEditing(true)

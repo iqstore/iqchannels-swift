@@ -12,6 +12,7 @@ struct IQResponse<T: Decodable>: Decodable {
     var ok: Bool
     var error: IQError?
     var result: T?
+    var data: T?
     var rels: IQRelations?
 
 }

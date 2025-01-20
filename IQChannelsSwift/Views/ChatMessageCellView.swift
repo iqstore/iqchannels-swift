@@ -19,6 +19,10 @@ struct ChatMessageCellView: View {
     
     @State private var dragAmountX: CGFloat = 0
     
+    var backgroundColor: Color {
+        return Style.getColor(theme: Style.model?.chat?.background) ?? Color(hex: "919399")
+    }
+    
     var senderTextColor: Color {
         return Style.getColor(theme: Style.model?.messages?.textUp?.color) ?? Color(hex: "919399")
     }
@@ -30,57 +34,65 @@ struct ChatMessageCellView: View {
     // MARK: - BODY
     var body: some View {
         let isSender = message.isMy
-        ZStack(alignment: .trailing) {
-            getReplyView()
-                .opacity(-dragAmountX / 56)
-                .offset(x: 56)
-            
-            HStack(alignment: .bottom, spacing: 8) {
-                if !isSender {
-                    getAvatarView(avatarURL: message.user?.avatarURL,
-                                  userDisplayName: message.senderName)
-                        .opacity(isGroupStart ? 1 : 0)
-                }
+        let isSystem = message.isSystem
+        
+        if !isSystem {
+            ZStack(alignment: .trailing) {
+                getReplyView()
+                    .opacity(-dragAmountX / 56)
+                    .offset(x: 56)
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    if !isSender,
-                        isGroupStart {
-                        Text(message.senderName)
-                            .font(.system(size: senderFontSize))
-                            .foregroundColor(senderTextColor)
-                            .padding(.leading, 12)
+                HStack(alignment: .bottom, spacing: 8) {
+                    if !isSender {
+                        getAvatarView(avatarURL: message.user?.avatarURL,
+                                      userDisplayName: message.senderName)
+                        .opacity(isGroupStart ? 1 : 0)
                     }
                     
-                    MessageCellBubbleView(message: message,
-                                          replyMessage: replyMessage,
-                                          isLastMessage: isLastMessage,
-                                          onLongPress: onLongPress,
-                                          onReplyMessageTapCompletion: onReplyMessageTapCompletion,
-                                          delegate: delegate)
+                    VStack(alignment: .leading, spacing: 4) {
+                        if !isSender,
+                           isGroupStart {
+                            Text(message.senderName)
+                                .font(.system(size: senderFontSize))
+                                .foregroundColor(senderTextColor)
+                                .padding(.leading, 12)
+                        }
+                        
+                        MessageCellBubbleView(message: message,
+                                              replyMessage: replyMessage,
+                                              isLastMessage: isLastMessage,
+                                              onLongPress: onLongPress,
+                                              onReplyMessageTapCompletion: onReplyMessageTapCompletion,
+                                              delegate: delegate)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: isSender ? .trailing : .leading)
+            .padding(isSender ? .leading : .trailing, 48)
+            .offset(x: dragAmountX)
+            .animation(.bouncy, value: dragAmountX)
+            .background(Color(white: 1, opacity: 0.000001))
+            .gesture(
+                DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                    .onChanged { dragValue in
+                        if dragValue.translation.width < 0,
+                           dragValue.translation.width > -(UIScreen.main.bounds.width / 3) {
+                            dragAmountX = dragValue.translation.width
+                        }
+                    }
+                    .onEnded { dragValue in
+                        if dragValue.translation.width < -60 {
+                            triggerHapticFeedback(style: .rigid)
+                            onReplyToMessage?(message)
+                        }
+
+                        dragAmountX = 0
+                    }
+            )
+        } else{
+            SystemMessageCellView(message: message)
         }
-        .frame(maxWidth: .infinity, alignment: isSender ? .trailing : .leading)
-        .padding(isSender ? .leading : .trailing, 48)
-        .offset(x: dragAmountX)
-        .animation(.bouncy, value: dragAmountX)
-        .simultaneousGesture(
-            DragGesture()
-                .onChanged { dragValue in
-                    if dragValue.translation.width < 0,
-                       dragValue.translation.width > -(UIScreen.screenWidth / 3){
-                        dragAmountX = dragValue.translation.width
-                    }
-                }
-                .onEnded { dragValue in
-                    if dragValue.translation.width < -60 {
-                        triggerHapticFeedback(style: .rigid)
-                        onReplyToMessage?(message)
-                    }
-                    
-                    dragAmountX = 0
-                }
-        )
+            
     }
     
     // MARK: - VIEWS

@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct IQUser: Decodable, Equatable {
+struct IQUser: Equatable, Codable {
     var id: Int
     var displayName: String?
     var avatarID: String?

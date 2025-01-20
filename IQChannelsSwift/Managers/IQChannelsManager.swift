@@ -20,6 +20,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     @Published var state: IQChannelsState = .awaitingNetwork
     @Published var messages: [IQMessage] = []
     @Published var detailViewModel: IQChatDetailViewModel?
+    @Published var systemChat: Bool = false
     var config: IQChannelsConfig
     var listViewModel: IQChatListViewModel?
     var baseViewModels: [IQBaseViewModel] {
@@ -115,6 +116,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     }
     
     func logout() {
+        IQLog.debug(message: "logout")
         listViewModel?.dismissListener.send(())
         clear()
     }

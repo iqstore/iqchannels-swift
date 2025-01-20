@@ -216,8 +216,7 @@ extension IQNetworkManager: URLSessionDelegate {
             if !response.ok {
                 return .init(error: NSError(response.error))
             }
-            
-            let result = IQResult(value: response.result, relations: relationManager.mapFromRelations(response.rels))
+            let result = IQResult(value: response.result ?? response.data, relations: relationManager.mapFromRelations(response.rels))
             return .init(result: result)
         } catch {
             return .init(error: error)

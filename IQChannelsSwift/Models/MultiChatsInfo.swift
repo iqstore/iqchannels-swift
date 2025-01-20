@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct IQMultiChatsInfo: Decodable, Equatable {
+struct IQMultiChatsInfo: Equatable, Codable {
     var personalManagerName: String?
     var channelName: String?
     var channelIconColor: String?

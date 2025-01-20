@@ -15,6 +15,7 @@ struct IQRelationMap {
     var clients: [Int: IQClient] = [:]
     var files: [String: IQFile] = [:]
     var ratings: [Int: IQRating] = [:]
+    var ratingPolls: [Int: IQRatingPoll] = [:]
     var users: [Int: IQUser] = [:]
     
     init() {
@@ -58,9 +59,10 @@ struct IQRelationMap {
             }
         }
         
-        if let ratings = relations?.ratings {
-            for rating in ratings {
-                self.ratings[rating.id] = rating
+        if var ratings = relations?.ratings {
+            for i in 0..<ratings.count {
+                ratings[i].ratingPoll = relations?.ratingPolls?.last
+                self.ratings[ratings[i].id] = ratings[i]
             }
         }
         

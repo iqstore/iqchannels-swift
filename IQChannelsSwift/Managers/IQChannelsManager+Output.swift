@@ -24,12 +24,12 @@ extension IQChannelsManager: IQChannelsManagerListOutput {
 
 extension IQChannelsManager: IQChannelsManagerDetailOutput {
     
-    func detailController(didSend text: String, replyToMessage: Int?) {
-        sendText(text, replyToMessage: replyToMessage)
+    func detailController(didSend text: String, files: [DataFile]?, replyToMessage: Int?) {
+        sendMessage(text, files: files, replyToMessage: replyToMessage)
     }
     
-    func detailController(didPick items: [(URL?, UIImage?)], replyToMessage: Int?) {
-        sendFiles(items: items, replyToMessage: replyToMessage)
+    func detailController(didPick items: [(URL?, UIImage?)]) {
+        sendFiles(items: items)
     }
     
     func detailControllerDismissChat() {
@@ -40,12 +40,12 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
 
     func detailControllerDidPop() {
         guard eventListener?.iqChannelsShouldCloseChat() ?? true else { return }
-        
+        IQLog.debug(message: "detailControllerDidPop")
         closeCurrentChat()
     }
     
-    func detailController(didPick results: [PHPickerResult], replyToMessage: Int?) {
-        sendImages(result: results, replyToMessage: replyToMessage)
+    func detailController(didPick results: [PHPickerResult]) {
+        sendImages(result: results)
     }
     
     func detailController(didCancelUpload message: IQMessage) {
@@ -66,6 +66,14 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     
     func detailController(didRate value: Int, ratingID: Int) {
         rate(value: value, ratingID: ratingID)
+    }
+    
+    func detailController(didSendPoll value: Int?, answers: [IQRatingPollClientAnswerInput], ratingID: Int, pollId: Int) {
+        sendPoll(value: value, answers: answers, ratingID: ratingID, pollId: pollId)
+    }
+    
+    func detailController(didPollIgnored ratingID: Int, pollId: Int) {
+        pollIgnored(ratingID: ratingID, pollId: pollId)
     }
     
     func detailController(didSelect choice: IQSingleChoice) {

@@ -25,6 +25,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var messageControlInfo: MessageControlInfo? = nil
     @Published var isMessageCopied: Bool = false
     @Published var messageToReply: IQMessage? = nil
+    @Published var selectedFiles: [DataFile]? = nil
     @Published var scrollDown: Bool = false
     
     // MARK: - METHODS

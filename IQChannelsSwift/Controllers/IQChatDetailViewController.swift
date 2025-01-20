@@ -193,16 +193,8 @@ class IQChatDetailViewController: IQViewController {
     }
     
     private func confirmDocumentSubmission(fileUrls: [URL]) {
-        let title = fileUrls.count > 10 ? "За один раз можно отправить не более 10 файлов. Вы действительно желаете отправить первые выбранные 10 файлов?" : "Подтвердите отправку файлов(\(fileUrls.count))"
-        let alertController = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
-        alertController.addAction(.init(title: "Отправить", style: .default, handler: { _ in
-            self.output.detailController(didPick: fileUrls.map { ($0, nil) }, replyToMessage: self.viewModel.messageToReply?.messageID)
-            self.viewModel.inputText = ""
-            self.viewModel.messageToReply = nil
-            self.viewModel.scrollDown.toggle()
-        }))
-        alertController.addAction(.init(title: "Отмена", style: .cancel))
-        present(alertController, animated: true)
+        self.output.detailController(didPick: fileUrls.map { ($0, nil) })
+        self.viewModel.scrollDown.toggle()
     }
     
     private func showFilePreview(file: IQFile) {
@@ -242,7 +234,7 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
     }
     
     func onSendMessage(_ text: String) {
-        output.detailController(didSend: text, replyToMessage: viewModel.messageToReply?.messageID)
+        output.detailController(didSend: text, files: viewModel.selectedFiles, replyToMessage: viewModel.messageToReply?.messageID)
         viewModel.scrollDown.toggle()
     }
     
@@ -253,15 +245,21 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
     func onRate(value: Int, ratingId: Int) {
         output.detailController(didRate: value, ratingID: ratingId)
     }
+    
+    func onSendPoll(value: Int?, answers: [IQRatingPollClientAnswerInput], ratingId: Int, pollId: Int) {
+        output.detailController(didSendPoll: value, answers: answers, ratingID: ratingId, pollId: pollId)
+    }
+    
+    func onPollIgnored(ratingId: Int, pollId: Int) {
+        output.detailController(didPollIgnored: ratingId, pollId: pollId)
+    }
 }
 
 // MARK: - PH PICKER DELEGATE
 extension IQChatDetailViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
-        output.detailController(didPick: results, replyToMessage: viewModel.messageToReply?.messageID)
-        viewModel.inputText = ""
-        viewModel.messageToReply = nil
+        output.detailController(didPick: results)
         viewModel.scrollDown.toggle()
     }
 }
@@ -272,12 +270,10 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
         picker.dismiss(animated: true)
         
         if let url = info[.imageURL] as? URL {
-            output.detailController(didPick: [(url, nil)], replyToMessage: viewModel.messageToReply?.messageID)
+            output.detailController(didPick: [(url, nil)])
         } else if let image = info[.editedImage] as? UIImage {
-            output.detailController(didPick: [(nil, image)], replyToMessage: viewModel.messageToReply?.messageID)
+            output.detailController(didPick: [(nil, image)])
         }
-        viewModel.inputText = ""
-        viewModel.messageToReply = nil
         viewModel.scrollDown.toggle()
     }
 }

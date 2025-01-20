@@ -36,39 +36,42 @@ struct StyleModel: Decodable {
 
     struct ChatStyle: Decodable {
         let background: Theme?
-        let dateText: TextStyle?
+        let dateText: Text?
         let chatHistory: Theme?
+        let chatLoader: Theme?
         let iconOperator: URL?
-        let systemText: TextStyle?
+        let systemText: Text?
 
         enum CodingKeys: String, CodingKey {
             case background
             case dateText = "date_text"
             case chatHistory = "chat_history"
+            case chatLoader = "chat_loader"
             case iconOperator = "icon_operator"
             case systemText = "system_text"
         }
     }
 
     struct MessagesStyle: Decodable {
-        let backgroundOperator: Theme?
-        let backgroundClient: Theme?
-        let textOperator: TextStyle?
-        let textClient: TextStyle?
-        let replyTextClient: TextStyle?
-        let replySenderTextClient: TextStyle?
-        let replyTextOperator: TextStyle?
-        let replySenderTextOperator: TextStyle?
-        let textTime: TextStyle?
-        let textUp: TextStyle?
-        let textFileStateRejectedClient: TextStyle?
-        let textFileStateOnCheckingClient: TextStyle?
-        let textFileStateSentForCheckingClient: TextStyle?
-        let textFileStateCheckErrorClient: TextStyle?
-        let textFileStateRejectedOperator: TextStyle?
-        let textFileStateOnCheckingOperator: TextStyle?
-        let textFileStateSentForCheckingOperator: TextStyle?
-        let textFileStateCheckErrorOperator: TextStyle?
+        let backgroundOperator: ContainerStyle?
+        let backgroundClient: ContainerStyle?
+        let textOperator: Text?
+        let textClient: Text?
+        let replyTextClient: Text?
+        let replySenderTextClient: Text?
+        let replyTextOperator: Text?
+        let replySenderTextOperator: Text?
+        let textTimeOperator: Text?
+        let textTimeClient: Text?
+        let textUp: Text?
+        let textFileStateRejectedClient: Text?
+        let textFileStateOnCheckingClient: Text?
+        let textFileStateSentForCheckingClient: Text?
+        let textFileStateCheckErrorClient: Text?
+        let textFileStateRejectedOperator: Text?
+        let textFileStateOnCheckingOperator: Text?
+        let textFileStateSentForCheckingOperator: Text?
+        let textFileStateCheckErrorOperator: Text?
 
         enum CodingKeys: String, CodingKey {
             case backgroundOperator = "background_operator"
@@ -79,7 +82,8 @@ struct StyleModel: Decodable {
             case replySenderTextClient = "reply_sender_text_client"
             case replyTextOperator = "reply_text_operator"
             case replySenderTextOperator = "reply_sender_text_operator"
-            case textTime = "text_time"
+            case textTimeOperator = "text_time_operator"
+            case textTimeClient = "text_time_client"
             case textUp = "text_up"
             case textFileStateRejectedClient = "text_file_state_rejected_client"
             case textFileStateOnCheckingClient = "text_file_state_on_checking_client"
@@ -93,8 +97,8 @@ struct StyleModel: Decodable {
     }
 
     struct AnswerStyle: Decodable {
-        let textSender: TextStyle?
-        let textMessage: TextStyle?
+        let textSender: Text?
+        let textMessage: Text?
         let backgroundTextUpMessage: Theme?
         let iconCancel: URL?
         let leftLine: Theme?
@@ -109,12 +113,12 @@ struct StyleModel: Decodable {
     }
 
     struct MessagesFileStyle: Decodable {
-        let textFilenameClient: TextStyle?
-        let textFilenameOperator: TextStyle?
+        let textFilenameClient: Text?
+        let textFilenameOperator: Text?
         let iconFileClient: URL?
         let iconFileOperator: URL?
-        let textFileSizeClient: TextStyle?
-        let textFileSizeOperator: TextStyle?
+        let textFileSizeClient: Text?
+        let textFileSizeOperator: Text?
 
         enum CodingKeys: String, CodingKey {
             case textFilenameClient = "text_filename_client"
@@ -127,56 +131,59 @@ struct StyleModel: Decodable {
     }
 
     struct RatingStyle: Decodable {
-        let backgroundContainer: Theme?
-        let text: TextStyle?
-        let textRating: TextStyle?
+        let backgroundContainer: ContainerStyle?
+        let ratingTitle: Text?
+        let text: Text?
+        let textRating: Text?
         let fullStar: URL?
         let emptyStar: URL?
-        let sentRating: SentRating?
+        let sentRating: ButtonStyle?
+        let answerButton: ButtonStyle?
+        let scaleButton: ButtonStyle?
+        let scaleMinText: Text?
+        let scaleMaxText: Text?
+        let inputBackground: ContainerStyle?
+        let inputText: Text?
+        let feedbackThanksText: Text?
         
-        struct SentRating: Decodable {
-            let colorEnabled: Theme?
-            let colorDisabled: Theme?
-            let textEnabled: TextStyle?
-            let textDisabled: TextStyle?
-            
-            enum CodingKeys: String, CodingKey {
-                case colorEnabled = "color_enabled"
-                case colorDisabled = "color_disabled"
-                case textEnabled = "text_enabled"
-                case textDisabled = "text_disabled"
-            }
-        }
-
+        
         enum CodingKeys: String, CodingKey {
             case backgroundContainer = "background_container"
+            case ratingTitle = "rating_title"
             case text
             case textRating = "text_rating"
             case fullStar = "full_star"
             case emptyStar = "empty_star"
             case sentRating = "sent_rating"
+            case answerButton = "answer_button"
+            case scaleButton = "scale_button"
+            case scaleMinText = "scale_min_text"
+            case scaleMaxText = "scale_max_text"
+            case inputBackground = "input_background"
+            case inputText = "input_text"
+            case feedbackThanksText = "feedback_thanks_text"
         }
     }
 
     struct ToolsToMessageStyle: Decodable {
         let iconSent: URL?
-        let backgroundIcon: Theme?
-        let backgroundChat: Theme?
-        let textChat: TextStyle?
         let iconClip: URL?
+        let backgroundIcon: Theme?
+        let backgroundChat: ContainerStyle?
+        let textChat: Text?
 
         enum CodingKeys: String, CodingKey {
             case iconSent = "icon_sent"
+            case iconClip = "icon_clip"
             case backgroundIcon = "background_icon"
             case backgroundChat = "background_chat"
             case textChat = "text_chat"
-            case iconClip = "icon_clip"
         }
     }
 
     struct ErrorStyle: Decodable {
-        let titleError: TextStyle?
-        let textError: TextStyle?
+        let titleError: Text?
+        let textError: Text?
         let iconError: URL?
 
         enum CodingKeys: String, CodingKey {
@@ -189,10 +196,10 @@ struct StyleModel: Decodable {
     struct SingleChoiceStyle: Decodable {
         let backgroundButton: Theme?
         let borderButton: BorderStyle?
-        let textButton: TextStyle?
+        let textButton: Text?
         let backgroundIVR: Theme?
         let borderIVR: BorderStyle?
-        let textIVR: TextStyle?
+        let textIVR: Text?
 
         enum CodingKeys: String, CodingKey {
             case backgroundButton = "background_button"
@@ -211,19 +218,27 @@ struct Theme: Decodable {
 }
 
 extension StyleModel {
-
     struct ColorTheme: Decodable {
         let color: Theme?
     }
 
-    struct TextStyle: Decodable {
+    struct Text: Decodable {
         let color: Theme?
         let textSize: Int?
+        let textAlign: String?
+        let textStyle: TextStyle?
 
         enum CodingKeys: String, CodingKey {
             case color
             case textSize = "text_size"
+            case textAlign = "text_align"
+            case textStyle = "text_style"
         }
+    }
+    
+    struct TextStyle: Decodable {
+        let bold: Bool?
+        let italic: Bool?
     }
 
     struct BorderStyle: Decodable {
@@ -237,4 +252,24 @@ extension StyleModel {
             case borderRadius = "border-radius"
         }
     }
+    
+    struct ContainerStyle: Decodable {
+        let color: Theme?
+        let border: BorderStyle?
+    }
+    
+    struct ButtonStyle: Decodable {
+        let backgroundEnabled: Theme?
+        let backgroundDisabled: Theme?
+        let textEnabled: Text?
+        let textDisabled: Text?
+        
+        enum CodingKeys: String, CodingKey {
+            case backgroundEnabled = "background_enabled"
+            case backgroundDisabled = "background_disabled"
+            case textEnabled = "text_enabled"
+            case textDisabled = "text_disabled"
+        }
+    }
+
 }

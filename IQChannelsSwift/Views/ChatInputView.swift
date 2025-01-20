@@ -10,10 +10,12 @@ enum CustomTextAreaConfig {
 struct ChatInputView: View {
     
     // MARK: - PROPERTIES
+    @EnvironmentObject var viewModel: IQChatDetailViewModel
     @Environment(\.colorScheme) var colorScheme
     
     @Binding var text: String
     @Binding var messageToReply: IQMessage?
+    @Binding var selectedFiles: [DataFile]?
     
     let disableInput: Bool
     
@@ -37,6 +39,10 @@ struct ChatInputView: View {
     // MARK: - BODY
     var body: some View {
         VStack(spacing: 0) {
+            if let typingUser = viewModel.typingUser {
+                getTypingView(user: typingUser)
+            }
+            
             Group {
                 if let messageToReply {
                     VStack(spacing: 0) {
@@ -48,10 +54,29 @@ struct ChatInputView: View {
             }
             .opacity(messageToReply == nil ? 0 : 1)
             
+            
+            
+            Group {
+                if let selectedFiles {
+                    VStack(spacing: 0) {
+                        Divider()
+                        getFilePreview(files: selectedFiles)
+                        
+                    }
+                    .transition(.move(edge: .bottom))
+                }
+            }
+            .opacity(selectedFiles == nil ? 0 : 1)
+            
+            
             getTextFieldView()
         }
         .animation(.bouncy, value: messageToReply)
         .allowsHitTesting(!disableInput)
+    }
+    
+    var showSendButton: Bool {
+        return !text.isEmpty || selectedFiles != nil
     }
     
     // MARK: - VIEWS
@@ -82,7 +107,7 @@ struct ChatInputView: View {
                 }
             }
             
-            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat) ?? Color(hex: "F4F4F8")
+            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat?.color) ?? Color(hex: "F4F4F8")
             let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textChat?.color) ?? UIColor(hex: "242729")
             let fontSize = CGFloat(Style.model?.toolsToMessage?.textChat?.textSize ?? 17)
             ComposerInputView(text: $text,
@@ -102,7 +127,7 @@ struct ChatInputView: View {
                 .cornerRadius(CustomTextAreaConfig.minHeight / 2)
             
             Group {
-                if !text.isEmpty {
+                if showSendButton {
                     let backgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundIcon) ?? Color(hex: "242729")
                     Button {
                         onSendCompletion?()
@@ -127,12 +152,12 @@ struct ChatInputView: View {
                                 .clipShape(Circle())
                         }
                     }
-                    .transition(.slide)
+                    .transition(.move(edge: .trailing))
                 }
             }
-            .opacity(text.isEmpty ? 0 : 1)
+            .opacity(showSendButton ? 1 : 0)
         }
-        .animation(.bouncy, value: text.isEmpty)
+        .animation(.bouncy, value: showSendButton)
         .padding(.horizontal, 8)
         .padding(.vertical, 12)
     }
@@ -194,5 +219,89 @@ struct ChatInputView: View {
         .frame(height: 56)
         .padding(.horizontal, 8)
         .background(backgroundColor)
+    }
+    
+    var fileNameTextColor: Color {
+        let fileNameTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
+        return fileNameTextColor
+    }
+    
+    func formatBytes(_ bytes: Int) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useKB, .useMB]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: Int64(bytes))
+    }
+    
+    @ViewBuilder
+    private func getFilePreview(files: [DataFile]) -> some View {
+        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.clear
+        let fileNameFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        let fileSizeTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
+        let fileSizeFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        
+        HStack(spacing: 8) {
+            Image(name: "file")
+                .renderingMode(.template)
+                .resizable()
+                .frame(width: 40, height: 40)
+                .foregroundColor(fileNameTextColor)
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text(files.first?.filename ?? "Файл")
+                    .font(.system(size: fileNameFontSize))
+                    .foregroundColor(fileNameTextColor)
+                    .lineLimit(2)
+                
+                Text(formatBytes(files.first?.data.count ?? 0))
+                    .font(.system(size: fileSizeFontSize))
+                    .foregroundColor(fileSizeTextColor)
+                    .lineLimit(1)
+            }
+            
+            Spacer(minLength: 0)
+            
+            if (files.count > 1){
+                Text("+ \(files.count - 1)")
+                    .font(.system(size: fileNameFontSize))
+                    .foregroundColor(fileNameTextColor)
+                    .lineLimit(1)
+            }
+            
+            Button {
+                selectedFiles = nil
+            } label: {
+                if let iconCancelUrl = Style.model?.answer?.iconCancel {
+                    AnimatedImage(url: iconCancelUrl)
+                        .resizable()
+                        .indicator(SDWebImageActivityIndicator.gray)
+                        .transition(SDWebImageTransition.fade)
+                        .frame(width: 24, height: 24)
+                } else {
+                    Image(name: "close_fill")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+            }
+        }
+        .frame(height: 56)
+        .padding(.horizontal, 8)
+        .background(backgroundColor)
+    }
+    
+    @ViewBuilder
+    private func getTypingView(user: IQUser) -> some View {
+        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
+        ZStack {
+            Text("\(user.displayName ?? "") печатает...")
+                .font(.system(size: fontSize))
+                .foregroundColor(textColor)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 12)
+                .cornerRadius(12)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 48)
     }
 }
