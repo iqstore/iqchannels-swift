@@ -114,13 +114,58 @@ class PreviewViewController: UIViewController, UIScrollViewDelegate {
     @objc func downloadButtonTapped() {
         guard let data else { return }
         
-        PHPhotoLibrary.shared().performChanges ({
+        let authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        
+        switch authorizationStatus {
+        case .authorized, .limited:
+            savePhotoToLibrary(data: data)
+            
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+                DispatchQueue.main.async {
+                    if status == .authorized || status == .limited {
+                        self.savePhotoToLibrary(data: data)
+                    } else {
+                        self.showAccessDeniedAlert()
+                    }
+                }
+            }
+            
+        case .denied, .restricted:
+            showAccessDeniedAlert()
+            
+        @unknown default:
+            break
+        }
+    }
+
+    private func savePhotoToLibrary(data: Data) {
+        PHPhotoLibrary.shared().performChanges({
             let request = PHAssetCreationRequest.forAsset()
             request.addResource(with: .photo, data: data, options: nil)
-        }) { _, error in
+        }) { success, error in
             DispatchQueue.main.async {
-                self.showAlert(title: error == nil ? "Успешно!" : "Ошибка!", message: "")
+                let title = success ? "Успешно!" : "Ошибка!"
+                let message = success ? "Фото успешно сохранено в галерею." : "Не удалось сохранить фото."
+                self.showAlert(title: title, message: message)
             }
+        }
+    }
+
+    private func showAccessDeniedAlert() {
+        let alert: UIAlertController = .init(title: "Доступ к галерее запрещён",
+                                             message: "Пожалуйста, разрешите доступ в настройках, чтобы сохранять фото.",
+                                             preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "В настройки", style: .default) { _ in
+            if let appSettingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(appSettingsURL, options: [:], completionHandler: nil)
+            }
+        })
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
