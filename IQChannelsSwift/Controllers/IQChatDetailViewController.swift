@@ -194,9 +194,6 @@ class IQChatDetailViewController: IQViewController {
     
     private func confirmDocumentSubmission(fileUrls: [URL]) {
         self.output.detailController(didPick: fileUrls.map { ($0, nil) })
-        self.viewModel.inputText = ""
-        self.viewModel.messageToReply = nil
-        self.viewModel.selectedFiles = nil
         self.viewModel.scrollDown.toggle()
     }
     
@@ -263,9 +260,6 @@ extension IQChatDetailViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
         output.detailController(didPick: results)
-        viewModel.inputText = ""
-        viewModel.messageToReply = nil
-        viewModel.selectedFiles = nil
         viewModel.scrollDown.toggle()
     }
 }
@@ -280,9 +274,6 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
         } else if let image = info[.editedImage] as? UIImage {
             output.detailController(didPick: [(nil, image)])
         }
-        viewModel.inputText = ""
-        viewModel.messageToReply = nil
-        viewModel.selectedFiles = nil
         viewModel.scrollDown.toggle()
     }
 }
