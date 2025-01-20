@@ -36,7 +36,6 @@ struct ChatMessageCellView: View {
         let isSender = message.isMy
         let isSystem = message.isSystem
         
-        
         if !isSystem {
             ZStack(alignment: .trailing) {
                 getReplyView()
