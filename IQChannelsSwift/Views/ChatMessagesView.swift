@@ -15,7 +15,7 @@ struct ChatMessagesView: View {
     // MARK: - BODY
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView() {
+            ScrollView {
                 LazyVStack(spacing: 8) {
                     Color.clear.frame(height: 1)
                         .id("last")
@@ -231,7 +231,6 @@ struct ChatMessagesView: View {
             Button(action: {
                 delegate?.onResendMessage(isMenuVisibleMessage!.withError(false))
                 isMenuVisibleMessage = nil
-                print("Первая кнопка нажата")
             }) {
                 Text("Повторить отправку")
                     .frame(width: 200, alignment: .leading)
@@ -245,7 +244,6 @@ struct ChatMessagesView: View {
             Button(action: {
                 delegate?.onCancelSend(isMenuVisibleMessage!)
                 isMenuVisibleMessage = nil
-                print("Вторая кнопка нажата")
             }) {
                 Text("Удалить")
                     .frame(width: 200, alignment: .leading)
