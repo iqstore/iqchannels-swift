@@ -36,6 +36,7 @@ struct IQDatabaseMessage {
     let file: String?
     let rating: String?
     let upload: String?
+    let error: Bool
 }
 
 
@@ -74,7 +75,8 @@ extension IQMessage {
             user: self.user?.toJSONString(),
             file: self.file?.toJSONString(),
             rating: self.rating?.toJSONString(),
-            upload: self.upload
+            upload: self.upload,
+            error: self.error
         )
     }
 }
@@ -122,39 +124,10 @@ extension IQMessage {
         self.user = IQUser.fromJSONString(databaseMessage.user)
         self.file = IQFile.fromJSONString(databaseMessage.file)
         self.rating = IQRating.fromJSONString(databaseMessage.rating)
+        self.upload = databaseMessage.upload
+        self.error = databaseMessage.error
     }
 }
-//extension IQDatabaseMessage {
-//    func toIQMessage() -> IQMessage {
-//        return IQMessage(
-//            messageID: self.messageID,
-//            localID: self.localID ?? 0,
-//            fileID: self.fileID,
-//            createdAt: self.createdAt,
-//            userID: self.userID,
-//            clientID: self.clientID,
-//            ratingID: self.ratingID,
-//            payload: IQMessagePayloadType(rawValue: self.payload ?? ""),
-//            text: self.text ?? "",
-//            author: IQAuthorType.fromJSONString(self.author),
-//            isRead: self.isRead,
-//            replyToMessageID: self.replyToMessageID,
-//            botpressPayload: self.botpressPayload,
-//            isDropDown: self.isDropDown,
-//            disableFreeText: self.disableFreeText,
-//            isSystem: self.isSystem,
-//            actions: [IQAction].fromJSONString(self.actions),
-//            singleChoices: [IQSingleChoice].fromJSONString(self.singleChoices),
-//            chatType: IQChatType(rawValue: self.chatType ?? "") ?? IQChatType.chat,
-//            eventID: self.eventID,
-//            client: IQClient.fromJSONString(self.client),
-//            user: IQUser.fromJSONString(self.user),
-//            file: IQFile.fromJSONString(self.file),
-//            rating: IQRating.fromJSONString(self.rating)
-//        )
-//    }
-//}
-//
 extension Decodable {
     static func fromJSONString(_ json: String?) -> Self? {
         guard let json = json, let data = json.data(using: .utf8) else { return nil }

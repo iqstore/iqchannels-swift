@@ -10,11 +10,12 @@ struct ChatMessagesView: View {
     
     @State private var keyboardShown: Bool = false
     @State private var isScrollDownVisible: Bool = false
+    @State private var isMenuVisibleMessage: IQMessage? = nil
     
     // MARK: - BODY
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView {
+            ScrollView() {
                 LazyVStack(spacing: 8) {
                     Color.clear.frame(height: 1)
                         .id("last")
@@ -30,47 +31,58 @@ struct ChatMessagesView: View {
                                 getNewMessagesView()
                             }
                             
-                            if let rating = message.rating {
-                                if(message.isPendingRatingMessage){
-                                    if (rating.state == .poll) {
-                                        if let ratingPoll = message.rating?.ratingPoll {
-                                            RatingPollCellView(rating: rating, ratingPoll: ratingPoll) { value, answers, ratingId, pollId, rated in
-                                                if(rated){
-                                                    delegate?.onSendPoll(value: value, answers: answers, ratingId: ratingId, pollId: pollId)
-                                                }else{
-                                                    delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
+                            VStack(alignment: .trailing){
+                                if isMenuVisibleMessage == message{
+                                    getMenuView()
+                                        .zIndex(200)
+                                }
+                                
+                                if let rating = message.rating {
+                                    if(message.isPendingRatingMessage){
+                                        if (rating.state == .poll) {
+                                            if let ratingPoll = message.rating?.ratingPoll {
+                                                RatingPollCellView(rating: rating, ratingPoll: ratingPoll) { value, answers, ratingId, pollId, rated in
+                                                    if(rated){
+                                                        delegate?.onSendPoll(value: value, answers: answers, ratingId: ratingId, pollId: pollId)
+                                                    }else{
+                                                        delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
+                                                    }
                                                 }
                                             }
+                                            
+                                        } else{
+                                            RatingCellView(rating: rating) { value, ratingId in
+                                                delegate?.onRate(value: value, ratingId: ratingId)
+                                            }
                                         }
-                                        
-                                    } else{
-                                        RatingCellView(rating: rating) { value, ratingId in
-                                            delegate?.onRate(value: value, ratingId: ratingId)
-                                        }
+                                    }else{
+                                        SystemMessageCellView(message: message)
                                     }
-                                }else{
-                                    SystemMessageCellView(message: message)
-                                }
-                            } else{
-                                let isLastMessage = message == viewModel.messages.first
-                                ChatMessageCellView(message: message,
-                                                    replyMessage: viewModel.getMessage(with: message.replyToMessageID),
-                                                    isGroupStart: isGroupStart(index),
-                                                    isLastMessage: isLastMessage,
-                                                    delegate: delegate,
-                                                    onLongPress: { messageControlInfo in
-                                    viewModel.showMessageControl(messageControlInfo)
-                                }, onReplyToMessage: { message in
-                                    viewModel.messageToReply = message
-                                }, onReplyMessageTapCompletion: { messageId in
-                                    if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
-                                        withAnimation(.easeInOut) {
-                                            proxy.scrollTo(id, anchor: .center)
+                                } else{
+                                    let isLastMessage = message == viewModel.messages.first
+                                    ChatMessageCellView(message: message,
+                                                        replyMessage: viewModel.getMessage(with: message.replyToMessageID),
+                                                        isGroupStart: isGroupStart(index),
+                                                        isLastMessage: isLastMessage,
+                                                        delegate: delegate,
+                                                        onLongPress: { messageControlInfo in
+                                        viewModel.showMessageControl(messageControlInfo)
+                                    }, onReplyToMessage: { message in
+                                        withAnimation {
+                                            viewModel.messageToReply = message
                                         }
+                                    }, onReplyMessageTapCompletion: { messageId in
+                                        if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
+                                            withAnimation(.easeInOut) {
+                                                proxy.scrollTo(id, anchor: .center)
+                                            }
+                                        }
+                                    }, onErrorTap: { message in
+                                        isMenuVisibleMessage = message
+                                    })
+                                    .onAppear {
+                                        delegate?.onMessageAppear(with: message.messageID)
                                     }
-                                })
-                                .onAppear {
-                                    delegate?.onMessageAppear(with: message.messageID)
                                 }
                             }
                         }
@@ -108,6 +120,9 @@ struct ChatMessagesView: View {
             }
             .animation(.bouncy, value: isScrollDownVisible)
             .animation(.easeInOut, value: viewModel.isLoading)
+        }
+        .onTapGesture {
+            isMenuVisibleMessage = nil
         }
     }
     
@@ -205,5 +220,46 @@ struct ChatMessagesView: View {
         return messageDateComponents.year != prevDateComponents.year ||
         messageDateComponents.month != prevDateComponents.month ||
         messageDateComponents.day != prevDateComponents.day
+    }
+    
+    
+    
+    
+    @ViewBuilder
+    private func getMenuView() -> some View {
+        VStack(spacing: 8) {
+            Button(action: {
+                delegate?.onResendMessage(isMenuVisibleMessage!.withError(false))
+                isMenuVisibleMessage = nil
+                print("Первая кнопка нажата")
+            }) {
+                Text("Повторить отправку")
+                    .frame(width: 200, alignment: .leading)
+                    .font(.system(size: 16))
+                    .padding(3)
+                    .foregroundColor(.black)
+                    .cornerRadius(8)
+            }
+            Divider()
+
+            Button(action: {
+                delegate?.onCancelSend(isMenuVisibleMessage!)
+                isMenuVisibleMessage = nil
+                print("Вторая кнопка нажата")
+            }) {
+                Text("Удалить")
+                    .frame(width: 200, alignment: .leading)
+                    .font(.system(size: 16))
+                    .padding(3)
+                    .foregroundColor(.black)
+                    .cornerRadius(8)
+            }
+        }
+        .animation(.easeInOut(duration: 0.1), value: true)
+        .frame(width: 200)
+        .padding(6)
+        .background(Color(hex: "f1f1f1"))
+        .cornerRadius(12)
+        .shadow(radius: 4)
     }
 }

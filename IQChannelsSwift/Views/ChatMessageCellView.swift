@@ -16,8 +16,10 @@ struct ChatMessageCellView: View {
     let onLongPress: ((MessageControlInfo) -> Void)?
     let onReplyToMessage: ((IQMessage) -> Void)?
     let onReplyMessageTapCompletion: ((Int) -> Void)?
+    let onErrorTap: ((IQMessage) -> Void)?
     
     @State private var dragAmountX: CGFloat = 0
+    @State private var isMenuVisible = false
     
     var backgroundColor: Color {
         return Style.getColor(theme: Style.model?.chat?.background) ?? Color(hex: "919399")
@@ -58,12 +60,17 @@ struct ChatMessageCellView: View {
                                 .padding(.leading, 12)
                         }
                         
-                        MessageCellBubbleView(message: message,
-                                              replyMessage: replyMessage,
-                                              isLastMessage: isLastMessage,
-                                              onLongPress: onLongPress,
-                                              onReplyMessageTapCompletion: onReplyMessageTapCompletion,
-                                              delegate: delegate)
+                        HStack(){
+                            MessageCellBubbleView(message: message,
+                                                  replyMessage: replyMessage,
+                                                  isLastMessage: isLastMessage,
+                                                  onLongPress: onLongPress,
+                                                  onReplyMessageTapCompletion: onReplyMessageTapCompletion,
+                                                  delegate: delegate)
+                            if(message.error){
+                                getErrorView()
+                            }
+                        }
                     }
                 }
             }
@@ -127,5 +134,23 @@ struct ChatMessageCellView: View {
             .padding(8)
             .background(Color(hex: "F4F4F8"))
             .clipShape(Circle())
+    }
+    
+    
+    @ViewBuilder
+    private func getErrorView() -> some View {
+        Button(action: {
+            onErrorTap?(message)
+        }) {
+            ZStack {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 30, height: 30)
+
+                Text("!")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+            }
+        }
     }
 }

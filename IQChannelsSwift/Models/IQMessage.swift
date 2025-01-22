@@ -43,6 +43,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var chatType: IQChatType?
     var eventID: Int?
     var upload: String?
+    var error: Bool = false
     var newMsgHeader: Bool = false
 
     //MARK: - Relations
@@ -213,4 +214,13 @@ struct IQMessage: Codable, Identifiable, Equatable {
         return copy
     }
 
+}
+
+
+extension IQMessage {
+    func withError(_ error: Bool) -> IQMessage {
+        var copy = self
+        copy.error = error
+        return copy
+    }
 }

@@ -238,8 +238,16 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
         viewModel.scrollDown.toggle()
     }
     
+    func onResendMessage(_ message: IQMessage) {
+        output.detailController(didResend: message)
+    }
+    
     func onCancelUpload(_ message: IQMessage) {
         output.detailController(didCancelUpload: message)
+    }
+    
+    func onCancelSend(_ message: IQMessage) {
+        output.detailController(didCancelSend: message)
     }
     
     func onRate(value: Int, ratingId: Int) {

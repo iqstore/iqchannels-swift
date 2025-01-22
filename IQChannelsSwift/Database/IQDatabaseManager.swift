@@ -42,6 +42,7 @@ class IQDatabaseManager {
     private let file = Expression<String?>("file")
     private let rating = Expression<String?>("rating")
     private let upload = Expression<String?>("upload")
+    private let error = Expression<Bool>("error")
 
     private init() {
         setupDatabase()
@@ -80,12 +81,38 @@ class IQDatabaseManager {
                 t.column(file)
                 t.column(rating)
                 t.column(upload)
+                t.column(error)
             })
+            
+            checkColumns()
         } catch {
             print("Error initializing database: \(error)")
         }
     }
+    
+    // Проверка колон в базе
+    func checkColumns() {
+        do {
+            // Проверка существования колонки "error"
+            let checkColumnExists = try db.scalar("""
+               SELECT COUNT(*)
+               FROM pragma_table_info('messages')
+               WHERE name = 'error'
+            """) as! Int64
 
+            if checkColumnExists == 0 {
+                // Если колонка "error" не существует, добавляем её
+                do {
+                    try db.run(messages.addColumn(error, defaultValue: false))
+                } catch {
+                    print("Error add columns: \(error)")
+                }
+            }
+        } catch {
+            print("Error check columns: \(error)")
+        }
+    }
+    
     // Вставка или обновление сообщения
     func insertMessage(_ message: IQDatabaseMessage) {
         if(message.localID != 0){
@@ -116,7 +143,8 @@ class IQDatabaseManager {
                    user <- message.user,
                    file <- message.file,
                    rating <- message.rating,
-                   upload <- message.upload
+                   upload <- message.upload,
+                   error <- message.error
                   ))
             } catch {
                 print("Error inserting message: \(error)")
@@ -156,7 +184,8 @@ class IQDatabaseManager {
                     user: message[user],
                     file: message[file],
                     rating: message[rating],
-                    upload: message[upload]
+                    upload: message[upload],
+                    error: message[error]
                 ))
             }
         } catch {
