@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name             = 'IQChannelsSwift'
-    s.version          = '1.0.0'
+    s.version          = '2.1.1'
     s.summary          = 'A short description of IQChannelsSwift.'
     
     # This description is used to generate tags and improve search results.
@@ -71,6 +71,6 @@ Pod::Spec.new do |s|
     s.frameworks = 'UIKit'
 #    s.dependency 'TRVSEventSource', '0.0.8'
     s.dependency 'SDWebImageSwiftUI', '3.0.4'
-    s.dependency 'SQLite.swift', '0.15.3'
+    s.dependency 'SQLite.swift', '> 0.13'
     # s.dependency 'AFNetworking', '~> 2.3'
 end
