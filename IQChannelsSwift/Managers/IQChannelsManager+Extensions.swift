@@ -640,7 +640,7 @@ extension IQChannelsManager {
             listenToEvents()
             
             await sendUnsendMessages()
-            await sendPreFillMessages()
+            sendPreFillMessages()
             
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -769,21 +769,22 @@ extension IQChannelsManager {
         }
     }
     
-    private func sendPreFillMessages() async {
-        guard let preFillMessages = config.preFillMessages else { return }
-        
-        print("preFillMessages    \(preFillMessages)")
-        
-        let texts = preFillMessages.textMsg
-        let files = preFillMessages.fileMsg
-        
-        if let texts {
-            for text in texts {
-                sendMessage(text, files: nil, replyToMessage: nil)
+    private func sendPreFillMessages() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            guard let preFillMessages = self.config.preFillMessages else { return }
+            
+            let texts = preFillMessages.textMsg
+            let files = preFillMessages.fileMsg
+            
+            if let texts {
+                for text in texts {
+                    self.sendMessage(text, files: nil, replyToMessage: nil)
+                }
             }
-        }
-        if let files {
-            sendMessage("", files: files, replyToMessage: nil)
+            if let files {
+                self.sendMessage("", files: files, replyToMessage: nil)
+            }
+            self.config.preFillMessages = nil
         }
     }
 }
