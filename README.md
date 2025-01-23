@@ -3,13 +3,15 @@
 
 1. **TRVSEventSource**: Для обработки серверных событий (Server-Sent Events).
 2. **SDWebImageSwiftUI**: Для загрузки и кэширования изображений в SwiftUI.
+2. **SQLite.swift**: Для сохранения сообщений в локальную базу.
+    
 
 ## Руководство по установке
 
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.0'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.1'
 ```
 
 Затем выполните команду:

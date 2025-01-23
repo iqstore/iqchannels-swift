@@ -28,6 +28,10 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
         sendMessage(text, files: files, replyToMessage: replyToMessage)
     }
     
+    func detailController(didResend message: IQMessage) {
+        resendMessage(message)
+    }
+    
     func detailController(didPick items: [(URL?, UIImage?)]) {
         sendFiles(items: items)
     }
@@ -50,6 +54,10 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     
     func detailController(didCancelUpload message: IQMessage) {
         cancelUploadFileMessage(message)
+    }
+    
+    func detailController(didCancelSend message: IQMessage) {
+        cancelSendMessage(message)
     }
 
     func detailController(didDisplayMessageWith id: Int) {

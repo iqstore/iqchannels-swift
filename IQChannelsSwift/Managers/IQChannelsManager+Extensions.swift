@@ -417,6 +417,13 @@ extension IQChannelsManager {
         }
     }
     
+    public func resendMessage(_ message: IQMessage) {
+        Task {
+            await sendMessage(message)
+        }
+    }
+    
+    
     func sendFiles(items: [(URL?, UIImage?)]) {
         let files: [DataFile] = items.prefix(10).compactMap { (url, image) -> DataFile? in
             if let url {
@@ -485,12 +492,16 @@ extension IQChannelsManager {
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
+        cancelSendMessage(message)
+        if let taskID = message.file?.taskIdentifier {
+            currentNetworkManager?.cancelTask(with: taskID)
+        }
+    }
+    
+    func cancelSendMessage(_ message: IQMessage) {
         if let messageIndex = indexOfMyMessage(localID: message.localID) {
             messages.remove(at: messageIndex)
             IQDatabaseManager.shared.deleteMessageByLocalId(message.localID ?? 0)
-        }
-        if let taskID = message.file?.taskIdentifier {
-            currentNetworkManager?.cancelTask(with: taskID)
         }
     }
     
@@ -561,29 +572,46 @@ extension IQChannelsManager {
         }
     }
     
-    private func sendMessage(_ message: IQMessage) async {
-        IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
-        
-        DispatchQueue.main.async { [self] in
-            detailViewModel?.idOfNewMessage = nil
-        }
-        
-        guard let networkManager = currentNetworkManager else { return }
-        
-        let error = await networkManager.sendMessage(form: .init(message))
-        
-        if error != nil {
-            if networkStatusManager.isReachable {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                    Task {
-                        await self?.sendMessage(message)
+    private func sendMessage(_ message: IQMessage, attempts: Int = 0) async {
+        if (!message.error){
+            var attempts = attempts
+            
+            if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
+                messages[index] = message
+            }
+            
+            IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
+            
+            DispatchQueue.main.async { [self] in
+                detailViewModel?.idOfNewMessage = nil
+            }
+            
+            guard let networkManager = currentNetworkManager else { return }
+            
+            let error = await networkManager.sendMessage(form: .init(message))
+            
+            if error != nil {
+                if networkStatusManager.isReachable && attempts < 4{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                        Task {
+                            attempts += 1
+                            await self?.sendMessage(message, attempts: attempts)
+                        }
                     }
+                    print(attempts)
+                } else {
+                    var errorMessage = message.withError(true)
+                    
+                    if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
+                        messages[index] = errorMessage
+                    }
+                    
+                    IQDatabaseManager.shared.insertMessage(errorMessage.toDatabaseMessage())
+                    unsentMessages.append(errorMessage)
                 }
             } else {
-                unsentMessages.append(message)
+                unsentMessages.removeAll(where: { $0.id == message.id })
             }
-        } else {
-            unsentMessages.removeAll(where: { $0.id == message.id })
         }
     }
     
@@ -640,7 +668,7 @@ extension IQChannelsManager {
             listenToEvents()
             
             await sendUnsendMessages()
-            await sendPreFillMessages()
+            sendPreFillMessages()
             
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -769,21 +797,22 @@ extension IQChannelsManager {
         }
     }
     
-    private func sendPreFillMessages() async {
-        guard let preFillMessages = config.preFillMessages else { return }
-        
-        print("preFillMessages    \(preFillMessages)")
-        
-        let texts = preFillMessages.textMsg
-        let files = preFillMessages.fileMsg
-        
-        if let texts {
-            for text in texts {
-                sendMessage(text, files: nil, replyToMessage: nil)
+    private func sendPreFillMessages() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            guard let preFillMessages = self.config.preFillMessages else { return }
+            
+            let texts = preFillMessages.textMsg
+            let files = preFillMessages.fileMsg
+            
+            if let texts {
+                for text in texts {
+                    self.sendMessage(text, files: nil, replyToMessage: nil)
+                }
             }
-        }
-        if let files {
-            sendMessage("", files: files, replyToMessage: nil)
+            if let files {
+                self.sendMessage("", files: files, replyToMessage: nil)
+            }
+            self.config.preFillMessages = nil
         }
     }
 }

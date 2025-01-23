@@ -149,6 +149,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                                       channels: channelsArray,
                                       styleJson: selectedStyle,
                                       preFillMessages: preFillMessages)
+        preFillMessages = nil
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)
         configuration.setCustomHeaders(headers)
@@ -216,8 +217,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func preFilledMsgDidTap() {
-        setServer(server: serverField.text)
-        
         let preFillMsgView = PreFillMsgView()
         preFillMsgView.configuration = configuration
         

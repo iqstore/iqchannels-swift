@@ -58,15 +58,17 @@ struct MessageStatusView: View {
             
             if isSender {
                 if message.isLoading {
-                    Image(name: "loading")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(textColor)
-                        .frame(width: 12, height: 12)
-                        .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
-                        .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
-                        .onAppear { self.showMessageLoading = true }
+                    if !message.error {
+                        Image(name: "loading")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(textColor)
+                            .frame(width: 12, height: 12)
+                            .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                            .onAppear { self.showMessageLoading = true }
+                    }
                 } else {
                     let imageName: String = (message.isRead ?? false) ? "double_checkmark" : "single_checkmark"
                     Image(name: imageName)
