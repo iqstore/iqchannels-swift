@@ -60,7 +60,7 @@ struct ChatMessageCellView: View {
                                 .padding(.leading, 12)
                         }
                         
-                        HStack(){
+                        HStack(alignment: .bottom){
                             MessageCellBubbleView(message: message,
                                                   replyMessage: replyMessage,
                                                   isLastMessage: isLastMessage,
