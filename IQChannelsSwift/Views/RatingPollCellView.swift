@@ -102,7 +102,7 @@ struct RatingPollCellView: View {
                         .foregroundColor(textColor)
                         .font(.system(size: textFontSize))
                         .minimumScaleFactor(0.8)
-                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
                     OfferView() { value in
                         needShowOffer = false
                         needPoll = value
@@ -117,7 +117,7 @@ struct RatingPollCellView: View {
                         .foregroundColor(textColor)
                         .font(.system(size: textFontSize))
                         .minimumScaleFactor(0.8)
-                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
                         .onAppear {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                 let ticketRatingValue = pollResult
@@ -134,7 +134,7 @@ struct RatingPollCellView: View {
                         .foregroundColor(textColor)
                         .font(.system(size: textFontSize))
                         .minimumScaleFactor(0.8)
-                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
                     
                     switch questionType {
                     case .scale:
