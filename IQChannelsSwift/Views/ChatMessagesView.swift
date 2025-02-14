@@ -16,7 +16,7 @@ struct ChatMessagesView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 8) {
+//                LazyVStack(spacing: 8) {
                     Color.clear.frame(height: 1)
                         .id("last")
                     
@@ -48,15 +48,24 @@ struct ChatMessagesView: View {
                                                         delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
                                                     }
                                                 }
+                                                .onAppear {
+                                                    delegate?.onMessageAppear(with: message.messageID)
+                                                }
                                             }
                                             
                                         } else{
                                             RatingCellView(rating: rating) { value, ratingId in
                                                 delegate?.onRate(value: value, ratingId: ratingId)
                                             }
+                                            .onAppear {
+                                                delegate?.onMessageAppear(with: message.messageID)
+                                            }
                                         }
                                     }else{
                                         SystemMessageCellView(message: message)
+                                            .onAppear {
+                                                delegate?.onMessageAppear(with: message.messageID)
+                                            }
                                     }
                                 } else{
                                     let isLastMessage = message == viewModel.messages.first
