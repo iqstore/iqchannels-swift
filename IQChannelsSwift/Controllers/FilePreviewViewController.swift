@@ -125,13 +125,22 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             
             let type: UTType = .init(self.documentUrl.lastPathComponent) ?? .data
             let savedURL = documentsDirectory.appendingPathComponent(response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
-            FileManager.default.createFile(atPath: savedURL.path, contents: data)
-            
+
             DispatchQueue.main.async {
-                self.present(UIActivityViewController(activityItems: [savedURL], applicationActivities: nil), animated: true)
+                let documentPicker = UIDocumentPickerViewController(forExporting: [savedURL], asCopy: true)
+                documentPicker.delegate = self
+                self.present(documentPicker, animated: true)
             }
         }
         
         downloadTask.resume()
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let selectedURL = urls.first {
+            let title = "Успешно!"
+            let message = "Файл успешно сохранен."
+            self.showAlert(title: title, message: message)
+        }
     }
 }
