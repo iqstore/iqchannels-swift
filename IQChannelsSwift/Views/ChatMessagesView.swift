@@ -66,38 +66,51 @@ struct ChatMessagesView: View {
                                                         isLastMessage: isLastMessage,
                                                         delegate: delegate,
                                                         onLongPress: { messageControlInfo in
-                                        viewModel.showMessageControl(messageControlInfo)
-                                    }, onReplyToMessage: { message in
-                                        withAnimation {
-                                            viewModel.messageToReply = message
-                                        }
-                                    }, onReplyMessageTapCompletion: { messageId in
-                                        if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
-                                            withAnimation(.easeInOut) {
-                                                proxy.scrollTo(id, anchor: .center)
-                                            }
-                                        }
-                                    }, onErrorTap: { message in
-                                        isMenuVisibleMessage = message
-                                    })
-                                    .onAppear {
-                                        delegate?.onMessageAppear(with: message.messageID)
-                                    }
+                                                            if(message.isReply){
+                                                                viewModel.showMessageControl(messageControlInfo)
+                                                            }
+                                                        },
+                                                        onReplyToMessage: { message in
+                                                            withAnimation {
+                                                                viewModel.messageToReply = message
+                                                            }
+                                                        },
+                                                        onReplyMessageTapCompletion: { messageId in
+                                                            if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
+                                                                withAnimation(.easeInOut) {
+                                                                    proxy.scrollTo(id, anchor: .center)
+                                                                }
+                                                            }
+                                                        },
+                                                        onErrorTap: { message in
+                                                            isMenuVisibleMessage = message
+                                                        })
+                                                        .onAppear {
+                                                            delegate?.onMessageAppear(with: message.messageID)
+                                                        }
                                 }
                             }
                         }
                         .modifier(FlippedUpsideDown())
                     }
-                }
-                .padding([.bottom, .horizontal], 16)
-                .background(GeometryReader { geometry in
-                    Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).origin)
-                })
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                    isScrollDownVisible = value.y < -100
-                }
+//                }
+//                .padding([.bottom, .horizontal], 16)
+//                .background(GeometryReader { geometry in
+//                    Color.clear
+//                        .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).origin)
+//                })
+//                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+//                    isScrollDownVisible = value.y < -100
+//                }
             }
+//            .transaction { transaction in
+//                print("transaction   \(transaction)")
+//                if "\(transaction)" == "Transaction(plist: [TransactionPropertyKey<FromScrollViewKey> = true])" {
+//                    transaction.disablesAnimations = true
+//                }
+//                transaction.plist
+//                transaction.disablesAnimations = true
+//            }
             .clipped()
             .coordinateSpace(name: "scroll")
             .modifier(FlippedUpsideDown())
