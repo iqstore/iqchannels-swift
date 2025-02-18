@@ -116,7 +116,7 @@ extension IQChannelsManager {
         
         listViewModel?.popListener.send(())
         
-        networkManager.stopUnreadListeners()
+//        networkManager.stopListenToUnread()
         networkManager.stopListenToEvents()
         self.messages = []
         self.selectedChat = nil
@@ -336,7 +336,7 @@ extension IQChannelsManager {
             guard let self else { return }
             
             if error != nil {
-                currentNetworkManager?.stopUnreadListeners()
+                currentNetworkManager?.stopListenToUnread()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
                     self?.listenToUnread()
                 }
@@ -748,7 +748,7 @@ extension IQChannelsManager {
                   let newFile = try? await currentNetworkManager?.getFile(id: fileID) else { return }
             
             if let index = indexOfMessage(messageID: messageID) {
-                message.file = newFile
+                message.file?.state = newFile.state
                 self.messages[index] = message
             }
         }
@@ -914,7 +914,7 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
             guard status != .notReachable else {
                 state = .awaitingNetwork
                 currentNetworkManager?.stopListenToEvents()
-                currentNetworkManager?.stopUnreadListeners()
+                currentNetworkManager?.stopListenToUnread()
                 return
             }
             

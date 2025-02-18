@@ -10,7 +10,7 @@ import WebKit
 import MobileCoreServices
 import UniformTypeIdentifiers
 
-class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate {
+class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate, UIDocumentPickerDelegate {
     
     private var webView: WKWebView!
     private var documentUrl: URL
@@ -125,7 +125,8 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             
             let type: UTType = .init(self.documentUrl.lastPathComponent) ?? .data
             let savedURL = documentsDirectory.appendingPathComponent(response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
-
+            FileManager.default.createFile(atPath: savedURL.path, contents: data)
+            
             DispatchQueue.main.async {
                 let documentPicker = UIDocumentPickerViewController(forExporting: [savedURL], asCopy: true)
                 documentPicker.delegate = self

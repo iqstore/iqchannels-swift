@@ -20,7 +20,7 @@ class IQChatDetailViewController: IQViewController {
     
     private lazy var titleLabel: UILabel = {
         let label: UILabel = .init()
-        label.text = "Сообщения"
+        label.text = "Чат с банком"
         label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
         label.textColor = UIColor(hex: "242729")
         return label

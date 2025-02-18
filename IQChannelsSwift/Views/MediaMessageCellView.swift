@@ -53,7 +53,6 @@ struct MediaMessageCellView: View {
     
     // MARK: - BODY
     var body: some View {
-        let imageSize = calculateImageSize(file: message.file)
         VStack(alignment: .leading, spacing: 4) {
             if let replyMessage {
                 MessageReplyView(message: replyMessage,
@@ -66,42 +65,14 @@ struct MediaMessageCellView: View {
             VStack(alignment: .trailing){
                 ZStack(alignment: .bottomTrailing) {
                     if let file = message.file {
-                        if file.isLoading {
-                            if let data = file.dataFile?.data,
-                               let uiImage = UIImage(data: data) {
-                                ZStack {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: imageSize.width, height: imageSize.height)
-                                    
-                                    Button {
-                                        onCancelImageSendCompletion?()
-                                    } label: {
-                                        ZStack {
-                                            Image(name: "loading")
-                                                .resizable()
-                                                .frame(width: 32, height: 32)
-                                                .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
-                                            
-                                            Image(name: "xmark")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 12, height: 12)
-                                        }
-                                        .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
-                                        .onAppear { self.showMessageLoading = true }
-                                    }
-                                }
+                        if let state = file.state {
+                            if state == .approved {
+                                getApprovedStateView(file)
+                            } else {
+                                getNotApprovedStateView(state)
                             }
                         } else {
-                            AnimatedImage(url: message.file?.imagePreviewUrl)
-                                .resizable()
-                                .indicator(SDWebImageActivityIndicator.gray)
-                                .transition(SDWebImageTransition.fade)
-                                .scaledToFill()
-                                .frame(width: imageSize.width, height: imageSize.height)
-                                .clipped()
+                            getApprovedStateView(file)
                         }
                     }
                     
@@ -130,8 +101,73 @@ struct MediaMessageCellView: View {
         .cornerRadius(12)
         .animation(.bouncy, value: message.file?.isLoading)
         .onTapGesture {
-            onImageTapCompletion?()
+            if let file = message.file {
+                if let state = file.state {
+                    if state == .approved {
+                        onImageTapCompletion?()
+                    }
+                } else {
+                    onImageTapCompletion?()
+                }
+            }
         }
+    }
+    
+    // MARK: - VIEWS
+    @ViewBuilder
+    private func getApprovedStateView(_ file: IQFile) -> some View {
+        let imageSize = calculateImageSize(file: message.file)
+        HStack(spacing: 8) {
+            if file.isLoading {
+                if let data = file.dataFile?.data,
+                   let uiImage = UIImage(data: data) {
+                    ZStack {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: imageSize.width, height: imageSize.height)
+                        
+                        Button {
+                            onCancelImageSendCompletion?()
+                        } label: {
+                            ZStack {
+                                Image(name: "loading")
+                                    .resizable()
+                                    .frame(width: 32, height: 32)
+                                    .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                                
+                                Image(name: "xmark")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 12, height: 12)
+                            }
+                            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                            .onAppear { self.showMessageLoading = true }
+                        }
+                    }
+                }
+            } else {
+                AnimatedImage(url: message.file?.imagePreviewUrl)
+                    .resizable()
+                    .indicator(SDWebImageActivityIndicator.gray)
+                    .transition(SDWebImageTransition.fade)
+                    .scaledToFill()
+                    .frame(width: imageSize.width, height: imageSize.height)
+                    .clipped()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func getNotApprovedStateView(_ state: IQFileState) -> some View {
+        let textColor: Color = isSender ? state.titleClientColor : state.titleOperatorColor
+        let fontSize: CGFloat = isSender ? state.titleClientFontSize : state.titleOperatorFontSize
+        
+        Text(state.title)
+            .foregroundColor(textColor)
+            .font(.system(size: fontSize))
+            .padding(10)
+            .padding(.bottom, 20)
     }
     
     // MARK: - METHODS

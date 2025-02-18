@@ -120,7 +120,15 @@ struct FilePreviewCellView: View {
         .cornerRadius(12)
         .animation(.bouncy, value: message.file?.isLoading)
         .onTapGesture {
-            onFileTapCompletion?()
+            if let file = message.file {
+                if let state = file.state {
+                    if state == .approved {
+                        onFileTapCompletion?()
+                    }
+                } else {
+                    onFileTapCompletion?()
+                }
+            }
         }
     }
     
