@@ -228,10 +228,12 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         let unreadMessagesCount = value.filter { $0.isRead == nil && $0.author == .user}.count
         if(unreadMessagesCount > 0){
-            value.insert(
-                IQMessage(newMsgHeader: true),
-                at: value.count - unreadMessagesCount
-            )
+            if let lastMessage = value.last, !lastMessage.isMy {
+                value.insert(
+                    IQMessage(newMsgHeader: true),
+                    at: value.count - unreadMessagesCount
+                )
+            }
         }
         
         self.relationManager.chatMessages(&value, with: result.relations)

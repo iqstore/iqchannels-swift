@@ -580,6 +580,7 @@ extension IQChannelsManager {
                 messages[index] = message
             }
             
+            messages.removeAll { $0.newMsgHeader == true }
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
             
             DispatchQueue.main.async { [self] in
@@ -784,8 +785,6 @@ extension IQChannelsManager {
     
     private func sendUnsendMessages() async {
         let unsentMessagesFromLocalDatabase = IQDatabaseManager.shared.getAllMessages().filter { $0.messageID == 0 && $0.author == "\"client\""}
-        
-        print("неотправленные сообщения:   \(unsentMessagesFromLocalDatabase.count)")
         
         for unsentMessage in unsentMessagesFromLocalDatabase {
             messages.append(IQMessage(from: unsentMessage))
