@@ -80,21 +80,22 @@ struct ChatMessageCellView: View {
             .animation(.bouncy, value: dragAmountX)
             .background(Color(white: 1, opacity: 0.000001))
             .gesture(
-                DragGesture(minimumDistance: 30, coordinateSpace: .local)
-                    .onChanged { dragValue in
-                        if dragValue.translation.width < 0,
-                           dragValue.translation.width > -(UIScreen.main.bounds.width / 3) {
-                            dragAmountX = dragValue.translation.width
+                message.isReply ?
+                    DragGesture(minimumDistance: 25, coordinateSpace: .local)
+                        .onChanged { dragValue in
+                            if dragValue.translation.width < 0,
+                               dragValue.translation.width > -(UIScreen.main.bounds.width / 3) {
+                                dragAmountX = dragValue.translation.width
+                            }
                         }
-                    }
-                    .onEnded { dragValue in
-                        if dragValue.translation.width < -60 {
-                            triggerHapticFeedback(style: .rigid)
-                            onReplyToMessage?(message)
+                        .onEnded { dragValue in
+                            if dragValue.translation.width < -60 {
+                                triggerHapticFeedback(style: .rigid)
+                                onReplyToMessage?(message)
+                            }
+                            dragAmountX = 0
                         }
-
-                        dragAmountX = 0
-                    }
+                : nil
             )
         } else{
             SystemMessageCellView(message: message)

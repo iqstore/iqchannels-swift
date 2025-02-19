@@ -16,7 +16,7 @@ struct ChatMessagesView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 8) {
+//                LazyVStack(spacing: 8) {
                     Color.clear.frame(height: 1)
                         .id("last")
                     
@@ -48,15 +48,24 @@ struct ChatMessagesView: View {
                                                         delegate?.onPollIgnored(ratingId: ratingId, pollId: pollId)
                                                     }
                                                 }
+                                                .onAppear {
+                                                    delegate?.onMessageAppear(with: message.messageID)
+                                                }
                                             }
                                             
                                         } else{
                                             RatingCellView(rating: rating) { value, ratingId in
                                                 delegate?.onRate(value: value, ratingId: ratingId)
                                             }
+                                            .onAppear {
+                                                delegate?.onMessageAppear(with: message.messageID)
+                                            }
                                         }
                                     }else{
                                         SystemMessageCellView(message: message)
+                                            .onAppear {
+                                                delegate?.onMessageAppear(with: message.messageID)
+                                            }
                                     }
                                 } else{
                                     let isLastMessage = message == viewModel.messages.first
@@ -66,38 +75,51 @@ struct ChatMessagesView: View {
                                                         isLastMessage: isLastMessage,
                                                         delegate: delegate,
                                                         onLongPress: { messageControlInfo in
-                                        viewModel.showMessageControl(messageControlInfo)
-                                    }, onReplyToMessage: { message in
-                                        withAnimation {
-                                            viewModel.messageToReply = message
-                                        }
-                                    }, onReplyMessageTapCompletion: { messageId in
-                                        if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
-                                            withAnimation(.easeInOut) {
-                                                proxy.scrollTo(id, anchor: .center)
-                                            }
-                                        }
-                                    }, onErrorTap: { message in
-                                        isMenuVisibleMessage = message
-                                    })
-                                    .onAppear {
-                                        delegate?.onMessageAppear(with: message.messageID)
-                                    }
+                                                            if(message.isReply){
+                                                                viewModel.showMessageControl(messageControlInfo)
+                                                            }
+                                                        },
+                                                        onReplyToMessage: { message in
+                                                            withAnimation {
+                                                                viewModel.messageToReply = message
+                                                            }
+                                                        },
+                                                        onReplyMessageTapCompletion: { messageId in
+                                                            if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
+                                                                withAnimation(.easeInOut) {
+                                                                    proxy.scrollTo(id, anchor: .center)
+                                                                }
+                                                            }
+                                                        },
+                                                        onErrorTap: { message in
+                                                            isMenuVisibleMessage = message
+                                                        })
+                                                        .onAppear {
+                                                            delegate?.onMessageAppear(with: message.messageID)
+                                                        }
                                 }
                             }
                         }
                         .modifier(FlippedUpsideDown())
                     }
-                }
-                .padding([.bottom, .horizontal], 16)
-                .background(GeometryReader { geometry in
-                    Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).origin)
-                })
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                    isScrollDownVisible = value.y < -100
-                }
+//                }
+//                .padding([.bottom, .horizontal], 16)
+//                .background(GeometryReader { geometry in
+//                    Color.clear
+//                        .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).origin)
+//                })
+//                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+//                    isScrollDownVisible = value.y < -100
+//                }
             }
+//            .transaction { transaction in
+//                print("transaction   \(transaction)")
+//                if "\(transaction)" == "Transaction(plist: [TransactionPropertyKey<FromScrollViewKey> = true])" {
+//                    transaction.disablesAnimations = true
+//                }
+//                transaction.plist
+//                transaction.disablesAnimations = true
+//            }
             .clipped()
             .coordinateSpace(name: "scroll")
             .modifier(FlippedUpsideDown())

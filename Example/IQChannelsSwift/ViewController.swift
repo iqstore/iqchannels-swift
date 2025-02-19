@@ -9,7 +9,16 @@
 import UIKit
 import IQChannelsSwift
 
-class ViewController: UIViewController, UITextFieldDelegate {
+class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
+    var id: String = "0"
+    func iqChannelsUnreadDidChange(_ unread: Int) {
+        DispatchQueue.main.async {
+            self.unreadLabel.text = "Непрочитанных сообщений: \(unread)"
+        }
+    }
+    
+    
+    
     private lazy var serverField: UITextField = {
         let field = UITextField()
         field.borderStyle = .roundedRect
@@ -32,6 +41,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
         field.text = "support"
         field.addToolbar()
         return field
+    }()
+    
+    private lazy var unreadLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .black
+        label.layer.cornerRadius = 12
+        label.text = "Непрочитанных сообщений: nil"
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private lazy var styleButton: UIButton = {
@@ -104,7 +123,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var stackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, loginButton, anonButton, preFilledMsgButton, styleButton, styleDark, styleLight, styleSystem
+            serverField, emailField, channelsField, unreadLabel, loginButton, anonButton, preFilledMsgButton, styleButton, styleDark, styleLight, styleSystem
         ])
         view.spacing = 16
         view.distribution = .fillEqually
@@ -207,12 +226,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @objc func loginDidTap() {
         setServer(server: serverField.text)
         configuration.login(.credentials(emailField.text ?? ""))
+        configuration.addUnread(listener: self)
         showMessages()
     }
     
     @objc func anonymousDidTap() {
         setServer(server: serverField.text)
         configuration.login(.anonymous)
+        configuration.addUnread(listener: self)
         showMessages()
     }
     
@@ -258,7 +279,6 @@ extension ViewController: UIDocumentPickerDelegate {
         selectedStyle = try? Data(contentsOf: url)
         url.stopAccessingSecurityScopedResource()
     }
-
 }
 
 

@@ -28,6 +28,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var isDropDown: Bool?
     var disableFreeText: Bool?
     var isSystem: Bool = false
+    var isReply: Bool = true
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
     
@@ -169,6 +170,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.localID = 0
         self.text = text
         self.isRead = true
+        self.isReply = false
         self.payload = .text
         self.user = IQUser(id: 0, displayName: operatorName)
     }

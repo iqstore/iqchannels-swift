@@ -38,7 +38,7 @@ struct RatingCellView: View {
                 .foregroundColor(textColor)
                 .font(.system(size: textFontSize))
                 .minimumScaleFactor(0.8)
-                .lineLimit(2)
+                .multilineTextAlignment(.center)
             
             HStack(spacing: 8) {
                 ForEach(1..<6) { i in

@@ -10,7 +10,7 @@ import WebKit
 import MobileCoreServices
 import UniformTypeIdentifiers
 
-class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate {
+class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate, UIDocumentPickerDelegate {
     
     private var webView: WKWebView!
     private var documentUrl: URL
@@ -128,10 +128,20 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             FileManager.default.createFile(atPath: savedURL.path, contents: data)
             
             DispatchQueue.main.async {
-                self.present(UIActivityViewController(activityItems: [savedURL], applicationActivities: nil), animated: true)
+                let documentPicker = UIDocumentPickerViewController(forExporting: [savedURL], asCopy: true)
+                documentPicker.delegate = self
+                self.present(documentPicker, animated: true)
             }
         }
         
         downloadTask.resume()
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let selectedURL = urls.first {
+            let title = "Успешно!"
+            let message = "Файл успешно сохранен."
+            self.showAlert(title: title, message: message)
+        }
     }
 }

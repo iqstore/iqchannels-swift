@@ -7,6 +7,8 @@
 
 import Foundation
 
+var unreadListeners: [IQEventSourceManager] = []
+
 class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
     var token: String?
@@ -83,6 +85,10 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>) {
         let path = "/sse/chats/channel/unread/\(channel)"
+        
+        unreadListeners.forEach { $0.close() }
+        unreadListeners.removeAll()
+        
         unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
             if let error = error {
                 callback(nil, error)
@@ -98,6 +104,10 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             
             callback(result?.value ?? 0, nil)
         }
+        
+        if let unreadListener = unreadListener {
+            unreadListeners.append(unreadListener)
+        }
     }
     
     func stopListenToEvents(){
@@ -105,7 +115,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         eventsListener = nil
     }
     
-    func stopUnreadListeners(){
+    func stopListenToUnread(){
         unreadListener?.close()
         unreadListener = nil
     }
@@ -218,10 +228,12 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         let unreadMessagesCount = value.filter { $0.isRead == nil && $0.author == .user}.count
         if(unreadMessagesCount > 0){
-            value.insert(
-                IQMessage(newMsgHeader: true),
-                at: value.count - unreadMessagesCount
-            )
+            if let lastMessage = value.last, !lastMessage.isMy {
+                value.insert(
+                    IQMessage(newMsgHeader: true),
+                    at: value.count - unreadMessagesCount
+                )
+            }
         }
         
         self.relationManager.chatMessages(&value, with: result.relations)

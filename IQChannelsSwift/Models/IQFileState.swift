@@ -40,8 +40,8 @@ enum IQFileState: String, Codable {
         switch self {
         case .approved: return Color.white
         case .rejected: return Style.getColor(theme: Style.model?.messages?.textFileStateRejectedOperator?.color) ?? Color.red
-        case .onChecking: return Style.getColor(theme: Style.model?.messages?.textFileStateOnCheckingOperator?.color) ?? Color.white
-        case .sentForCheck: return Style.getColor(theme: Style.model?.messages?.textFileStateSentForCheckingOperator?.color) ?? Color.white
+        case .onChecking: return Style.getColor(theme: Style.model?.messages?.textFileStateOnCheckingOperator?.color) ?? Color.black
+        case .sentForCheck: return Style.getColor(theme: Style.model?.messages?.textFileStateSentForCheckingOperator?.color) ?? Color.black
         case .checkError: return Style.getColor(theme: Style.model?.messages?.textFileStateCheckErrorOperator?.color) ?? Color.red
         }
     }
