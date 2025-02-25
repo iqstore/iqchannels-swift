@@ -11,7 +11,7 @@
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.1'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.2'
 ```
 
 Затем выполните команду:
@@ -148,33 +148,35 @@ func showMessages() {
 
 Отображение непрочитанных сообщений
 -----------------------------------
-Для отображения непрочитанных сообщений нужно добавить слушателя, в который будет присылаться текущее количество
-новых непрочитанных сообщений `в текущем чате`. Слушателя можно добавлять в любой момент времени, в т.ч. и до конфигурации
-и логина.
+Для отображения непрочитанных сообщений нужно добавить слушателя, в который будет присылаться количество
+непрочитанных сообщений `в текущем чате`. Слушателя нужно добавлять после конфигурации и логина.
 
-Пример с таббаром:
+Пример реализации:
 ```swift
-class IQTabbarController: UITabBarController, IQChannelsUnreadListenerProtocol {
-    
+class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
     var id: String {
         UUID().uuidString
     }
     
     let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        configuration.addUnread(listener: self)
-    }
-    
     // MARK: - IQChannelsUnreadListenerProtocol
     func iqChannelsUnreadDidChange(_ unread: Int) {
-        if unread == 0 {
-            self.messages?.tabBarItem.badgeValue = nil
-        } else {
-            self.messages?.tabBarItem.badgeValue = "\(unread)"
-        }
+        self.unreadLabel.text = "Непрочитанных сообщений: \(unread)"
+    }
+    
+    private lazy var unreadLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Непрочитанных сообщений: nil"
+        return label
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setServer(server: "https://example.ru")   // Конфигурация
+        configuration.login(.anonymous)           // Логин
+        configuration.addUnread(listener: self)   // Добавление слушателя
     }
 }
 ```
