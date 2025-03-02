@@ -188,14 +188,9 @@ struct ChatMessagesView: View {
     @ViewBuilder
     private func getLoadingView() -> some View {
         if viewModel.isLoading {
-            HStack(spacing: 4) {
-                Text("Загрузка...")
-                    .foregroundColor(.gray)
-                    .font(.system(size: 16))
-                
-                ProgressView()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: loaderColor))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     

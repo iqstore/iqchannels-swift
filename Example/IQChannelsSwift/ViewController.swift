@@ -10,7 +10,9 @@ import UIKit
 import IQChannelsSwift
 
 class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
-    var id: String = "0"
+    var id: String {
+        UUID().uuidString
+    }
     func iqChannelsUnreadDidChange(_ unread: Int) {
         DispatchQueue.main.async {
             self.unreadLabel.text = "Непрочитанных сообщений: \(unread)"
@@ -157,8 +159,9 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         emailField.delegate = self
         
         setServer(server: "https://iqchannels.isimplelab.com")
-//        setServer(server: "https://sandbox.iqstore.ru")
-//        setServer(server: "https://app3.iqstore.ru")
+        
+        configuration.login(.anonymous)
+        configuration.addUnread(listener: self)
     }
 
     func setServer(server: String?) {
@@ -231,9 +234,6 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     }
     
     @objc func anonymousDidTap() {
-        setServer(server: serverField.text)
-        configuration.login(.anonymous)
-        configuration.addUnread(listener: self)
         showMessages()
     }
     

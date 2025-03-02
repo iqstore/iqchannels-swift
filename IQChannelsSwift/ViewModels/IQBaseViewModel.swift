@@ -8,7 +8,8 @@
 import Combine
 
 class IQBaseViewModel: ObservableObject {
-    @Published var state: IQChannelsState = .awaitingNetwork
+//    @Published var state: IQChannelsState = .awaitingNetwork
+    @Published var state: IQChannelsState = .authenticated
     var errorListener = PassthroughSubject<Error, Never>()
 }
 
