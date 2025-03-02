@@ -21,8 +21,10 @@ class IQChatDetailViewController: IQViewController {
     private lazy var titleLabel: UILabel = {
         let label: UILabel = .init()
         label.text = "Чат с банком"
-        label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-        label.textColor = UIColor(hex: "242729")
+        let weight: UIFont.Weight = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false ? .bold : .medium
+        
+        label.font = UIFont.systemFont(ofSize: CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15), weight: weight)
+        label.textColor = Style.getUIColor(theme: Style.model?.chat?.titleLabel?.color) ?? UIColor(hex: "242729")
         return label
     }()
     
@@ -43,8 +45,10 @@ class IQChatDetailViewController: IQViewController {
     
     private lazy var statusLabel: UILabel = {
         let label: UILabel = .init()
-        label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        label.textColor = Style.getUIColor(theme: Style.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
+        let weight: UIFont.Weight = Style.model?.chat?.statusLabel?.textStyle?.bold ?? false ? .bold : .medium
+        
+        label.font = UIFont.systemFont(ofSize: CGFloat(Style.model?.chat?.statusLabel?.textSize ?? 13), weight: weight)
+        label.textColor = Style.getUIColor(theme: Style.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
         return label
     }()
     

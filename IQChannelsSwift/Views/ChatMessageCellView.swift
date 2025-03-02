@@ -33,6 +33,10 @@ struct ChatMessageCellView: View {
         return CGFloat(Style.model?.messages?.textUp?.textSize ?? 13)
     }
     
+    var avatarURL: URL? {
+        return Style.model?.chat?.iconOperator ?? message.user?.avatarURL
+    }
+    
     // MARK: - BODY
     var body: some View {
         let isSender = message.isMy
@@ -46,7 +50,7 @@ struct ChatMessageCellView: View {
                 
                 HStack(alignment: .bottom, spacing: 8) {
                     if !isSender {
-                        getAvatarView(avatarURL: message.user?.avatarURL,
+                        getAvatarView(avatarURL: avatarURL,
                                       userDisplayName: message.senderName)
                         .opacity(isGroupStart ? 1 : 0)
                     }

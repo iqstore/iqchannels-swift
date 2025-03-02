@@ -49,6 +49,22 @@ struct RatingPollCellView: View {
         return CGFloat(Style.model?.rating?.text?.textSize ?? 17)
     }
     
+    var titleTextColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
+    }
+    
+    var titleTextFontSize: CGFloat {
+        return CGFloat(Style.model?.rating?.ratingTitle?.textSize ?? 17)
+    }
+    
+    var thanksTextColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.feedbackThanksText?.color) ?? Color(hex: "242729")
+    }
+    
+    var thanksTextFontSize: CGFloat {
+        return CGFloat(Style.model?.rating?.feedbackThanksText?.textSize ?? 17)
+    }
+    
     var textPoll: String {
         return ratingPoll.questions?[currentQuestionIndex].text ?? ""
     }
@@ -99,8 +115,8 @@ struct RatingPollCellView: View {
             VStack(spacing: 12) {
                 if showOffer && needShowOffer {
                     Text("Желаете пройти опрос?")
-                        .foregroundColor(textColor)
-                        .font(.system(size: textFontSize))
+                        .foregroundColor(titleTextColor)
+                        .font(.system(size: titleTextFontSize))
                         .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.center)
                     OfferView() { value in
@@ -114,8 +130,8 @@ struct RatingPollCellView: View {
                 
                 else if wasLastQuestion && showThanks && needShowThanks {
                     Text(thanksText)
-                        .foregroundColor(textColor)
-                        .font(.system(size: textFontSize))
+                        .foregroundColor(thanksTextColor)
+                        .font(.system(size: thanksTextFontSize))
                         .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.center)
                         .onAppear {
@@ -131,8 +147,8 @@ struct RatingPollCellView: View {
                 
                 else if !wasLastQuestion {
                     Text(textPoll)
-                        .foregroundColor(textColor)
-                        .font(.system(size: textFontSize))
+                        .foregroundColor(titleTextColor)
+                        .font(.system(size: titleTextFontSize))
                         .minimumScaleFactor(0.8)
                         .multilineTextAlignment(.center)
                     

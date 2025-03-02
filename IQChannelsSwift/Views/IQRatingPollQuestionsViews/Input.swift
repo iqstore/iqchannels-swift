@@ -24,12 +24,16 @@ struct InputView: View {
         return ratingPoll.questions?[currentQuestionIndex].id ?? 0
     }
     
+    var backgroundColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.inputBackground?.color) ?? Color(hex: "ffffff")
+    }
+    
     var textColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.text?.color) ?? Color(hex: "242729")
+        return Style.getColor(theme: Style.model?.rating?.inputText?.color) ?? Color(hex: "242729")
     }
     
     var textFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.text?.textSize ?? 17)
+        return CGFloat(Style.model?.rating?.inputText?.textSize ?? 17)
     }
     
     
@@ -45,6 +49,7 @@ struct InputView: View {
         TextEditor(text: $userInput)
             .frame(height: 100)
             .foregroundColor(textColor)
+            .background(backgroundColor)
             .font(.system(size: textFontSize))
         
         

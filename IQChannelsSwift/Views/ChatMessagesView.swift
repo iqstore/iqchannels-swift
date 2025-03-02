@@ -12,6 +12,10 @@ struct ChatMessagesView: View {
     @State private var isScrollDownVisible: Bool = false
     @State private var isMenuVisibleMessage: IQMessage? = nil
     
+    var loaderColor: Color {
+        return Style.getColor(theme: Style.model?.chat?.chatLoader) ?? Color(hex: "555555")
+    }
+    
     // MARK: - BODY
     var body: some View {
         ScrollViewReader { proxy in

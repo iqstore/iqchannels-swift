@@ -82,7 +82,7 @@ struct FilePreviewCellView: View {
     
     // MARK: - BODY
     var body: some View {
-        VStack(alignment: .trailing, spacing: 4) {
+        VStack(alignment: .leading, spacing: 4) {
             VStack(alignment: .leading, spacing: 4) {
                 if let replyMessage {
                     MessageReplyView(message: replyMessage,

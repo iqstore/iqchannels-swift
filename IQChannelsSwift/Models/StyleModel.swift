@@ -41,6 +41,9 @@ struct StyleModel: Decodable {
         let chatLoader: Theme?
         let iconOperator: URL?
         let systemText: Text?
+        let statusLabel: Text?
+        let titleLabel: Text?
+        
 
         enum CodingKeys: String, CodingKey {
             case background
@@ -49,6 +52,8 @@ struct StyleModel: Decodable {
             case chatLoader = "chat_loader"
             case iconOperator = "icon_operator"
             case systemText = "system_text"
+            case statusLabel = "status_label"
+            case titleLabel = "title_label"
         }
     }
 
