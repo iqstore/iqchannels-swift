@@ -12,17 +12,17 @@ struct MessageStatusView: View {
     
     var textColor: Color {
         if(message.isMy){
-            return Style.getColor(theme: Style.model?.messages?.textClient?.color) ?? Color(hex: "919399")
+            return Style.getColor(theme: Style.model?.messages?.textTimeClient?.color) ?? Color(hex: "919399")
         }else{
-            return Style.getColor(theme: Style.model?.messages?.textOperator?.color) ?? Color(hex: "919399")
+            return Style.getColor(theme: Style.model?.messages?.textTimeOperator?.color) ?? Color(hex: "919399")
         }
     }
     
     var fontSize: CGFloat {
         if(message.isMy){
-            return CGFloat(Style.model?.messages?.textClient?.textSize ?? 13)
+            return CGFloat(Style.model?.messages?.textTimeClient?.textSize ?? 13)
         }else{
-            return CGFloat(Style.model?.messages?.textOperator?.textSize ?? 13)
+            return CGFloat(Style.model?.messages?.textTimeOperator?.textSize ?? 13)
         }
     }
     

@@ -31,7 +31,14 @@ struct ChatDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                ChatMessagesView(delegate: delegate)
+                ZStack(alignment: .bottom){
+                    ChatMessagesView(delegate: delegate)
+                    
+                    if let typingUser = viewModel.typingUser {
+                        getTypingView(user: typingUser)
+                        .zIndex(2)
+                    }
+                }
                 ChatInputView(text: $viewModel.inputText,
                               messageToReply: $viewModel.messageToReply,
                               selectedFiles: $viewModel.selectedFiles,
@@ -114,5 +121,39 @@ struct ChatDetailView: View {
         .shadow(radius: 10)
         .padding(16)
         .transition(.move(edge: .top))
+    }
+    
+    @ViewBuilder
+    private func getTypingView(user: IQUser) -> some View {
+        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.white
+        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
+        ZStack {
+            Text("\(user.displayName ?? "") печатает...")
+                .font(.system(size: fontSize))
+                .foregroundColor(textColor)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 12)
+                .background(backgroundColor)
+                .clipShape(
+                    RoundedCorner(radius: 12, corners: [.topLeft, .topRight])
+                )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 48)
+    }
+    
+    struct RoundedCorner: Shape {
+        var radius: CGFloat = 0
+        var corners: UIRectCorner = .allCorners
+
+        func path(in rect: CGRect) -> Path {
+            let path = UIBezierPath(
+                roundedRect: rect,
+                byRoundingCorners: corners,
+                cornerRadii: CGSize(width: radius, height: radius)
+            )
+            return Path(path.cgPath)
+        }
     }
 }

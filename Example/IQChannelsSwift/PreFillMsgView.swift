@@ -12,7 +12,6 @@ import SafariServices
 import IQChannelsSwift
 
 class PreFillMsgView: UIViewController {
-//    private var selectedFiles: [String] = []
     private var selectedFiles: [DataFile] = []
     var configuration: IQLibraryConfigurationProtocol?
     var setServer: ((IQPreFillMessages?) -> Void)?
@@ -97,7 +96,6 @@ class PreFillMsgView: UIViewController {
     
     @objc private func openChat() {
         let textMsg = messageField.text ?? ""
-        print("showChat called with message: \(textMsg) \nfiles: \(selectedFiles)")
         
         let preFillMessages = IQPreFillMessages(textMsg: [textMsg], fileMsg: selectedFiles)
         

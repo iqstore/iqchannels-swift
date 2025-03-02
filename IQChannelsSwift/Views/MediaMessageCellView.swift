@@ -17,6 +17,8 @@ struct MediaMessageCellView: View {
     private let isSender: Bool
     
     @State private var showMessageLoading: Bool = false
+    @State private var uiImage: UIImage? = nil
+    @State private var isLoading: Bool = true
     
     var backgroundColor: Color {
         let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
@@ -147,13 +149,46 @@ struct MediaMessageCellView: View {
                     }
                 }
             } else {
-                AnimatedImage(url: message.file?.imagePreviewUrl)
-                    .resizable()
-                    .indicator(SDWebImageActivityIndicator.gray)
-                    .transition(SDWebImageTransition.fade)
-                    .scaledToFill()
-                    .frame(width: imageSize.width, height: imageSize.height)
-                    .clipped()
+                Group {
+                    if isLoading {
+                        ProgressView() // Индикатор загрузки
+                    } else if let uiImage = uiImage {
+                        AnimatedImage(url: message.file?.imagePreviewUrl)
+                            .resizable()
+                            .indicator(SDWebImageActivityIndicator.gray)
+                            .transition(SDWebImageTransition.fade)
+                            .scaledToFill()
+                            .frame(width: imageSize.width, height: imageSize.height)
+                            .clipped()
+                    } else {
+                        Text("Ошибка загрузки")
+                            .foregroundColor(.red)
+                            .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+                    }
+                }
+                .onAppear {
+                    loadImage()
+                }
+            }
+        }
+    }
+    
+    private func loadImage() {
+        guard let url = message.file?.imagePreviewUrl else {
+            isLoading = false
+            return
+        }
+        
+        SDWebImageManager.shared.loadImage(
+            with: url,
+            options: [],
+            progress: nil
+        ) { image, _, error, _, _, _ in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                if let image = image {
+                    self.uiImage = image
+                }
             }
         }
     }

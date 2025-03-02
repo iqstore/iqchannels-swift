@@ -548,7 +548,12 @@ extension IQChannelsManager {
         if index == messages.count - 1 {
             DispatchQueue.main.async {
                 self.detailViewModel?.scrollDotHidden = true
+                self.detailViewModel?.idOfNewMessage = messageID
             }
+        }
+        if !isLoadingOldMessages,
+            index <= 15 {
+            loadOldMessages()
         }
     }
     
@@ -689,7 +694,11 @@ extension IQChannelsManager {
     
     func loadOldMessages() {
         Task {
-            guard let networkManager = currentNetworkManager, let selectedChat else { return }
+            isLoadingOldMessages = true
+            guard let networkManager = currentNetworkManager, let selectedChat else {
+                isLoadingOldMessages = false
+                return
+            }
             
             var query = IQLoadMessageRequest(chatType: selectedChat.chatType)
             for message in messages {
@@ -699,7 +708,6 @@ extension IQChannelsManager {
             }
             
             
-            isLoadingOldMessages = true
             let result = await networkManager.loadMessages(request: query)
             isLoadingOldMessages = false
             

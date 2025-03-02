@@ -11,7 +11,7 @@
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.2'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.3'
 ```
 
 Затем выполните команду:
@@ -160,7 +160,6 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     
     let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
     
-    // MARK: - IQChannelsUnreadListenerProtocol
     func iqChannelsUnreadDidChange(_ unread: Int) {
         self.unreadLabel.text = "Непрочитанных сообщений: \(unread)"
     }
@@ -470,7 +469,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       "text_align": "center",
       "text_style": {
         "bold": false,
-        "italic": true
+        "italic": false
+      }
+    },
+    "status_label": {         //Текст статуса в шапке чата
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "title_label": {          //Заголовок в шапке чата
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
       }
     }
   },
