@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ComposerInputView: UIViewRepresentable {
+    // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
     
     @Binding var text: String
     @Binding var height: CGFloat
@@ -88,7 +90,6 @@ struct ComposerInputView: UIViewRepresentable {
 }
 
 class InputTextView: UITextView {
-
     override open var text: String! {
         didSet {
             if !oldValue.isEmpty && text.isEmpty {
@@ -106,10 +107,11 @@ class InputTextView: UITextView {
     }
 
     open func setUpAppearance() {
+        let cursorColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.cursorColor) ?? UIColor(hex: "525252")
         backgroundColor = .clear
         textContainer.lineFragmentPadding = 8
         textAlignment = .natural
-        tintColor = UIColor(hex: "DD0A34")
+        tintColor = cursorColor
     }
 
     open func setUpLayout() {

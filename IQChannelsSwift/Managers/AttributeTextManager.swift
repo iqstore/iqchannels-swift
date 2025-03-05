@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUICore
 
 final class AttributeTextManager {
     
@@ -6,17 +7,39 @@ final class AttributeTextManager {
     
     private init() {}
     
-    func getString(from markdown: String, textColor: UIColor, fontSize: CGFloat) -> (NSAttributedString, [Link]) {
+    func getString(from markdown: String, textColor: UIColor, fontSize: CGFloat, alingment: TextAlignment, isBold: Bool, isItalic: Bool) -> (NSAttributedString, [Link]) {
         var formattedMarkdown = markdown.replacingOccurrences(of: "\\n", with: "\n")
         if isList(formattedMarkdown) {
             formattedMarkdown = formatStringWithList(formattedMarkdown)
         }
         
+        
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+        var font = UIFont.systemFont(ofSize: fontSize)
+
+        if let descriptor = font.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            font = UIFont(descriptor: descriptor, size: fontSize)
+        }
+        let textAlignments: [TextAlignment: NSTextAlignment] = [
+            .leading: .left,
+            .center: .center,
+            .trailing: .right
+        ]
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = textAlignments[alingment] ?? .left
+        
         let attributedString = NSMutableAttributedString(string: formattedMarkdown)
         var linkRanges: [Link] = []
         attributedString.setAttributes([
-            .font: UIFont.systemFont(ofSize: fontSize),
-            .foregroundColor: textColor
+            .font: font,
+            .foregroundColor: textColor,
+            .paragraphStyle: paragraphStyle
         ], range: .init(location: 0, length: (formattedMarkdown as NSString).length))
         
         // Define patterns for markdown

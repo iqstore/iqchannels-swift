@@ -28,10 +28,19 @@ struct ChatMessageCellView: View {
     var senderTextColor: Color {
         return Style.getColor(theme: Style.model?.messages?.textUp?.color) ?? Color(hex: "919399")
     }
-    
     var senderFontSize: CGFloat {
         return CGFloat(Style.model?.messages?.textUp?.textSize ?? 13)
     }
+    var senderIsBold: Bool {
+        return Style.model?.messages?.textUp?.textStyle?.bold ?? false
+    }
+    var senderIsItalic: Bool {
+        return Style.model?.messages?.textUp?.textStyle?.italic ?? false
+    }
+    var senderAligment: TextAlignment {
+        return stringToAlignment(stringAlignment: Style.model?.messages?.textUp?.textAlign) ?? .leading
+    }
+    
     
     var avatarURL: URL? {
         return Style.model?.chat?.iconOperator ?? message.user?.avatarURL
@@ -58,10 +67,21 @@ struct ChatMessageCellView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         if !isSender,
                            isGroupStart {
-                            Text(message.senderName)
-                                .font(.system(size: senderFontSize))
-                                .foregroundColor(senderTextColor)
-                                .padding(.leading, 12)
+                            if #available(iOS 16.0, *) {
+                                Text(message.senderName)
+                                    .font(.system(size: senderFontSize))
+                                    .foregroundColor(senderTextColor)
+                                    .multilineTextAlignment(senderAligment)
+                                    .bold(senderIsBold)
+                                    .italic(senderIsItalic)
+                                    .padding(.leading, 12)
+                            } else {
+                                Text(message.senderName)
+                                    .font(.system(size: senderFontSize))
+                                    .foregroundColor(senderTextColor)
+                                    .multilineTextAlignment(senderAligment)
+                                    .padding(.leading, 12)
+                            }
                         }
                         
                         HStack(alignment: .bottom){

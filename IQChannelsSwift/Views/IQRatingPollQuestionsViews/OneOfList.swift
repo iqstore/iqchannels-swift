@@ -29,9 +29,17 @@ struct OneOfListView: View {
     
     // MARK: - BODY
     var body: some View {
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
+        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
+        let disabledRatingFontSize = CGFloat(Style.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
+        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        
+        let disabledRatingIsBold = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
+        let disabledRatingIsItalic = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
+        let disabledRatingAlignment = stringToAlignment(stringAlignment: Style.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
+        
+        let disabledRatingRadius = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
+        let disabledRatingBorderSize = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
+        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
         VStack() {
             ForEach(answers) { answer in
@@ -48,13 +56,39 @@ struct OneOfListView: View {
                                                                    answerScale: nil,
                                                                    asTicketRating: nil))
                 } label: {
-                    Text(answer.text)
-                        .foregroundColor(disabledRatingTextColor)
-                        .font(.system(size: disabledRatingFontSize))
-                        .frame(height: 40)
-                        .frame(maxWidth: .infinity)
-                        .background(disabledRatingBackgroundColor)
-                        .cornerRadius(8)
+                    if #available(iOS 16.0, *) {
+                        Text(answer.text)
+                            .foregroundColor(disabledRatingTextColor)
+                            .font(.system(size: disabledRatingFontSize))
+                            .bold(disabledRatingIsBold)
+                            .italic(disabledRatingIsItalic)
+                            .multilineTextAlignment(disabledRatingAlignment)
+                            .frame(height: 40)
+                            .frame(maxWidth: .infinity)
+                            .background(disabledRatingBackgroundColor)
+                            .cornerRadius(disabledRatingRadius)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: disabledRatingRadius)
+                                    .stroke(
+                                        disabledRatingBorderColor,
+                                        lineWidth: disabledRatingBorderSize)
+                            )
+                    } else {
+                        Text(answer.text)
+                            .foregroundColor(disabledRatingTextColor)
+                            .font(.system(size: disabledRatingFontSize))
+                            .multilineTextAlignment(disabledRatingAlignment)
+                            .frame(height: 40)
+                            .frame(maxWidth: .infinity)
+                            .background(disabledRatingBackgroundColor)
+                            .cornerRadius(disabledRatingRadius)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: disabledRatingRadius)
+                                    .stroke(
+                                        disabledRatingBorderColor,
+                                        lineWidth: disabledRatingBorderSize)
+                            )
+                    }
                 }
             }
         }

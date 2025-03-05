@@ -21,10 +21,58 @@ class IQChatDetailViewController: IQViewController {
     private lazy var titleLabel: UILabel = {
         let label: UILabel = .init()
         label.text = "Чат с банком"
-        let weight: UIFont.Weight = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false ? .bold : .medium
         
-        label.font = UIFont.systemFont(ofSize: CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15), weight: weight)
+        let fontSize = CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15)
+        let isBold = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false
+        let isItalic = Style.model?.chat?.titleLabel?.textStyle?.italic ?? false
+        
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+
+        let systemFont = UIFont.systemFont(ofSize: fontSize)
+
+        if let descriptor = systemFont.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            label.font = UIFont(descriptor: descriptor, size: fontSize)
+        } else {
+            label.font = systemFont
+        }
+        
+        
         label.textColor = Style.getUIColor(theme: Style.model?.chat?.titleLabel?.color) ?? UIColor(hex: "242729")
+        return label
+    }()
+    
+    private lazy var statusLabel: UILabel = {
+        let label: UILabel = .init()
+        
+        let fontSize = CGFloat(Style.model?.chat?.statusLabel?.textSize ?? 15)
+        let isBold = Style.model?.chat?.statusLabel?.textStyle?.bold ?? false
+        let isItalic = Style.model?.chat?.statusLabel?.textStyle?.italic ?? false
+        
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+
+        let systemFont = UIFont.systemFont(ofSize: fontSize)
+
+        if let descriptor = systemFont.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            label.font = UIFont(descriptor: descriptor, size: fontSize)
+        } else {
+            label.font = systemFont
+        }
+        
+        label.textColor = Style.getUIColor(theme: Style.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
         return label
     }()
     
@@ -41,15 +89,6 @@ class IQChatDetailViewController: IQViewController {
         view.hidesWhenStopped = true
         view.widthAnchor.constraint(equalToConstant: 24).isActive = true
         return view
-    }()
-    
-    private lazy var statusLabel: UILabel = {
-        let label: UILabel = .init()
-        let weight: UIFont.Weight = Style.model?.chat?.statusLabel?.textStyle?.bold ?? false ? .bold : .medium
-        
-        label.font = UIFont.systemFont(ofSize: CGFloat(Style.model?.chat?.statusLabel?.textSize ?? 13), weight: weight)
-        label.textColor = Style.getUIColor(theme: Style.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
-        return label
     }()
     
     private lazy var backButton: UIButton = {

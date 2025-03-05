@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUICore
 
 struct StyleModel: Decodable {
     let chat: ChatStyle?
@@ -138,8 +139,6 @@ struct StyleModel: Decodable {
     struct RatingStyle: Decodable {
         let backgroundContainer: ContainerStyle?
         let ratingTitle: Text?
-        let text: Text?
-        let textRating: Text?
         let fullStar: URL?
         let emptyStar: URL?
         let sentRating: ButtonStyle?
@@ -155,8 +154,6 @@ struct StyleModel: Decodable {
         enum CodingKeys: String, CodingKey {
             case backgroundContainer = "background_container"
             case ratingTitle = "rating_title"
-            case text
-            case textRating = "text_rating"
             case fullStar = "full_star"
             case emptyStar = "empty_star"
             case sentRating = "sent_rating"
@@ -173,16 +170,20 @@ struct StyleModel: Decodable {
     struct ToolsToMessageStyle: Decodable {
         let iconSent: URL?
         let iconClip: URL?
+        let background: Theme?
         let backgroundIcon: Theme?
-        let backgroundChat: ContainerStyle?
-        let textChat: Text?
+        let backgroundInput: ContainerStyle?
+        let textInput: Text?
+        let cursorColor: Theme?
 
         enum CodingKeys: String, CodingKey {
             case iconSent = "icon_sent"
             case iconClip = "icon_clip"
+            case background
             case backgroundIcon = "background_icon"
-            case backgroundChat = "background_chat"
-            case textChat = "text_chat"
+            case backgroundInput = "background_input"
+            case textInput = "text_input"
+            case cursorColor = "cursor_color"
         }
     }
 
@@ -247,9 +248,9 @@ extension StyleModel {
     }
 
     struct BorderStyle: Decodable {
-        let size: Int?
+        let size: CGFloat?
         let color: Theme?
-        let borderRadius: Int?
+        let borderRadius: CGFloat?
 
         enum CodingKeys: String, CodingKey {
             case size
@@ -264,8 +265,8 @@ extension StyleModel {
     }
     
     struct ButtonStyle: Decodable {
-        let backgroundEnabled: Theme?
-        let backgroundDisabled: Theme?
+        let backgroundEnabled: ContainerStyle?
+        let backgroundDisabled: ContainerStyle?
         let textEnabled: Text?
         let textDisabled: Text?
         
@@ -277,4 +278,17 @@ extension StyleModel {
         }
     }
 
+}
+
+public func stringToAlignment(stringAlignment: String?) -> TextAlignment? {
+    switch stringAlignment {
+    case "left":
+        .leading
+    case "center":
+        .center
+    case "right":
+        .trailing
+    default:
+        nil
+    }
 }

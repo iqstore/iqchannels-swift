@@ -11,7 +11,7 @@
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.3'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.1.4'
 ```
 
 Затем выполните команду:
@@ -300,7 +300,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ```json
 {
-  "signup": {                 //Авторизация:
+  "signup": {                 //Авторизация: (только Android)
     "background": {           //Фон
       "light": "#FFFFFF",     //Цвет для светлой темы
       "dark": "#FFFFE0"       //Цвет для темной темы
@@ -990,7 +990,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           "dark": "#FFFFFF"
         },
         "text_size": 10,
-        "text_align": "center",
         "text_style": {
           "bold": false,
           "italic": false
@@ -1002,14 +1001,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           "dark": "#FFFFFF"
         },
         "text_size": 10,
-        "text_align": "center",
         "text_style": {
           "bold": false,
           "italic": false
         }
       }
     },
-    "scale_min_text": {                   //Текст низкой оценки (Scale)
+    "scale_min_text": {                   //Текст низкой оценки
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -1021,7 +1019,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "scale_max_text": {                   //Текст высокой оценки (Scale)
+    "scale_max_text": {                   //Текст высокой оценки
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -1052,12 +1050,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#000000"
       },
-      "text_size": 10,
-      "text_align": "left",
-      "text_style": {
-        "bold": false,
-        "italic": false
-      }
+      "text_size": 10
     },
     "feedback_thanks_text": {             //Текст благодарности за прохождение опроса
       "color": {
@@ -1073,12 +1066,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   },
   "tools_to_message": {                   //Панель инструментов (для отправки сообщений):
+    "background": {                       //Фон панели
+      "light": "#ffffff",
+      "dark": "#696969"
+    },
     "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png", //Иконка-кнопка для отправки – вид кнопки(изменяется с помощью файла с иконкой)
     "background_icon": {                  //Фон иконки для отправки
       "light": "#DEB887",
       "dark": "#696969"
     },
-    "background_chat": {                  //Фон области ввода текста
+    "background_input": {                 //Фон области ввода текста
       "color": {
         "light": "#DEB887",
         "dark": "#696969"
@@ -1092,21 +1089,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "border-radius": 0
       }
     },
-    "text_chat": {                        //Текст в поле ввода
+    "text_input": {                       //Текст в поле ввода
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10,
-      "text_align": "center",
-      "text_style": {
-        "bold": false,
-        "italic": false
-      }
+      "text_size": 10
     },
-    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png",  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
+    "cursor_color": {                     //Цвет курсора
+      "light": "#525252",
+      "dark": "#525252"
+    }
   },
-  "error": {                              //Страница ошибки (для отправки сообщений):
+  "error": {                              //Страница ошибки:
     "title_error": {                      //Заголовок
       "color": {
         "light": "#000000",
@@ -1138,7 +1134,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       "light": "#FFFF00",
       "dark": "#00FFFF"
     },
-    "border_button": {                  //Граница IVR кнопки Single-choice (isDropDown)
+    "border_button": {                  //Граница кнопки Single-choice
       "size": 3,
       "color": {
         "light": "#000000",

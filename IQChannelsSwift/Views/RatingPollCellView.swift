@@ -40,30 +40,54 @@ struct RatingPollCellView: View {
     var backgroundColor: Color {
         return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
-    
-    var textColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.text?.color) ?? Color(hex: "242729")
+    var backgroundRadius: CGFloat {
+        return Style.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
+    }
+    var backgroundBorderSize: CGFloat {
+        return Style.model?.rating?.backgroundContainer?.border?.size ?? 0
+    }
+    var backgroundBorderColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
     }
     
-    var textFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.text?.textSize ?? 17)
-    }
     
-    var titleTextColor: Color {
+    
+    
+    var titleColor: Color {
         return Style.getColor(theme: Style.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
     }
-    
-    var titleTextFontSize: CGFloat {
+    var titleFontSize: CGFloat {
         return CGFloat(Style.model?.rating?.ratingTitle?.textSize ?? 17)
     }
+    var titleIsBold: Bool {
+        return Style.model?.rating?.ratingTitle?.textStyle?.bold ?? false
+    }
+    var titleIsItalic: Bool {
+        return Style.model?.rating?.ratingTitle?.textStyle?.italic ?? false
+    }
+    var titleAligment: TextAlignment {
+        return stringToAlignment(stringAlignment: Style.model?.rating?.ratingTitle?.textAlign) ?? .leading
+    }
     
-    var thanksTextColor: Color {
+    
+    
+    var thanksColor: Color {
         return Style.getColor(theme: Style.model?.rating?.feedbackThanksText?.color) ?? Color(hex: "242729")
     }
-    
-    var thanksTextFontSize: CGFloat {
+    var thanksFontSize: CGFloat {
         return CGFloat(Style.model?.rating?.feedbackThanksText?.textSize ?? 17)
     }
+    var thanksIsBold: Bool {
+        return Style.model?.rating?.feedbackThanksText?.textStyle?.bold ?? false
+    }
+    var thanksIsItalic: Bool {
+        return Style.model?.rating?.feedbackThanksText?.textStyle?.italic ?? false
+    }
+    var thanksAligment: TextAlignment {
+        return stringToAlignment(stringAlignment: Style.model?.rating?.feedbackThanksText?.textAlign) ?? .leading
+    }
+    
+    
     
     var textPoll: String {
         return ratingPoll.questions?[currentQuestionIndex].text ?? ""
@@ -114,11 +138,23 @@ struct RatingPollCellView: View {
         if needPoll{
             VStack(spacing: 12) {
                 if showOffer && needShowOffer {
-                    Text("Желаете пройти опрос?")
-                        .foregroundColor(titleTextColor)
-                        .font(.system(size: titleTextFontSize))
-                        .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
+                    if #available(iOS 16.0, *) {
+                        Text("Желаете пройти опрос?")
+                            .foregroundColor(titleColor)
+                            .font(.system(size: titleFontSize))
+                            .bold(titleIsBold)
+                            .italic(titleIsItalic)
+                            .multilineTextAlignment(titleAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("Желаете пройти опрос?")
+                            .foregroundColor(titleColor)
+                            .font(.system(size: titleFontSize))
+                            .multilineTextAlignment(titleAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                    }
                     OfferView() { value in
                         needShowOffer = false
                         needPoll = value
@@ -129,28 +165,61 @@ struct RatingPollCellView: View {
                 }
                 
                 else if wasLastQuestion && showThanks && needShowThanks {
-                    Text(thanksText)
-                        .foregroundColor(thanksTextColor)
-                        .font(.system(size: thanksTextFontSize))
-                        .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                let ticketRatingValue = pollResult
-                                    .filter { $0.asTicketRating == true }
-                                    .compactMap { $0.answerStars ?? $0.answerScale }.first
-                                onSendPollConversation?(ticketRatingValue, pollResult, rating.id, ratingPoll.id, true)
-                                pollResult = []
+                    if #available(iOS 16.0, *) {
+                        Text(thanksText)
+                            .foregroundColor(thanksColor)
+                            .font(.system(size: thanksFontSize))
+                            .bold(thanksIsBold)
+                            .italic(thanksIsItalic)
+                            .multilineTextAlignment(thanksAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    let ticketRatingValue = pollResult
+                                        .filter { $0.asTicketRating == true }
+                                        .compactMap { $0.answerStars ?? $0.answerScale }.first
+                                    onSendPollConversation?(ticketRatingValue, pollResult, rating.id, ratingPoll.id, true)
+                                    pollResult = []
+                                }
                             }
-                        }
+                    } else {
+                        Text(thanksText)
+                            .foregroundColor(thanksColor)
+                            .font(.system(size: thanksFontSize))
+                            .multilineTextAlignment(thanksAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    let ticketRatingValue = pollResult
+                                        .filter { $0.asTicketRating == true }
+                                        .compactMap { $0.answerStars ?? $0.answerScale }.first
+                                    onSendPollConversation?(ticketRatingValue, pollResult, rating.id, ratingPoll.id, true)
+                                    pollResult = []
+                                }
+                            }
+                    }
                 }
                 
                 else if !wasLastQuestion {
-                    Text(textPoll)
-                        .foregroundColor(titleTextColor)
-                        .font(.system(size: titleTextFontSize))
-                        .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
+                    if #available(iOS 16.0, *) {
+                        Text(textPoll)
+                            .foregroundColor(titleColor)
+                            .font(.system(size: titleFontSize))
+                            .bold(titleIsBold)
+                            .italic(titleIsItalic)
+                            .multilineTextAlignment(titleAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text(textPoll)
+                            .foregroundColor(titleColor)
+                            .font(.system(size: titleFontSize))
+                            .multilineTextAlignment(titleAligment)
+                            .minimumScaleFactor(0.8)
+                            .multilineTextAlignment(.center)
+                    }
                     
                     switch questionType {
                     case .scale:
@@ -208,7 +277,11 @@ struct RatingPollCellView: View {
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .background(backgroundColor)
-            .cornerRadius(12)
+            .cornerRadius(backgroundRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: backgroundRadius)
+                    .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
+            )
         }
     }
 }

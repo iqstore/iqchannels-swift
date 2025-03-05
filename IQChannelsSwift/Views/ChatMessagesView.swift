@@ -149,10 +149,24 @@ struct ChatMessagesView: View {
     private func getDatePreviewView(date: String) -> some View {
         let color = Style.getColor(theme: Style.model?.chat?.dateText?.color) ?? Color(hex: "919399")
         let fontSize = CGFloat(Style.model?.chat?.dateText?.textSize ?? 13)
-        Text(date)
-            .font(.system(size: fontSize))
-            .foregroundColor(color)
-            .padding(.vertical, 12)
+        let alignment = stringToAlignment(stringAlignment: Style.model?.chat?.dateText?.textAlign) ?? .leading
+        let isBold = Style.model?.chat?.dateText?.textStyle?.bold ?? false
+        let isItalic = Style.model?.chat?.dateText?.textStyle?.italic ?? false
+        if #available(iOS 16.0, *) {
+            Text(date)
+                .font(.system(size: fontSize))
+                .foregroundColor(color)
+                .multilineTextAlignment(alignment)
+                .bold(isBold)
+                .italic(isItalic)
+                .padding(.vertical, 12)
+        } else {
+            Text(date)
+                .font(.system(size: fontSize))
+                .foregroundColor(color)
+                .multilineTextAlignment(alignment)
+                .padding(.vertical, 12)
+        }
     }
     
     @ViewBuilder
@@ -200,14 +214,35 @@ struct ChatMessagesView: View {
     
     @ViewBuilder
     private func getNewMessagesView() -> some View {
-        Text("Новые сообщения")
-            .foregroundColor(.gray)
-            .font(.system(size: 18))
-            .frame(height: 24)
-            .frame(maxWidth: .infinity)
-            .background(Color(hex: "F4F4F8"))
-            .padding(.top, 12)
-            .padding(.horizontal, -16)
+        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
+        let alignment = stringToAlignment(stringAlignment: Style.model?.chat?.systemText?.textAlign) ?? .leading
+        let isBold = Style.model?.chat?.systemText?.textStyle?.bold ?? false
+        let isItalic = Style.model?.chat?.systemText?.textStyle?.italic ?? false
+        
+        if #available(iOS 16.0, *) {
+            Text("Новые сообщения")
+                .foregroundColor(textColor)
+                .font(.system(size: fontSize))
+                .multilineTextAlignment(alignment)
+                .bold(isBold)
+                .italic(isItalic)
+                .frame(height: 24)
+                .frame(maxWidth: .infinity)
+                .background(Color(hex: "F4F4F8"))
+                .padding(.top, 12)
+                .padding(.horizontal, -16)
+        } else {
+            Text("Новые сообщения")
+                .foregroundColor(textColor)
+                .font(.system(size: fontSize))
+                .multilineTextAlignment(alignment)
+                .frame(height: 24)
+                .frame(maxWidth: .infinity)
+                .background(Color(hex: "F4F4F8"))
+                .padding(.top, 12)
+                .padding(.horizontal, -16)
+        }
     }
     
     // MARK: - METHODS
