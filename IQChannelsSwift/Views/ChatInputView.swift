@@ -69,7 +69,7 @@ struct ChatInputView: View {
             
             getTextFieldView()
         }
-        .animation(.bouncy, value: messageToReply)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: messageToReply)
         .allowsHitTesting(!disableInput)
     }
     
@@ -167,7 +167,7 @@ struct ChatInputView: View {
             }
             .opacity(showSendButton ? 1 : 0)
         }
-        .animation(.bouncy, value: showSendButton)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: showSendButton)
         .padding(.horizontal, 8)
         .padding(.vertical, 12)
         .background(backgroundColor)

@@ -133,7 +133,7 @@ struct ChatMessagesView: View {
                     proxy.scrollTo(messageUiId, anchor: .bottom)
                 }
             }
-            .animation(.bouncy, value: isScrollDownVisible)
+            .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: isScrollDownVisible)
             .animation(.easeInOut, value: viewModel.isLoading)
         }
         .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
