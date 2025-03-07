@@ -196,7 +196,7 @@ struct FilePreviewCellView: View {
             RoundedRectangle(cornerRadius: backgroundRadius)
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
-        .animation(.bouncy, value: message.file?.isLoading)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: message.file?.isLoading)
         .onTapGesture {
             if let file = message.file {
                 if let state = file.state {

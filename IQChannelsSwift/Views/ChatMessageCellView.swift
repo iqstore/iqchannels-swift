@@ -101,7 +101,7 @@ struct ChatMessageCellView: View {
             .frame(maxWidth: .infinity, alignment: isSender ? .trailing : .leading)
             .padding(isSender ? .leading : .trailing, 48)
             .offset(x: dragAmountX)
-            .animation(.bouncy, value: dragAmountX)
+            .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: dragAmountX)
             .background(Color(white: 1, opacity: 0.000001))
             .gesture(
                 message.isReply ?

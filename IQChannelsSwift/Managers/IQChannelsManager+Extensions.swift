@@ -141,8 +141,19 @@ extension IQChannelsManager {
         
         didSendAttachments = true
         
-        let texts = attachment.attachments.compactMap{ if case .text(let text) = $0 { text } else { nil } }
-        let files = attachment.attachments.compactMap{ if case let .file(image, filename) = $0 { DataFile(data: image, filename: filename) } else { nil } }
+        let texts = attachment.attachments.compactMap { attachment -> String? in
+            if case .text(let text) = attachment {
+                return text
+            }
+            return nil
+        }
+
+        let files = attachment.attachments.compactMap { attachment -> DataFile? in
+            if case let .file(image, filename) = attachment {
+                return DataFile(data: image, filename: filename)
+            }
+            return nil
+        }
         
         texts.forEach {
             sendMessage($0, files: nil, replyToMessage: nil)
@@ -520,7 +531,7 @@ extension IQChannelsManager {
         
         if response.error != nil {
             if let error = response.error {
-                if let index = indexOfMyMessage(localID: message.localID) {
+                if indexOfMyMessage(localID: message.localID) != nil {
                     baseViewModels.sendError(error)
                 }
             } else {
@@ -579,8 +590,6 @@ extension IQChannelsManager {
     
     private func sendMessage(_ message: IQMessage, attempts: Int = 0) async {
         if (!message.error){
-            var attempts = attempts
-            
             if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
                 messages[index] = message
             }
@@ -598,15 +607,16 @@ extension IQChannelsManager {
             
             if error != nil {
                 if networkStatusManager.isReachable && attempts < 4{
+                    let nextAttempt = attempts + 1
+                                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                         Task {
-                            attempts += 1
-                            await self?.sendMessage(message, attempts: attempts)
+                            await self?.sendMessage(message, attempts: nextAttempt)
                         }
                     }
-                    print(attempts)
+                    print(nextAttempt)
                 } else {
-                    var errorMessage = message.withError(true)
+                    let errorMessage = message.withError(true)
                     
                     if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
                         messages[index] = errorMessage
