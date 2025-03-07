@@ -32,13 +32,6 @@ struct StarsView: View {
     
     // MARK: - BODY
     var body: some View {
-        let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
-        let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
-        
         HStack(spacing: 10) {
             ForEach(1..<6) { i in
                 Button {
@@ -76,31 +69,20 @@ struct StarsView: View {
                 }
             }
         }
-
-        Button {
-            if let selectedRating {
-                questionAnswered(IQRatingPollClientAnswerInput(projectId: rating.projectID ?? 0,
-                                                               clientId: rating.clientID ?? 0,
-                                                               ratingId: rating.id,
-                                                               ratingPollQuestionId: ratingPollQuestionId,
-                                                               type: .stars,
-                                                               fcr: nil,
-                                                               ratingPollAnswerId: nil,
-                                                               answerInput: nil,
-                                                               answerStars: selectedRating,
-                                                               answerScale: nil,
-                                                               asTicketRating: asTicketRating))
-            }
-        } label: {
-            Text("Отправить")
-                .foregroundColor(selectedRating == nil ? disabledRatingTextColor : enabledRatingTextColor)
-                .font(.system(size: selectedRating == nil ? disabledRatingFontSize : enabledRatingFontSize))
-                .frame(height: 40)
-                .frame(maxWidth: .infinity)
-                .background(selectedRating == nil ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
-                .cornerRadius(8)
+        
+        SentRatingButton(disabled: selectedRating == nil) {
+            questionAnswered(IQRatingPollClientAnswerInput(projectId: rating.projectID ?? 0,
+                                                           clientId: rating.clientID ?? 0,
+                                                           ratingId: rating.id,
+                                                           ratingPollQuestionId: ratingPollQuestionId,
+                                                           type: .stars,
+                                                           fcr: nil,
+                                                           ratingPollAnswerId: nil,
+                                                           answerInput: nil,
+                                                           answerStars: selectedRating,
+                                                           answerScale: nil,
+                                                           asTicketRating: asTicketRating))
         }
-        .disabled(selectedRating == nil)
     }
 }
 

@@ -36,6 +36,7 @@ struct ChatInputView: View {
         return textAreaHeight
     }
     
+    
     // MARK: - BODY
     var body: some View {
         VStack(spacing: 0) {
@@ -79,6 +80,8 @@ struct ChatInputView: View {
     // MARK: - VIEWS
     @ViewBuilder
     private func getTextFieldView() -> some View {
+        let backgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.background) ?? Color.clear
+        
         HStack(alignment: .bottom, spacing: 8) {
             Button {
                 onAttachmentCompletion?()
@@ -104,9 +107,15 @@ struct ChatInputView: View {
                 }
             }
             
-            let chatBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundChat?.color) ?? Color(hex: "F4F4F8")
-            let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textChat?.color) ?? UIColor(hex: "242729")
-            let fontSize = CGFloat(Style.model?.toolsToMessage?.textChat?.textSize ?? 17)
+            let inputBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundInput?.color) ?? Color(hex: "F4F4F8")
+            let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textInput?.color) ?? UIColor(hex: "242729")
+            let fontSize = CGFloat(Style.model?.toolsToMessage?.textInput?.textSize ?? 17)
+            
+            let radius = Style.model?.toolsToMessage?.backgroundInput?.border?.borderRadius ?? 8
+            let borderSize = Style.model?.toolsToMessage?.backgroundInput?.border?.size ?? 0
+            let borderColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundInput?.border?.color) ?? Color(hex: "000000")
+            
+            
             ComposerInputView(text: $text,
                               height: $textAreaHeight,
                               textColor: textColor,
@@ -120,8 +129,12 @@ struct ChatInputView: View {
                         .padding(.leading, 8)
                 }
                 .padding(.horizontal, 8)
-                .background(chatBackgroundColor)
-                .cornerRadius(CustomTextAreaConfig.minHeight / 2)
+                .background(inputBackgroundColor)
+                .cornerRadius(radius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: radius)
+                        .stroke(borderColor, lineWidth: borderSize)
+                )
             
             Group {
                 if showSendButton {
@@ -157,6 +170,7 @@ struct ChatInputView: View {
         .animation(.bouncy, value: showSendButton)
         .padding(.horizontal, 8)
         .padding(.vertical, 12)
+        .background(backgroundColor)
     }
     
     @ViewBuilder
@@ -182,17 +196,47 @@ struct ChatInputView: View {
             VStack(alignment: .leading, spacing: 0) {
                 let senderTextColor = Style.getColor(theme: Style.model?.answer?.textSender?.color) ?? Color(hex: "919399")
                 let senderFontSize = CGFloat(Style.model?.answer?.textSender?.textSize ?? 13)
-                Text(message.senderName)
-                    .font(.system(size: senderFontSize))
-                    .foregroundColor(senderTextColor)
-                    .lineLimit(1)
+                let senderAlignment = stringToAlignment(stringAlignment: Style.model?.answer?.textSender?.textAlign) ?? .leading
+                let senderIsBold = Style.model?.answer?.textSender?.textStyle?.bold ?? false
+                let senderIsItalic = Style.model?.answer?.textSender?.textStyle?.italic ?? false
+                
+                if #available(iOS 16.0, *) {
+                    Text(message.senderName)
+                        .font(.system(size: senderFontSize))
+                        .foregroundColor(senderTextColor)
+                        .multilineTextAlignment(senderAlignment)
+                        .bold(senderIsBold)
+                        .italic(senderIsItalic)
+                        .lineLimit(1)
+                } else {
+                    Text(message.senderName)
+                        .font(.system(size: senderFontSize))
+                        .foregroundColor(senderTextColor)
+                        .multilineTextAlignment(senderAlignment)
+                        .lineLimit(1)
+                }
                 
                 let messageTextColor = Style.getColor(theme: Style.model?.answer?.textMessage?.color) ?? Color(hex: "242729")
                 let messageFontSize = CGFloat(Style.model?.answer?.textMessage?.textSize ?? 15)
-                Text(message.messageText)
-                    .font(.system(size: messageFontSize))
-                    .foregroundColor(messageTextColor)
-                    .lineLimit(1)
+                let messageAlignment = stringToAlignment(stringAlignment: Style.model?.answer?.textMessage?.textAlign) ?? .leading
+                let messageIsBold = Style.model?.answer?.textMessage?.textStyle?.bold ?? false
+                let messageIsItalic = Style.model?.answer?.textMessage?.textStyle?.italic ?? false
+                
+                if #available(iOS 16.0, *) {
+                    Text(message.messageText)
+                        .font(.system(size: messageFontSize))
+                        .foregroundColor(messageTextColor)
+                        .multilineTextAlignment(senderAlignment)
+                        .bold(senderIsBold)
+                        .italic(senderIsItalic)
+                        .lineLimit(1)
+                } else {
+                    Text(message.messageText)
+                        .font(.system(size: messageFontSize))
+                        .foregroundColor(messageTextColor)
+                        .multilineTextAlignment(senderAlignment)
+                        .lineLimit(1)
+                }
             }
             
             Spacer(minLength: 0)
@@ -218,11 +262,6 @@ struct ChatInputView: View {
         .background(backgroundColor)
     }
     
-    var fileNameTextColor: Color {
-        let fileNameTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
-        return fileNameTextColor
-    }
-    
     func formatBytes(_ bytes: Int) -> String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB]
@@ -233,9 +272,19 @@ struct ChatInputView: View {
     @ViewBuilder
     private func getFilePreview(files: [DataFile]) -> some View {
         let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.clear
+        
+        let fileNameTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
         let fileNameFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        let fileNameAlignment = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
+        let fileNameIsBold = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
+        let fileNameIsItalic = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
+        
+        
         let fileSizeTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
         let fileSizeFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        let fileSizeAlignment = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFileSizeOperator?.textAlign) ?? .leading
+        let fileSizeIsBold = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
+        let fileSizeIsItalic = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
         
         HStack(spacing: 8) {
             Image(name: "file")
@@ -245,24 +294,57 @@ struct ChatInputView: View {
                 .foregroundColor(fileNameTextColor)
             
             VStack(alignment: .leading, spacing: 0) {
-                Text(files.first?.filename ?? "Файл")
-                    .font(.system(size: fileNameFontSize))
-                    .foregroundColor(fileNameTextColor)
-                    .lineLimit(2)
+                if #available(iOS 16.0, *) {
+                    Text(files.first?.filename ?? "Файл")
+                        .font(.system(size: fileNameFontSize))
+                        .foregroundColor(fileNameTextColor)
+                        .multilineTextAlignment(fileNameAlignment)
+                        .bold(fileNameIsBold)
+                        .italic(fileNameIsItalic)
+                        .lineLimit(2)
+                } else {
+                    Text(files.first?.filename ?? "Файл")
+                        .font(.system(size: fileNameFontSize))
+                        .foregroundColor(fileNameTextColor)
+                        .multilineTextAlignment(fileNameAlignment)
+                        .lineLimit(2)
+                }
                 
-                Text(formatBytes(files.first?.data.count ?? 0))
-                    .font(.system(size: fileSizeFontSize))
-                    .foregroundColor(fileSizeTextColor)
-                    .lineLimit(1)
+                if #available(iOS 16.0, *) {
+                    Text(formatBytes(files.first?.data.count ?? 0))
+                        .font(.system(size: fileSizeFontSize))
+                        .foregroundColor(fileSizeTextColor)
+                        .multilineTextAlignment(fileSizeAlignment)
+                        .bold(fileSizeIsBold)
+                        .italic(fileSizeIsItalic)
+                        .lineLimit(1)
+                } else {
+                    Text(formatBytes(files.first?.data.count ?? 0))
+                        .font(.system(size: fileSizeFontSize))
+                        .foregroundColor(fileSizeTextColor)
+                        .multilineTextAlignment(fileSizeAlignment)
+                        .lineLimit(1)
+                }
             }
             
             Spacer(minLength: 0)
             
             if (files.count > 1){
-                Text("+ \(files.count - 1)")
-                    .font(.system(size: fileNameFontSize))
-                    .foregroundColor(fileNameTextColor)
-                    .lineLimit(1)
+                if #available(iOS 16.0, *) {
+                    Text("+ \(files.count - 1)")
+                        .font(.system(size: fileNameFontSize))
+                        .foregroundColor(fileNameTextColor)
+                        .multilineTextAlignment(fileNameAlignment)
+                        .bold(fileNameIsBold)
+                        .italic(fileNameIsItalic)
+                        .lineLimit(1)
+                } else {
+                    Text("+ \(files.count - 1)")
+                        .font(.system(size: fileNameFontSize))
+                        .foregroundColor(fileNameTextColor)
+                        .multilineTextAlignment(fileNameAlignment)
+                        .lineLimit(1)
+                }
             }
             
             Button {

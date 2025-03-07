@@ -27,6 +27,17 @@ struct InputView: View {
     var backgroundColor: Color {
         return Style.getColor(theme: Style.model?.rating?.inputBackground?.color) ?? Color(hex: "ffffff")
     }
+    var backgroundRadius: CGFloat {
+        return Style.model?.rating?.inputBackground?.border?.borderRadius ?? 12
+    }
+    var backgroundBorderSize: CGFloat {
+        return Style.model?.rating?.inputBackground?.border?.size ?? 0
+    }
+    var backgroundBorderColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.inputBackground?.border?.color) ?? Color(hex: "000000")
+    }
+    
+    
     
     var textColor: Color {
         return Style.getColor(theme: Style.model?.rating?.inputText?.color) ?? Color(hex: "242729")
@@ -43,39 +54,57 @@ struct InputView: View {
         let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
         let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
         let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
-        
-        TextEditor(text: $userInput)
-            .frame(height: 100)
-            .foregroundColor(textColor)
-            .background(backgroundColor)
-            .font(.system(size: textFontSize))
+        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
+        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
         
         
-        Button {
-            if userInput != "" {
-                questionAnswered(IQRatingPollClientAnswerInput(projectId: rating.projectID ?? 0,
-                                                               clientId: rating.clientID ?? 0,
-                                                               ratingId: rating.id,
-                                                               ratingPollQuestionId: ratingPollQuestionId,
-                                                               type: .input,
-                                                               fcr: nil,
-                                                               ratingPollAnswerId: nil,
-                                                               answerInput: userInput,
-                                                               answerStars: nil,
-                                                               answerScale: nil,
-                                                               asTicketRating: nil))
-            }
-        } label: {
-            Text("Отправить")
-                .foregroundColor(userInput == "" ? disabledRatingTextColor : enabledRatingTextColor)
-                .font(.system(size: userInput == "" ? disabledRatingFontSize : enabledRatingFontSize))
-                .frame(height: 40)
-                .frame(maxWidth: .infinity)
-                .background(userInput == "" ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
-                .cornerRadius(8)
+        let enabledRatingRadius = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.borderRadius ?? 8
+        let disabledRatingRadius = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.borderRadius ?? 8
+        let enabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.size ?? 0
+        let disabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.size ?? 0
+        let enabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
+        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        
+        let cursorColor = Style.getColor(theme: Style.model?.toolsToMessage?.cursorColor) ?? Color(hex: "525252")
+        
+        if #available(iOS 16.0, *) {
+            TextEditor(text: $userInput)
+                .frame(height: 100)
+                .foregroundColor(textColor)
+                .scrollContentBackground(.hidden)
+                .background(backgroundColor)
+                .font(.system(size: textFontSize))
+                .cornerRadius(backgroundRadius)
+                .tint(cursorColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: backgroundRadius)
+                        .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
+                )
+        } else {
+            TextEditor(text: $userInput)
+                .frame(height: 100)
+                .foregroundColor(textColor)
+                .background(backgroundColor)
+                .font(.system(size: textFontSize))
+                .cornerRadius(backgroundRadius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: backgroundRadius)
+                        .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
+                )
         }
-        .disabled(userInput == "")
+        
+        SentRatingButton(disabled: userInput == "") {
+            questionAnswered(IQRatingPollClientAnswerInput(projectId: rating.projectID ?? 0,
+                                                           clientId: rating.clientID ?? 0,
+                                                           ratingId: rating.id,
+                                                           ratingPollQuestionId: ratingPollQuestionId,
+                                                           type: .input,
+                                                           fcr: nil,
+                                                           ratingPollAnswerId: nil,
+                                                           answerInput: userInput,
+                                                           answerStars: nil,
+                                                           answerScale: nil,
+                                                           asTicketRating: nil))
+        }
     }
 }

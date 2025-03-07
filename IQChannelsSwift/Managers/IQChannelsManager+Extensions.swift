@@ -637,7 +637,7 @@ extension IQChannelsManager {
         guard let networkManager = currentNetworkManager, let selectedChat else { return }
         
         networkManager.stopListenToEvents()
-        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType)).result
+        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType), getSettings: false).result
         let newMessages = (result?.0 ?? [])
             .filter { $0.hasValidPayload }
             .filter { indexOfMessage(messageID: $0.messageID) == nil }
@@ -660,17 +660,27 @@ extension IQChannelsManager {
             
             DispatchQueue.main.async { self.detailViewModel?.isLoading = true }
             
-            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType))
+            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true)
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             
             if let error = result.error {
                 baseViewModels.sendError(error)
                 return
             }
+            let lifeTime = result.result?.2
             self.systemChat = result.result?.1 ?? false
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
             messages = results
+            
+            if let lifeTime {
+                DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime)) {
+                    if let index = self.messages.firstIndex(where: { $0.localID == -1 }) {
+                        self.messages.remove(at: index)
+                    }
+                }
+            }
+            
             listenToEvents()
             
             await sendUnsendMessages()
@@ -707,8 +717,7 @@ extension IQChannelsManager {
                 break
             }
             
-            
-            let result = await networkManager.loadMessages(request: query)
+            let result = await networkManager.loadMessages(request: query, getSettings: false)
             isLoadingOldMessages = false
             
             if let error = result.error {

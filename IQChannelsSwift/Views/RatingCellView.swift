@@ -22,23 +22,50 @@ struct RatingCellView: View {
     var backgroundColor: Color {
         return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
-    
-    var textColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.text?.color) ?? Color(hex: "242729")
+    var backgroundRadius: CGFloat {
+        return Style.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
+    }
+    var backgroundBorderSize: CGFloat {
+        return Style.model?.rating?.backgroundContainer?.border?.size ?? 0
+    }
+    var backgroundBorderColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
     }
     
-    var textFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.text?.textSize ?? 17)
+    var titleColor: Color {
+        return Style.getColor(theme: Style.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
+    }
+    var titleFontSize: CGFloat {
+        return CGFloat(Style.model?.rating?.ratingTitle?.textSize ?? 17)
+    }
+    var titleIsBold: Bool {
+        return Style.model?.rating?.ratingTitle?.textStyle?.bold ?? false
+    }
+    var titleIsItalic: Bool {
+        return Style.model?.rating?.ratingTitle?.textStyle?.italic ?? false
+    }
+    var titleAligment: TextAlignment {
+        return stringToAlignment(stringAlignment: Style.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
     // MARK: - BODY
     var body: some View {
         VStack(spacing: 12) {
-            Text("Удалось решить вопрос?\nОцените работу оператора")
-                .foregroundColor(textColor)
-                .font(.system(size: textFontSize))
-                .minimumScaleFactor(0.8)
-                .multilineTextAlignment(.center)
+            if #available(iOS 16.0, *) {
+                Text("Удалось решить вопрос?\nОцените работу оператора")
+                    .foregroundColor(titleColor)
+                    .font(.system(size: titleFontSize))
+                    .minimumScaleFactor(0.8)
+                    .bold(titleIsBold)
+                    .italic(titleIsItalic)
+                    .multilineTextAlignment(titleAligment)
+            } else {
+                Text("Удалось решить вопрос?\nОцените работу оператора")
+                    .foregroundColor(titleColor)
+                    .font(.system(size: titleFontSize))
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(titleAligment)
+            }
             
             HStack(spacing: 8) {
                 ForEach(1..<6) { i in
@@ -77,32 +104,20 @@ struct RatingCellView: View {
                     }
                 }
             }
-            
-            Button {
+            SentRatingButton(disabled: selectedRating == nil) {
                 if let selectedRating {
                     onRateConversation?(selectedRating, rating.id)
                 }
-            } label: {
-                let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
-                let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
-                let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
-                let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-                let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled) ?? Color(hex: "DD0A34")
-                let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled) ?? Color(hex: "B7B7CA")
-                Text("Отправить")
-                    .foregroundColor(selectedRating == nil ? disabledRatingTextColor : enabledRatingTextColor)
-                    .font(.system(size: selectedRating == nil ? disabledRatingFontSize : enabledRatingFontSize))
-                    .frame(height: 32)
-                    .frame(maxWidth: .infinity)
-                    .background(selectedRating == nil ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
-                    .cornerRadius(8)
             }
-            .disabled(selectedRating == nil)
         }
         .frame(width: cellWidth)
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(backgroundColor)
-        .cornerRadius(12)
+        .cornerRadius(backgroundRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: backgroundRadius)
+                .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
+        )
     }
 }

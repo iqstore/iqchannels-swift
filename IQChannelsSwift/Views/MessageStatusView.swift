@@ -17,7 +17,6 @@ struct MessageStatusView: View {
             return Style.getColor(theme: Style.model?.messages?.textTimeOperator?.color) ?? Color(hex: "919399")
         }
     }
-    
     var fontSize: CGFloat {
         if(message.isMy){
             return CGFloat(Style.model?.messages?.textTimeClient?.textSize ?? 13)
@@ -25,6 +24,29 @@ struct MessageStatusView: View {
             return CGFloat(Style.model?.messages?.textTimeOperator?.textSize ?? 13)
         }
     }
+    var alignment: TextAlignment {
+        if(message.isMy){
+            return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeClient?.textAlign) ?? .leading
+        }else{
+            return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeOperator?.textAlign) ?? .leading
+        }
+    }
+    var isBold: Bool {
+        if(message.isMy){
+            return Style.model?.messages?.textTimeClient?.textStyle?.bold ?? false
+        }else{
+            return Style.model?.messages?.textTimeOperator?.textStyle?.bold ?? false
+        }
+    }
+    var isItalic: Bool {
+        if(message.isMy){
+            return Style.model?.messages?.textTimeClient?.textStyle?.italic ?? false
+        }else{
+            return Style.model?.messages?.textTimeOperator?.textStyle?.italic ?? false
+        }
+    }
+    
+    
     
     // MARK: - INIT
     init(message: IQMessage,
@@ -51,10 +73,21 @@ struct MessageStatusView: View {
     @ViewBuilder
     private func getStatusView() -> some View {
         HStack(spacing: 2) {
-            Text(message.createdDate.formatToTime())
-                .foregroundColor(textColor)
-                .font(.system(size: fontSize))
-                .fixedSize(horizontal: true, vertical: false)
+            if #available(iOS 16.0, *) {
+                Text(message.createdDate.formatToTime())
+                    .foregroundColor(textColor)
+                    .font(.system(size: fontSize))
+                    .fixedSize(horizontal: true, vertical: false)
+                    .bold(isBold)
+                    .italic(isItalic)
+                    .multilineTextAlignment(alignment)
+            } else {
+                Text(message.createdDate.formatToTime())
+                    .foregroundColor(textColor)
+                    .font(.system(size: fontSize))
+                    .fixedSize(horizontal: true, vertical: false)
+                    .multilineTextAlignment(alignment)
+            }
             
             if isSender {
                 if message.isLoading {

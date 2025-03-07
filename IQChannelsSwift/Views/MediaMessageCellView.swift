@@ -25,17 +25,50 @@ struct MediaMessageCellView: View {
         let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
         return self.isSender ? backgroundClient : backgroundOperator
     }
+    var backgroundRadius: CGFloat {
+        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.borderRadius ?? 12
+        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.borderRadius ?? 12
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
+    var backgroundBorderSize: CGFloat {
+        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.size ?? 0
+        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.size ?? 0
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
+    var backgroundBorderColor: Color {
+        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.border?.color) ?? Color(hex: "000000")
+        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.border?.color) ?? Color(hex: "000000")
+        return self.isSender ? backgroundClient : backgroundOperator
+    }
+    
+    
+    
+    
     
     var textColor: UIColor {
         let textOperator = Style.getUIColor(theme: Style.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
         let textClient = Style.getUIColor(theme: Style.model?.messages?.textClient?.color) ?? UIColor.white
         return self.isSender ? textClient : textOperator
     }
-    
     var fontSize: CGFloat {
         let sizeOperator = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
         let sizeClient = CGFloat(Style.model?.messages?.textClient?.textSize ?? 17)
         return self.isSender ? sizeClient : sizeOperator
+    }
+    var isBold: Bool {
+        let clientIsBold = Style.model?.messages?.textClient?.textStyle?.bold ?? false
+        let operatorIsBold = Style.model?.messages?.textOperator?.textStyle?.bold ?? false
+        return self.isSender ? clientIsBold : operatorIsBold
+    }
+    var isItalic: Bool {
+        let clientIsItalic = Style.model?.messages?.textClient?.textStyle?.italic ?? false
+        let operatorIsItalic = Style.model?.messages?.textOperator?.textStyle?.italic ?? false
+        return self.isSender ? clientIsItalic : operatorIsItalic
+    }
+    var aligment: TextAlignment {
+        let clientAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textClient?.textAlign) ?? .leading
+        let operatorAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textOperator?.textAlign) ?? .leading
+        return self.isSender ? clientAlignment : operatorAlignment
     }
     
     // MARK: - INIT
@@ -79,7 +112,7 @@ struct MediaMessageCellView: View {
                     }
                     
                     if(text == ""){
-                        MessageStatusView(message: message, withBackground: true)
+                        MessageStatusView(message: message, withBackground: uiImage != nil)
                             .padding(8)
                     }
                 }
@@ -87,7 +120,10 @@ struct MediaMessageCellView: View {
                 if(text != ""){
                     let data = AttributeTextManager.shared.getString(from: text,
                                                                      textColor: textColor,
-                                                                     fontSize: fontSize)
+                                                                     fontSize: fontSize,
+                                                                     alingment: aligment,
+                                                                     isBold: isBold,
+                                                                     isItalic: isItalic)
                     TextLabel(text: data.0,
                               linkRanges: data.1)
                     .layoutPriority(1)
@@ -100,16 +136,22 @@ struct MediaMessageCellView: View {
             }
         }
         .background(backgroundColor)
-        .cornerRadius(12)
+        .cornerRadius(backgroundRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: backgroundRadius)
+                .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
+        )
         .animation(.bouncy, value: message.file?.isLoading)
         .onTapGesture {
-            if let file = message.file {
-                if let state = file.state {
-                    if state == .approved {
+            if let uiImage = uiImage {
+                if let file = message.file {
+                    if let state = file.state {
+                        if state == .approved {
+                            onImageTapCompletion?()
+                        }
+                    } else {
                         onImageTapCompletion?()
                     }
-                } else {
-                    onImageTapCompletion?()
                 }
             }
         }
@@ -150,8 +192,15 @@ struct MediaMessageCellView: View {
                 }
             } else {
                 Group {
+                    let textColor = Style.getUIColor(theme: Style.model?.error?.textError?.color) ?? UIColor(hex: "242729")
+                    let fontSize = CGFloat(Style.model?.error?.textError?.textSize ?? 17)
+                    let isBold = Style.model?.error?.textError?.textStyle?.bold ?? false
+                    let isItalic = Style.model?.error?.textError?.textStyle?.italic ?? false
+                    let alignment = stringToAlignment(stringAlignment: Style.model?.error?.textError?.textAlign) ?? .leading
+                    
                     if isLoading {
-                        ProgressView() // Индикатор загрузки
+                        ProgressView()
+                            .frame(minWidth: 150, minHeight: 150)
                     } else if let uiImage = uiImage {
                         AnimatedImage(url: message.file?.imagePreviewUrl)
                             .resizable()
@@ -161,9 +210,19 @@ struct MediaMessageCellView: View {
                             .frame(width: imageSize.width, height: imageSize.height)
                             .clipped()
                     } else {
-                        Text("Ошибка загрузки")
-                            .foregroundColor(.red)
-                            .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+                        if #available(iOS 16.0, *) {
+                            Text("Ошибка загрузки")
+                                .foregroundColor(.red)
+                                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+                                .bold(isBold)
+                                .italic(isItalic)
+                                .multilineTextAlignment(alignment)
+                        } else {
+                            Text("Ошибка загрузки")
+                                .foregroundColor(.red)
+                                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+                                .multilineTextAlignment(alignment)
+                        }
                     }
                 }
                 .onAppear {
@@ -197,12 +256,25 @@ struct MediaMessageCellView: View {
     private func getNotApprovedStateView(_ state: IQFileState) -> some View {
         let textColor: Color = isSender ? state.titleClientColor : state.titleOperatorColor
         let fontSize: CGFloat = isSender ? state.titleClientFontSize : state.titleOperatorFontSize
+        let alignment: TextAlignment = isSender ? state.titleClientAligment: state.titleOperatorAligment
+        let isBold: Bool = isSender ? state.titleClientIsBold : state.titleOperatorIsBold
+        let isItalic: Bool = isSender ? state.titleClientIsItalic : state.titleOperatorIsItalic
         
-        Text(state.title)
-            .foregroundColor(textColor)
-            .font(.system(size: fontSize))
-            .padding(10)
-            .padding(.bottom, 20)
+        if #available(iOS 16.0, *) {
+            Text(state.title)
+                .foregroundColor(textColor)
+                .font(.system(size: fontSize))
+                .bold(isBold)
+                .italic(isItalic)
+                .multilineTextAlignment(alignment)
+                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+        } else {
+            Text(state.title)
+                .foregroundColor(textColor)
+                .font(.system(size: fontSize))
+                .multilineTextAlignment(alignment)
+                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+        }
     }
     
     // MARK: - METHODS

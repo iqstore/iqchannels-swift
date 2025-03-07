@@ -25,24 +25,52 @@ struct SingleChoicesView: View {
                     Button {
                         onSingleChoiceTapCompletion?(singleChoice)
                     } label: {
+                        let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundIVR) ?? Color.clear
                         let textColor = Style.getColor(theme: Style.model?.singleChoice?.textIVR?.color) ?? Color(hex: "96BB5D")
                         let fontSize = CGFloat(Style.model?.singleChoice?.textIVR?.textSize ?? 12)
+                        
+                        let isBold = Style.model?.singleChoice?.textIVR?.textStyle?.bold ?? false
+                        let isItalic = Style.model?.singleChoice?.textIVR?.textStyle?.italic ?? false
+                        let alignment = stringToAlignment(stringAlignment: Style.model?.singleChoice?.textIVR?.textAlign) ?? .center
+                        let textAlignments: [TextAlignment: Alignment] = [
+                            .leading: Alignment.leading,
+                            .center: Alignment.center,
+                            .trailing: Alignment.trailing
+                        ]
+                        
                         let borderColor = Style.getColor(theme: Style.model?.singleChoice?.borderIVR?.color) ?? Color(hex: "96BB5D")
                         let lineWidth = CGFloat(Style.model?.singleChoice?.borderIVR?.size ?? 1)
                         let borderRadius = CGFloat(Style.model?.singleChoice?.borderIVR?.borderRadius ?? 8)
-                        let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundIVR) ?? Color.clear
-                        Text(singleChoice.title ?? "")
-                            .font(.system(size: fontSize))
-                            .foregroundColor(textColor)
-                            .frame(height: 32)
-                            .padding(.horizontal, 4)
-                            .background(backgroundColor)
-                            .cornerRadius(borderRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: borderRadius)
-                                    .inset(by: lineWidth / 2)
-                                    .stroke(borderColor, lineWidth: lineWidth)
-                            )
+                        
+                        if #available(iOS 16.0, *) {
+                            Text(singleChoice.title ?? "")
+                                .font(.system(size: fontSize))
+                                .foregroundColor(textColor)
+                                .frame(height: 32)
+                                .frame(maxWidth: .infinity, alignment: textAlignments[alignment] ?? Alignment.center)
+                                .padding(.horizontal, 4)
+                                .background(backgroundColor)
+                                .cornerRadius(borderRadius)
+                                .bold(isBold)
+                                .italic(isItalic)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: borderRadius)
+                                        .stroke(borderColor, lineWidth: lineWidth)
+                                )
+                        } else {
+                            Text(singleChoice.title ?? "")
+                                .font(.system(size: fontSize))
+                                .foregroundColor(textColor)
+                                .frame(height: 32)
+                                .frame(maxWidth: .infinity, alignment: textAlignments[alignment] ?? Alignment.center)
+                                .padding(.horizontal, 4)
+                                .background(backgroundColor)
+                                .cornerRadius(borderRadius)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: borderRadius)
+                                        .stroke(borderColor, lineWidth: lineWidth)
+                                )
+                        }
                     }
                 }
             }

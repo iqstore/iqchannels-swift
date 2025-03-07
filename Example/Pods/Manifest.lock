@@ -1,42 +1,42 @@
 PODS:
-  - IQChannelsSwift (1.0.0):
-    - IQChannelsSwift/Controllers (= 1.0.0)
-    - IQChannelsSwift/Database (= 1.0.0)
-    - IQChannelsSwift/Extensions (= 1.0.0)
-    - IQChannelsSwift/Managers (= 1.0.0)
-    - IQChannelsSwift/Models (= 1.0.0)
-    - IQChannelsSwift/Protocols (= 1.0.0)
-    - IQChannelsSwift/ViewModels (= 1.0.0)
-    - IQChannelsSwift/Views (= 1.0.0)
+  - IQChannelsSwift (2.1.3):
+    - IQChannelsSwift/Controllers (= 2.1.3)
+    - IQChannelsSwift/Database (= 2.1.3)
+    - IQChannelsSwift/Extensions (= 2.1.3)
+    - IQChannelsSwift/Managers (= 2.1.3)
+    - IQChannelsSwift/Models (= 2.1.3)
+    - IQChannelsSwift/Protocols (= 2.1.3)
+    - IQChannelsSwift/ViewModels (= 2.1.3)
+    - IQChannelsSwift/Views (= 2.1.3)
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Controllers (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Controllers (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Database (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Database (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Extensions (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Extensions (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Managers (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Managers (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Models (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Models (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Protocols (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Protocols (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/ViewModels (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/ViewModels (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - IQChannelsSwift/Views (1.0.0):
+    - SQLite.swift (> 0.13)
+  - IQChannelsSwift/Views (2.1.3):
     - SDWebImageSwiftUI (= 3.0.4)
-    - SQLite.swift (= 0.15.3)
-  - SDWebImage (5.20.0):
-    - SDWebImage/Core (= 5.20.0)
-  - SDWebImage/Core (5.20.0)
+    - SQLite.swift (> 0.13)
+  - SDWebImage (5.21.0):
+    - SDWebImage/Core (= 5.21.0)
+  - SDWebImage/Core (5.21.0)
   - SDWebImageSwiftUI (3.0.4):
     - SDWebImage (~> 5.10)
   - SQLite.swift (0.15.3):
@@ -57,8 +57,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  IQChannelsSwift: 3573224507ea1145de7a876e64b0eb316ab910df
-  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
+  IQChannelsSwift: a7e23c0c0b9739647ec5755e96dbfa57867db473
+  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
   SDWebImageSwiftUI: 824628d8220906aa101f62b39a7492edd138449d
   SQLite.swift: 8d054987f02728cc912b0eb5a9659650573a65a2
 
