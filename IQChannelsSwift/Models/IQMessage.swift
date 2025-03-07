@@ -167,7 +167,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(text: String, operatorName: String) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
-        self.localID = 0
+        self.localID = -1
         self.text = text
         self.isRead = true
         self.isReply = false

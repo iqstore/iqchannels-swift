@@ -31,6 +31,7 @@ struct StackedSingleChoicesView: View {
                     let borderColor = Style.getColor(theme: Style.model?.singleChoice?.borderButton?.color) ?? Color.clear
                     let lineWidth = CGFloat(Style.model?.singleChoice?.borderButton?.size ?? 0)
                     let borderRadius = CGFloat(Style.model?.singleChoice?.borderButton?.borderRadius ?? 4)
+                    
                     Button {
                         onSingleChoiceTapCompletion?(singleChoice)
                     } label: {

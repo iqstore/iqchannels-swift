@@ -194,7 +194,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: value)
     }
     
-    func loadMessages(request: IQLoadMessageRequest) async -> ResponseCallback<([IQMessage], Bool)> {
+    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?)> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
@@ -204,25 +204,30 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
         guard let result = response.result, var value = result.value else { return .init(error: NSError.failedToParseModel([IQMessage].self)) }
         
-        let chatSettings = await getChatSettings(request: .init(clientId: request.clientId))
-        
+        var lifeTime: Int?
         var systemChat: Bool = false
-        if let settings = chatSettings.result{
-            systemChat = settings.enabled == true
-
-            if(systemChat){
-                let response = await openSystemChat()
-                if (response != nil) {
-                    IQLog.error(message: "openSystemChat: error: \(String(describing: response))")
-                    systemChat = false
-                }
-            }
+        
+        if(getSettings){
+            let chatSettings = await getChatSettings(request: .init(clientId: request.clientId))
             
-            if(settings.totalOpenedTickets == 0){
-                value.append(IQMessage(
-                    text: settings.message,
-                    operatorName: settings.operatorName
-                ))
+            if let settings = chatSettings.result{
+                systemChat = settings.enabled == true
+                
+                if (settings.greetFrom == "bot") {
+                    let response = await openSystemChat()
+                    if (response != nil) {
+                        IQLog.error(message: "openSystemChat: error: \(String(describing: response))")
+                        systemChat = false
+                    }
+                } else{
+                    if(settings.totalOpenedTickets == 0){
+                        value.append(IQMessage(
+                            text: settings.message,
+                            operatorName: settings.operatorName
+                        ))
+                        lifeTime = settings.lifetime
+                    }
+                }
             }
         }
         
@@ -244,7 +249,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
         
-        return .init(result: (value, systemChat))
+        return .init(result: (value, systemChat, lifeTime))
     }
     
     func rate(value: Int, ratingID: Int) async -> Error? {

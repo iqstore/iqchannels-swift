@@ -25,8 +25,10 @@ struct SingleChoicesView: View {
                     Button {
                         onSingleChoiceTapCompletion?(singleChoice)
                     } label: {
+                        let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundIVR) ?? Color.clear
                         let textColor = Style.getColor(theme: Style.model?.singleChoice?.textIVR?.color) ?? Color(hex: "96BB5D")
                         let fontSize = CGFloat(Style.model?.singleChoice?.textIVR?.textSize ?? 12)
+                        
                         let isBold = Style.model?.singleChoice?.textIVR?.textStyle?.bold ?? false
                         let isItalic = Style.model?.singleChoice?.textIVR?.textStyle?.italic ?? false
                         let alignment = stringToAlignment(stringAlignment: Style.model?.singleChoice?.textIVR?.textAlign) ?? .center
@@ -39,7 +41,6 @@ struct SingleChoicesView: View {
                         let borderColor = Style.getColor(theme: Style.model?.singleChoice?.borderIVR?.color) ?? Color(hex: "96BB5D")
                         let lineWidth = CGFloat(Style.model?.singleChoice?.borderIVR?.size ?? 1)
                         let borderRadius = CGFloat(Style.model?.singleChoice?.borderIVR?.borderRadius ?? 8)
-                        let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundIVR) ?? Color.clear
                         
                         if #available(iOS 16.0, *) {
                             Text(singleChoice.title ?? "")
