@@ -229,6 +229,7 @@ struct RatingPollCellView: View {
                                   graduationWidth: graduationWidth) { value in
                             pollResult.append(value)
                             currentQuestionIndex += 1
+                            return
                         }
                     case .oneOfList:
                         OneOfListView(rating: rating,
@@ -236,6 +237,7 @@ struct RatingPollCellView: View {
                                       currentQuestionIndex: currentQuestionIndex) { value in
                             pollResult.append(value)
                             currentQuestionIndex += 1
+                            return
                         }
                     case .input:
                         InputView(rating: rating,
@@ -243,6 +245,7 @@ struct RatingPollCellView: View {
                                   currentQuestionIndex: currentQuestionIndex) { value in
                             pollResult.append(value)
                             currentQuestionIndex += 1
+                            return
                         }
                     case .stars:
                         StarsView(rating: rating,
@@ -251,6 +254,7 @@ struct RatingPollCellView: View {
                                   starWidth: starWidth) { value in
                             pollResult.append(value)
                             currentQuestionIndex += 1
+                            return
                         }
                     case .fcr:
                         FCRView(rating: rating,
@@ -258,12 +262,13 @@ struct RatingPollCellView: View {
                                 currentQuestionIndex: currentQuestionIndex) { value in
                             pollResult.append(value)
                             currentQuestionIndex += 1
+                            return
                         }
                     case .invalid:
                         Text("Ошибка опроса!")
                     }
                 }else{
-                    Text("").onAppear() {
+                    EmptyView().onAppear() {
                         let ticketRatingValue = pollResult
                             .filter { $0.asTicketRating == true }
                             .compactMap { $0.answerStars ?? $0.answerScale }.first

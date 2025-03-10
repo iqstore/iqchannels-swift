@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 struct StyleModel: Decodable {
     let chat: ChatStyle?
@@ -283,12 +283,12 @@ extension StyleModel {
 public func stringToAlignment(stringAlignment: String?) -> TextAlignment? {
     switch stringAlignment {
     case "left":
-        .leading
+        return .leading
     case "center":
-        .center
+        return .center
     case "right":
-        .trailing
+        return .trailing
     default:
-        nil
+        return nil
     }
 }

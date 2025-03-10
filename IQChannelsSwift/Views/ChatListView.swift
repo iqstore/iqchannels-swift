@@ -11,9 +11,7 @@ struct ChatListView: View {
     var body: some View {
         ZStack {
             if viewModel.state == .authenticated {
-                ScrollView {
-                }
-                .onAppear(){
+                EmptyView().onAppear(){
                     if let chatInfo = viewModel.chatsInfo.first {
                         output.listController(didSelectChat: chatInfo)
                     }
