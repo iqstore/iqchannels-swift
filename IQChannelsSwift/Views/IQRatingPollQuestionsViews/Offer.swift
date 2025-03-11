@@ -13,7 +13,7 @@ struct OfferView: View {
     // MARK: - PROPERTIES
     @Environment(\.colorScheme) var colorScheme
     
-    let questionAnswered: ((Bool) -> Void?)
+    let questionAnswered: ((Bool) -> Void)
     
     // MARK: - BODY
     var body: some View {

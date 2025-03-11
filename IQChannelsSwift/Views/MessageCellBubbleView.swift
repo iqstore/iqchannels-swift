@@ -46,24 +46,18 @@ struct MessageCellBubbleView: View {
                 if file.isImage {
                     MediaMessageCellView(message: message, replyMessage: replyMessage) {
                         delegate?.onFileTap(file)
-                        return
                     } onCancelImageSendCompletion: {
                         delegate?.onCancelUpload(message)
-                        return
                     } onReplyMessageTapCompletion: { messageId in
                         onReplyMessageTapCompletion?(messageId)
-                        return
                     }
                 } else if file.isFile {
                     FilePreviewCellView(message: message, replyMessage: replyMessage) {
                         delegate?.onFileTap(file)
-                        return
                     } onCancelFileSendCompletion: {
                         delegate?.onCancelUpload(message)
-                        return
                     } onReplyMessageTapCompletion: { messageId in
                         onReplyMessageTapCompletion?(messageId)
-                        return
                     }
                 }
             }
@@ -71,18 +65,15 @@ struct MessageCellBubbleView: View {
             if message.isDropDown == true {
                 SingleChoicesView(message: message, displaySingleChoices: isLastMessage) { singleChoice in
                     delegate?.onSingleChoiceTap(singleChoice)
-                    return
                 }
             } else {
                 StackedSingleChoicesView(message: message) { singleChoice in
                     delegate?.onSingleChoiceTap(singleChoice)
-                    return
                 }
             }
         case .card, .carousel:
             CardCellView(message: message) { action in
                 delegate?.onActionTap(action)
-                return
             }
         default:
             TextMessageCellView(message: message)

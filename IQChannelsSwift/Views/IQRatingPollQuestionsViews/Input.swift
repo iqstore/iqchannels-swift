@@ -16,7 +16,7 @@ struct InputView: View {
     let rating: IQRating
     let ratingPoll: IQRatingPoll
     let currentQuestionIndex: Int
-    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void?)
+    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void)
     
     @State private var userInput: String = ""
     
