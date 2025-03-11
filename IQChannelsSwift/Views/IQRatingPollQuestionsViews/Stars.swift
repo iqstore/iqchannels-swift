@@ -17,7 +17,7 @@ struct StarsView: View {
     let ratingPoll: IQRatingPoll
     let currentQuestionIndex: Int
     let starWidth: CGFloat
-    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void?)
+    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void)
     
     @State private var selectedRating: Int? = nil
     

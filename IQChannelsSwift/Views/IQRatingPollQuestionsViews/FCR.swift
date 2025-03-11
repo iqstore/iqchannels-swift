@@ -16,7 +16,7 @@ struct FCRView: View {
     let rating: IQRating
     let ratingPoll: IQRatingPoll
     let currentQuestionIndex: Int
-    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void?)
+    let questionAnswered: ((IQRatingPollClientAnswerInput) -> Void)
     
     var ratingPollQuestionId: Int {
         return ratingPoll.questions?[currentQuestionIndex].id ?? 0
