@@ -14,13 +14,15 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     
     private var webView: WKWebView!
     private var documentUrl: URL
+    private var fileName: String?
     private var downloadButton: UIButton!
     private var dismissButton: UIButton!
     private let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
     // Initialize with a URL
-    init(url: URL) {
+    init(url: URL, fileName: String?) {
         self.documentUrl = url
+        self.fileName = fileName
         super.init(nibName: nil, bundle: nil)
         modalTransitionStyle = .coverVertical
         modalPresentationStyle = .overFullScreen
@@ -133,7 +135,7 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             }
             
             let type: UTType = .init(self.documentUrl.lastPathComponent) ?? .data
-            let savedURL = documentsDirectory.appendingPathComponent(response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
+            let savedURL = documentsDirectory.appendingPathComponent(fileName ?? response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
             FileManager.default.createFile(atPath: savedURL.path, contents: data)
             
             DispatchQueue.main.async {
