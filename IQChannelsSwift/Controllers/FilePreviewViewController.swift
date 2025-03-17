@@ -45,11 +45,20 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.navigationDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.scrollView.contentInset.top += 56
+        
+        let headerView = UIView()
+        headerView.backgroundColor = .white
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(headerView)
         view.addSubview(webView)
         
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            headerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            headerView.heightAnchor.constraint(equalToConstant: 110),
+
+            webView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             webView.leftAnchor.constraint(equalTo: view.leftAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             webView.rightAnchor.constraint(equalTo: view.rightAnchor)
