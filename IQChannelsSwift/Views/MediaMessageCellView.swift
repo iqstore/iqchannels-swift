@@ -162,6 +162,7 @@ struct MediaMessageCellView: View {
     private func getApprovedStateView(_ file: IQFile) -> some View {
         let imageSize = calculateImageSize(file: message.file)
         HStack(spacing: 8) {
+            Spacer()
             if file.isLoading {
                 if let data = file.dataFile?.data,
                    let uiImage = UIImage(data: data) {
@@ -229,7 +230,9 @@ struct MediaMessageCellView: View {
                     loadImage()
                 }
             }
+            Spacer()
         }
+        .frame(maxWidth: 290)
     }
     
     private func loadImage() {
@@ -279,9 +282,9 @@ struct MediaMessageCellView: View {
     
     // MARK: - METHODS
     private func calculateImageSize(file: IQFile?) -> CGSize {
-        let maxWidth = CGFloat(210)
-        let maxHeight = CGFloat(150)
-        let minWidth = CGFloat(100)
+        let maxWidth = CGFloat(290)
+        let maxHeight = CGFloat(300)
+        let minWidth = CGFloat(150)
         
         if file?.isLoading ?? false {
             guard let data = file?.dataFile?.data,
