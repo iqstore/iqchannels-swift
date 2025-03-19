@@ -83,7 +83,7 @@ struct MediaMessageCellView: View {
         self.onCancelImageSendCompletion = onCancelImageSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.text = message.text ?? ""
-        self.isSender = message.isMy
+        self.isSender = message.isMy ?? false
     }
     
     // MARK: - BODY
@@ -91,7 +91,7 @@ struct MediaMessageCellView: View {
         VStack(alignment: .leading, spacing: 4) {
             if let replyMessage {
                 MessageReplyView(message: replyMessage,
-                                 isMy: message.isMy,
+                                 isMy: message.isMy ?? false,
                                  onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)

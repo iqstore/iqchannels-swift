@@ -571,7 +571,7 @@ extension IQChannelsManager {
     private func markAsRead(_ messageID: Int ){
         guard !readMessages.contains(messageID),
               let message = messages.first(where: { $0.messageID == messageID }),
-              !(message.isRead ?? false), !(message.isMy) else { return }
+              !(message.isRead ?? false), !(message.isMy ?? false) else { return }
         
         readMessages.update(with: messageID)
         

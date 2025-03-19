@@ -139,7 +139,7 @@ struct FilePreviewCellView: View {
         self.onCancelFileSendCompletion = onCancelFileSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.text = message.text ?? ""
-        self.isSender = message.isMy
+        self.isSender = message.isMy ?? false
     }
     
     // MARK: - BODY
@@ -149,7 +149,7 @@ struct FilePreviewCellView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     if let replyMessage {
                         MessageReplyView(message: replyMessage,
-                                         isMy: message.isMy,
+                                         isMy: message.isMy ?? false,
                                          onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                     }
                     

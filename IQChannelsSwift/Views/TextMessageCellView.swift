@@ -80,7 +80,7 @@ struct TextMessageCellView: View {
         self.onLongPress = onLongPress
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.text = message.messageText
-        self.isSender = message.isMy
+        self.isSender = message.isMy ?? false
         
         let nsText = text as NSString
         
@@ -96,7 +96,7 @@ struct TextMessageCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let replyMessage {
                     MessageReplyView(message: replyMessage,
-                                     isMy: message.isMy,
+                                     isMy: message.isMy ?? false,
                                      onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                 }
                 

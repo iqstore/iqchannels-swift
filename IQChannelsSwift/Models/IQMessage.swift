@@ -98,8 +98,15 @@ struct IQMessage: Codable, Identifiable, Equatable {
         }
     }
     
-    var isMy: Bool {
-        author == .client
+    var isMy: Bool? {
+        switch author {
+        case .client:
+            return true
+        case .user:
+            return false
+        default:
+            return nil
+        }
     }
     
     var messageText: String {
