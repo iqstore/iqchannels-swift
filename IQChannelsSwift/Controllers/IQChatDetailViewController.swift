@@ -248,7 +248,7 @@ class IQChatDetailViewController: IQViewController {
             controller.modalTransitionStyle = .coverVertical
             present(controller, animated: true)
         } else if file.type == .file {
-            let controller: FilePreviewController = .init(url: url)
+            let controller: FilePreviewController = .init(url: url, fileName: file.name)
             present(controller, animated: true)
         }
     }

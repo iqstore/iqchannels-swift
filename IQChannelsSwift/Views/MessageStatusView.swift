@@ -11,35 +11,35 @@ struct MessageStatusView: View {
     @State private var showMessageLoading: Bool = false
     
     var textColor: Color {
-        if(message.isMy){
+        if(message.isMy ?? false){
             return Style.getColor(theme: Style.model?.messages?.textTimeClient?.color) ?? Color(hex: "919399")
         }else{
             return Style.getColor(theme: Style.model?.messages?.textTimeOperator?.color) ?? Color(hex: "919399")
         }
     }
     var fontSize: CGFloat {
-        if(message.isMy){
+        if(message.isMy ?? false){
             return CGFloat(Style.model?.messages?.textTimeClient?.textSize ?? 13)
         }else{
             return CGFloat(Style.model?.messages?.textTimeOperator?.textSize ?? 13)
         }
     }
     var alignment: TextAlignment {
-        if(message.isMy){
+        if(message.isMy ?? false){
             return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeClient?.textAlign) ?? .leading
         }else{
             return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeOperator?.textAlign) ?? .leading
         }
     }
     var isBold: Bool {
-        if(message.isMy){
+        if(message.isMy ?? false){
             return Style.model?.messages?.textTimeClient?.textStyle?.bold ?? false
         }else{
             return Style.model?.messages?.textTimeOperator?.textStyle?.bold ?? false
         }
     }
     var isItalic: Bool {
-        if(message.isMy){
+        if(message.isMy ?? false){
             return Style.model?.messages?.textTimeClient?.textStyle?.italic ?? false
         }else{
             return Style.model?.messages?.textTimeOperator?.textStyle?.italic ?? false
@@ -52,7 +52,7 @@ struct MessageStatusView: View {
     init(message: IQMessage,
          withBackground: Bool = false) {
         self.message = message
-        self.isSender = message.isMy
+        self.isSender = message.isMy ?? false
         self.withBackground = withBackground
         self.backgroundColor = Color(hex: "242729").opacity(0.7)
     }

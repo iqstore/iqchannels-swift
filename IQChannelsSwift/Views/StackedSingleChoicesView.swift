@@ -10,7 +10,7 @@ struct StackedSingleChoicesView: View {
     
     // MARK: - BODY
     var body: some View {
-        VStack(alignment: message.isMy ? .trailing : .leading, spacing: 4) {
+        VStack(alignment: message.isMy ?? false ? .trailing : .leading, spacing: 4) {
             TextMessageCellView(message: message)
             
             if let singleChoices = message.singleChoices {

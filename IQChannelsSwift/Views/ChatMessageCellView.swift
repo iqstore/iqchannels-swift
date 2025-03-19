@@ -48,7 +48,7 @@ struct ChatMessageCellView: View {
     
     // MARK: - BODY
     var body: some View {
-        let isSender = message.isMy
+        let isSender = message.isMy ?? false
         let isSystem = message.isSystem
         
         if !isSystem {

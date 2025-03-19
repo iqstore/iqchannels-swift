@@ -26,7 +26,7 @@ struct MessageCellBubbleView: View {
         self.isLastMessage = isLastMessage
         self.onLongPress = onLongPress
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
-        self.isSender = message.isMy
+        self.isSender = message.isMy ?? false
         self.backgroundColor = self.isSender ? Color(hex: "242729") : Color(hex: "F4F4F8")
         self.textColor = self.isSender ? Color.white : Color(hex: "242729")
         self.secondaryColor = Color(hex: "919399")

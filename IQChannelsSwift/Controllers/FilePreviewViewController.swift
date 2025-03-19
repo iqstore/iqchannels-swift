@@ -14,13 +14,15 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     
     private var webView: WKWebView!
     private var documentUrl: URL
+    private var fileName: String?
     private var downloadButton: UIButton!
     private var dismissButton: UIButton!
     private let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
     // Initialize with a URL
-    init(url: URL) {
+    init(url: URL, fileName: String?) {
         self.documentUrl = url
+        self.fileName = fileName
         super.init(nibName: nil, bundle: nil)
         modalTransitionStyle = .coverVertical
         modalPresentationStyle = .overFullScreen
@@ -45,11 +47,20 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
         webView = WKWebView(frame: .zero, configuration: webConfiguration)
         webView.navigationDelegate = self
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.scrollView.contentInset.top += 56
+        
+        let headerView = UIView()
+        headerView.backgroundColor = .white
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(headerView)
         view.addSubview(webView)
         
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            headerView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            headerView.heightAnchor.constraint(equalToConstant: 110),
+
+            webView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             webView.leftAnchor.constraint(equalTo: view.leftAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             webView.rightAnchor.constraint(equalTo: view.rightAnchor)
@@ -124,7 +135,7 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             }
             
             let type: UTType = .init(self.documentUrl.lastPathComponent) ?? .data
-            let savedURL = documentsDirectory.appendingPathComponent(response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
+            let savedURL = documentsDirectory.appendingPathComponent(fileName ?? response?.suggestedFilename ?? "downloadedFile", conformingTo: type)
             FileManager.default.createFile(atPath: savedURL.path, contents: data)
             
             DispatchQueue.main.async {
