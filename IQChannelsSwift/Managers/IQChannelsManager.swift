@@ -46,6 +46,9 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     let networkStatusManager = IQNetworkStatusManager()
     let storageManager = IQStorageManager()
     var currentNetworkManager: IQNetworkManagerProtocol? {
+        if let token = selectedChat?.auth.auth.session?.token {
+            SDWebImageDownloader.shared.setValue("client-session=\(token)", forHTTPHeaderField: "Cookie")
+        }
         guard let channel = selectedChat?.auth.channel else { return nil}
         return networkManagers[channel]
     }

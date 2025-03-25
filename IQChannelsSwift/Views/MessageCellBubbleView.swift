@@ -12,6 +12,7 @@ struct MessageCellBubbleView: View {
     private let backgroundColor: Color
     private let textColor: Color
     private let secondaryColor: Color
+    private var sessionToken: String
     private weak var delegate: ChatDetailViewDelegate?
     
     // MARK: - INIT
@@ -20,6 +21,7 @@ struct MessageCellBubbleView: View {
          isLastMessage: Bool,
          onLongPress: ((MessageControlInfo) -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
+         sessionToken: String,
          delegate: ChatDetailViewDelegate? = nil) {
         self.message = message
         self.replyMessage = replyMessage
@@ -30,6 +32,7 @@ struct MessageCellBubbleView: View {
         self.backgroundColor = self.isSender ? Color(hex: "242729") : Color(hex: "F4F4F8")
         self.textColor = self.isSender ? Color.white : Color(hex: "242729")
         self.secondaryColor = Color(hex: "919399")
+        self.sessionToken = sessionToken
         self.delegate = delegate
     }
     
@@ -45,7 +48,7 @@ struct MessageCellBubbleView: View {
             if let file = message.file {
                 if file.isImage {
                     MediaMessageCellView(message: message, replyMessage: replyMessage) {
-                        delegate?.onFileTap(file)
+                        delegate?.onFileTap(file, sessionToken: sessionToken)
                     } onCancelImageSendCompletion: {
                         delegate?.onCancelUpload(message)
                     } onReplyMessageTapCompletion: { messageId in
@@ -53,7 +56,7 @@ struct MessageCellBubbleView: View {
                     }
                 } else if file.isFile {
                     FilePreviewCellView(message: message, replyMessage: replyMessage) {
-                        delegate?.onFileTap(file)
+                        delegate?.onFileTap(file, sessionToken: sessionToken)
                     } onCancelFileSendCompletion: {
                         delegate?.onCancelUpload(message)
                     } onReplyMessageTapCompletion: { messageId in

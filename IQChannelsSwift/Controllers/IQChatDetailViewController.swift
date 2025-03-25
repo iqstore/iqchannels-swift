@@ -240,7 +240,7 @@ class IQChatDetailViewController: IQViewController {
         self.viewModel.scrollDown.toggle()
     }
     
-    private func showFilePreview(file: IQFile) {
+    private func showFilePreview(file: IQFile, sessionToken: String) {
         guard let url = file.url else { return }
         if file.type == .image {
             let controller: PreviewViewController = .init(url: url)
@@ -248,7 +248,7 @@ class IQChatDetailViewController: IQViewController {
             controller.modalTransitionStyle = .coverVertical
             present(controller, animated: true)
         } else if file.type == .file {
-            let controller: FilePreviewController = .init(url: url, fileName: file.name)
+            let controller: FilePreviewController = .init(url: url, fileName: file.name, sessionToken: sessionToken)
             present(controller, animated: true)
         }
     }
@@ -260,8 +260,8 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
         displayAttachmentOptions()
     }
     
-    func onFileTap(_ file: IQFile) {
-        showFilePreview(file: file)
+    func onFileTap(_ file: IQFile, sessionToken: String) {
+        showFilePreview(file: file, sessionToken: sessionToken)
     }
     
     func onSingleChoiceTap(_ singleChoice: IQSingleChoice) {

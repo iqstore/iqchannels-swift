@@ -98,6 +98,7 @@ extension IQChannelsManager {
         viewModel.backDismisses = getChatItems(from: authResults).count == 1
         viewModel.state = state
         viewModel.client = chat.auth.auth.client
+        viewModel.session = chat.auth.auth.session
         viewModel.messages = messages.reversed()
         return IQChatDetailViewController(viewModel: viewModel, output: self)
     }
