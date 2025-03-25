@@ -12,6 +12,7 @@ import UniformTypeIdentifiers
 
 class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate, UIDocumentPickerDelegate {
     
+    private var sessionToken: String
     private var webView: WKWebView!
     private var documentUrl: URL
     private var fileName: String?
@@ -20,7 +21,8 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     private let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
     // Initialize with a URL
-    init(url: URL, fileName: String?) {
+    init(url: URL, fileName: String?, sessionToken: String) {
+        self.sessionToken = sessionToken
         self.documentUrl = url
         self.fileName = fileName
         super.init(nibName: nil, bundle: nil)
@@ -66,7 +68,8 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
             webView.rightAnchor.constraint(equalTo: view.rightAnchor)
         ])
         
-        let request = URLRequest(url: documentUrl)
+        var request = URLRequest(url: documentUrl)
+        request.setValue("client-session=\(sessionToken)", forHTTPHeaderField: "Cookie")
         webView.load(request)
     }
     
@@ -127,8 +130,11 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     
     @objc private func downloadDocument() {
         // Assuming the document is not protected by copyright or other restrictions
+        var request = URLRequest(url: documentUrl)
+        request.setValue("client-session=\(sessionToken)", forHTTPHeaderField: "Cookie")
+
         let session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
-        let downloadTask = session.downloadTask(with: documentUrl) { [weak self] url, response, error in
+        let downloadTask = session.downloadTask(with: request) { [weak self] url, response, error in
             guard let self, let url, let data = try? Data(contentsOf: url), error == nil else {
                 self?.showAlert(message: "Не удалось загрузить файл")
                 return

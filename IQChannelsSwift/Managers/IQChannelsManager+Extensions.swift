@@ -98,6 +98,7 @@ extension IQChannelsManager {
         viewModel.backDismisses = getChatItems(from: authResults).count == 1
         viewModel.state = state
         viewModel.client = chat.auth.auth.client
+        viewModel.session = chat.auth.auth.session
         viewModel.messages = messages.reversed()
         return IQChatDetailViewController(viewModel: viewModel, output: self)
     }
@@ -367,7 +368,7 @@ extension IQChannelsManager {
         
         switch action.action {
         case "Postback", "Say something":
-            let message = IQMessage(action: action, chatType: selectedChat.chatType, localID: nextLocalId())
+            let message = IQMessage(action: action, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
             messages.append(message)
             Task {
                 await sendMessage(message)
@@ -384,7 +385,7 @@ extension IQChannelsManager {
     func send(_ choice: IQSingleChoice) {
         guard let selectedChat else { return }
         
-        let message = IQMessage(choice: choice, chatType: selectedChat.chatType, localID: nextLocalId())
+        let message = IQMessage(choice: choice, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
         messages.append(message)
         Task {
             await sendMessage(message)
@@ -401,7 +402,7 @@ extension IQChannelsManager {
                 if(hasNonValidatedFilesText != nil){
                     return nil
                 }
-                return IQMessage(dataFile: file, chatType: selectedChat.chatType, localID: nextLocalId(), text: index == 0 ? text : nil, replyMessageID: index == 0 ? replyToMessage : nil)
+                return IQMessage(dataFile: file, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId(), text: index == 0 ? text : nil, replyMessageID: index == 0 ? replyToMessage : nil)
             }
             
             if hasNonValidatedFilesText != nil {
@@ -420,7 +421,7 @@ extension IQChannelsManager {
             }
     
         } else {
-            let message = IQMessage(text: text, chatType: selectedChat.chatType, localID: nextLocalId(), replyMessageID: replyToMessage)
+            let message = IQMessage(text: text, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId(), replyMessageID: replyToMessage)
             messages.append(message)
             Task {
                 await sendMessage(message)
@@ -814,11 +815,13 @@ extension IQChannelsManager {
         let unsentMessagesFromLocalDatabase = IQDatabaseManager.shared.getAllMessages().filter { $0.messageID == 0 && $0.author == "\"client\""}
         
         for unsentMessage in unsentMessagesFromLocalDatabase {
-            messages.append(IQMessage(from: unsentMessage))
-            if(unsentMessage.file != nil){
-                await uploadFileMessage(IQMessage(from: unsentMessage))
-            } else {
-                await sendMessage(IQMessage(from: unsentMessage))
+            if(selectedChat?.auth.auth.client?.id == unsentMessage.clientID){
+                messages.append(IQMessage(from: unsentMessage))
+                if(unsentMessage.file != nil){
+                    await uploadFileMessage(IQMessage(from: unsentMessage))
+                } else {
+                    await sendMessage(IQMessage(from: unsentMessage))
+                }
             }
         }
     }

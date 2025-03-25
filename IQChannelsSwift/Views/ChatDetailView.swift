@@ -2,7 +2,7 @@ import SwiftUI
 
 protocol ChatDetailViewDelegate: AnyObject {
     func onAttachmentTap()
-    func onFileTap(_ file: IQFile)
+    func onFileTap(_ file: IQFile, sessionToken: String)
     func onSingleChoiceTap(_ singleChoice: IQSingleChoice)
     func onActionTap(_ action: IQAction)
     func onMessageAppear(with messageId: Int)

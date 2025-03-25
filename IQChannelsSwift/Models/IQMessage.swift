@@ -144,28 +144,28 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     //MARK: - INIT
-    init(text: String, chatType: IQChatType, localID: Int, replyMessageID: Int?) {
-        self.init(localID: localID, chatType: chatType, replyMessageID: replyMessageID)
+    init(text: String, chatType: IQChatType, clientID: Int?, localID: Int, replyMessageID: Int?) {
+        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.text = text
         self.payload = .text
     }
     
-    init(dataFile: DataFile, chatType: IQChatType, localID: Int, text: String?, replyMessageID: Int?) {
-        self.init(localID: localID, chatType: chatType, replyMessageID: replyMessageID)
+    init(dataFile: DataFile, chatType: IQChatType, clientID: Int?, localID: Int, text: String?, replyMessageID: Int?) {
+        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.payload = .file
         self.text = text
         self.file = IQFile(dataFile: dataFile)
     }
     
-    init(action: IQAction, chatType: IQChatType, localID: Int) {
-        self.init(localID: localID, chatType: chatType, replyMessageID: nil)
+    init(action: IQAction, chatType: IQChatType, clientID: Int?, localID: Int) {
+        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
         self.text = action.title
         self.botpressPayload = action.payload
     }
     
-    init(choice: IQSingleChoice, chatType: IQChatType, localID: Int) {
-        self.init(localID: localID, chatType: chatType, replyMessageID: nil)
+    init(choice: IQSingleChoice, chatType: IQChatType, clientID: Int?, localID: Int) {
+        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
         self.text = choice.title
         self.botpressPayload = choice.value
@@ -191,8 +191,9 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.isSystem = true
     }
     
-    private init(localID: Int, chatType: IQChatType, replyMessageID: Int?) {
+    private init(localID: Int, clientID: Int?, chatType: IQChatType, replyMessageID: Int?) {
         self.author = .client
+        self.clientID = clientID
         self.replyToMessageID = replyMessageID
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = localID

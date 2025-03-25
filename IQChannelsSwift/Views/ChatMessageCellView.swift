@@ -10,6 +10,7 @@ struct ChatMessageCellView: View {
     let replyMessage: IQMessage?
     let isGroupStart: Bool
     let isLastMessage: Bool
+    let sessionToken: String
     
     weak var delegate: ChatDetailViewDelegate?
     
@@ -90,6 +91,7 @@ struct ChatMessageCellView: View {
                                                   isLastMessage: isLastMessage,
                                                   onLongPress: onLongPress,
                                                   onReplyMessageTapCompletion: onReplyMessageTapCompletion,
+                                                  sessionToken: sessionToken,
                                                   delegate: delegate)
                             if(message.error){
                                 getErrorView()

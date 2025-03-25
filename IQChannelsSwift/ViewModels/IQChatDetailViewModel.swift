@@ -18,6 +18,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var messages: [IQMessage] = []
     @Published var inputText: String = ""
     @Published var client: IQClient?
+    @Published var session: IQClientSession?
     @Published var typingUser: IQUser?
     @Published var isLoading = false
     @Published var scrollDotHidden = true

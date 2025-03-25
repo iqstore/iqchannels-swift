@@ -77,6 +77,7 @@ struct ChatMessagesView: View {
                                                         replyMessage: viewModel.getMessage(with: message.replyToMessageID),
                                                         isGroupStart: isGroupStart(index),
                                                         isLastMessage: isLastMessage,
+                                                        sessionToken: viewModel.session?.token ?? "",
                                                         delegate: delegate,
                                                         onLongPress: { messageControlInfo in
                                                             if(message.isReply){
