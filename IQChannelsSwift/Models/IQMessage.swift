@@ -129,7 +129,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
             }
         
             switch rating.state {
-            case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
+            case .pending: return "Пожалуйста, оцените качество консультации"
             case .ignored: return "Без оценки оператора"
             case .rated, .finished: return "Оценка оператора \(rating.value ?? 0) из \(toValue ?? 5)"
             default: return ""
