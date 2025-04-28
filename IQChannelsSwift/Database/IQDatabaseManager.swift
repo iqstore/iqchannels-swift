@@ -219,4 +219,14 @@ class IQDatabaseManager {
         }
         return false
     }
+    
+    // Прочитывание сообщений по chatId
+    func readMessageByChatId(_ chatIdValue: Int?) {
+        do {
+            let query = messages.filter(chatID == chatIdValue)
+            try db.run(messages.filter(chatID == chatIdValue).update(isRead <- true))
+        } catch {
+            print("Error reading messages by chatId: \(error)")
+        }
+    }
 }

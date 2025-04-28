@@ -231,7 +231,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             }
         }
         
-        let unreadMessagesCount = value.filter { $0.isRead == nil && $0.author == .user}.count
+        let unreadMessagesCount = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user}.count
         if(unreadMessagesCount > 0){
             if let lastMessage = value.last, !(lastMessage.isMy ?? false) {
                 value.insert(
