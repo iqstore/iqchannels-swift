@@ -11,6 +11,7 @@ struct IQChatSettings: Codable, Equatable {
     var enabled: Bool = true
     var greetFrom: String = "user"
     var lifetime: Int = 300
-    var operatorName: String = "Оператор"
+    var pseudonym: String = "Оператор"
+    var avatarID: String = ""
     var totalOpenedTickets: Int = 0
 }

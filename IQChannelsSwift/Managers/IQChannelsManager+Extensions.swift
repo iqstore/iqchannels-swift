@@ -46,7 +46,7 @@ extension IQChannelsManager {
                 DispatchQueue.main.async { [weak self] in
                     if let self, let chat {
                         listViewModel?.chatToPresentListener.send(getDetailViewController(for: chat))
-                        listenToUnread()
+//                        listenToUnread()
                         loadMessages()
                     }
                 }
@@ -118,7 +118,7 @@ extension IQChannelsManager {
         listViewModel?.popListener.send(())
         
 //        networkManager.stopListenToUnread()
-        networkManager.stopListenToEvents()
+//        networkManager.stopListenToEvents()
         self.messages = []
         self.selectedChat = nil
         self.detailViewModel = nil
@@ -574,6 +574,17 @@ extension IQChannelsManager {
               let message = messages.first(where: { $0.messageID == messageID }),
               !(message.isRead ?? false), !(message.isMy ?? false) else { return }
         
+        let readMessage = message.withRead(true)
+        IQDatabaseManager.shared.insertMessage(readMessage.toDatabaseMessage())
+        
+        let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
+        
+        IQDatabaseManager.shared.readMessageByChatId(chatId)
+        
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+    
+        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+        
         readMessages.update(with: messageID)
         
         Task {
@@ -684,6 +695,10 @@ extension IQChannelsManager {
             
             messages = results
             
+            let chatId = messages.filter {$0.clientID == selectedChat.auth.auth.client?.id}.first?.chatID
+            
+            let unread = messages.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user && $0.chatID == chatId}.count
+            
             if let lifeTime {
                 DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime)) {
                     if let index = self.messages.firstIndex(where: { $0.localID == -1 }) {
@@ -758,6 +773,11 @@ extension IQChannelsManager {
         guard let message = event.message else { return }
         
         IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
+        let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        
+        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+        
         if let index = indexOfMyMessage(localID: message.localID){
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
@@ -785,7 +805,22 @@ extension IQChannelsManager {
     
     private func messagesRemoved(_ event: IQChatEvent) {
         let ids = event.messages?.map({ $0.messageID }).compactMap { indexOfMessage(messageID: $0) } ?? []
+        let localIds = event.messages?.map({ $0.localID }) ?? []
+        
+        for localId in localIds {
+            if let localId {
+                IQDatabaseManager.shared.deleteMessageByLocalId(localId)
+            }
+        }
+        
         messages.remove(elementsAtIndices: ids)
+        
+        let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        
+        print("unread_5 \(unread)")
+        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+
     }
     
     private func message(with messageID: Int?) -> IQMessage? {
@@ -877,12 +912,14 @@ extension IQChannelsManager {
                 let response: ResponseCallback<IQClientAuth>
                 switch loginType {
                 case .anonymous:
+                    IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
                     if let token = storageManager.anonymousTokens?[channel] {
                         response = await networkManager.clientsAuth(token: token)
                     } else {
                         response = await networkManager.clientsSignup()
                     }
                 case let .credentials(credential):
+                    IQLog.debug(message: "Authentication credentials \n loginType: \(loginType)")
                     response = await networkManager.clientsIntegrationAuth(credentials: credential)
                 }
                 errors.append(response.error)
@@ -890,8 +927,10 @@ extension IQChannelsManager {
             }
             
             if let error = errors.compactMap({$0}).first{
+                IQLog.debug(message: "Error authentication \n error: \(error)")
                 self.auth(loginType, failedWith: error)
             } else {
+                IQLog.debug(message: "Success authentication \n results: \(results)")
                 self.auth(loginType, succeededWith: results)
             }
         }
@@ -950,7 +989,7 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
             if !authResults.isEmpty {
                 state = .authenticated
                 await loadMessagesAndMerge()
-                listenToUnread()
+//                listenToUnread()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                     self?.uploadUnsentMessages()
                 }

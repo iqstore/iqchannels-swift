@@ -63,7 +63,6 @@ struct ChatDetailView: View {
             .opacity(viewModel.isMessageCopied ? 1 : 0)
         }
         .background(backgroundColor.ignoresSafeArea())
-        .animation(.easeInOut(duration: 0.25), value: viewModel.messages)
         .animation(.easeInOut(duration: 0.25), value: viewModel.typingUser)
         .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: viewModel.isMessageCopied)
         .overlay(getMessageControlOverlay())

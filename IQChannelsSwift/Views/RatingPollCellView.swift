@@ -222,48 +222,48 @@ struct RatingPollCellView: View {
                     }
                     
                     switch questionType {
-                    case .scale:
-                        ScaleView(rating: rating,
-                                  ratingPoll: ratingPoll,
-                                  currentQuestionIndex: currentQuestionIndex,
-                                  graduationWidth: graduationWidth) { value in
-                            pollResult.append(value)
-                            currentQuestionIndex += 1
-                        }
-                    case .oneOfList:
-                        OneOfListView(rating: rating,
+                        case .scale:
+                            ScaleView(rating: rating,
+                                      ratingPoll: ratingPoll,
+                                      currentQuestionIndex: currentQuestionIndex,
+                                      graduationWidth: graduationWidth) { value in
+                                pollResult.append(value)
+                                currentQuestionIndex += 1
+                            }
+                        case .oneOfList:
+                            OneOfListView(rating: rating,
+                                          ratingPoll: ratingPoll,
+                                          currentQuestionIndex: currentQuestionIndex) { value in
+                                pollResult.append(value)
+                                currentQuestionIndex += 1
+                            }
+                        case .input:
+                            InputView(rating: rating,
                                       ratingPoll: ratingPoll,
                                       currentQuestionIndex: currentQuestionIndex) { value in
-                            pollResult.append(value)
-                            currentQuestionIndex += 1
-                        }
-                    case .input:
-                        InputView(rating: rating,
-                                  ratingPoll: ratingPoll,
-                                  currentQuestionIndex: currentQuestionIndex) { value in
-                            pollResult.append(value)
-                            currentQuestionIndex += 1
-                        }
-                    case .stars:
-                        StarsView(rating: rating,
-                                  ratingPoll: ratingPoll,
-                                  currentQuestionIndex: currentQuestionIndex,
-                                  starWidth: starWidth) { value in
-                            pollResult.append(value)
-                            currentQuestionIndex += 1
-                        }
-                    case .fcr:
-                        FCRView(rating: rating,
-                                ratingPoll: ratingPoll,
-                                currentQuestionIndex: currentQuestionIndex) { value in
-                            pollResult.append(value)
-                            currentQuestionIndex += 1
-                        }
-                    case .invalid:
-                        Text("Ошибка опроса!")
+                                pollResult.append(value)
+                                currentQuestionIndex += 1
+                            }
+                        case .stars:
+                            StarsView(rating: rating,
+                                      ratingPoll: ratingPoll,
+                                      currentQuestionIndex: currentQuestionIndex,
+                                      starWidth: starWidth) { value in
+                                pollResult.append(value)
+                                currentQuestionIndex += 1
+                            }
+                        case .fcr:
+                            FCRView(rating: rating,
+                                    ratingPoll: ratingPoll,
+                                    currentQuestionIndex: currentQuestionIndex) { value in
+                                pollResult.append(value)
+                                currentQuestionIndex += 1
+                            }
+                        case .invalid:
+                            Text("Ошибка опроса!")
                     }
                 }else{
-                    EmptyView().onAppear() {
+                    Text("").onAppear() {
                         let ticketRatingValue = pollResult
                             .filter { $0.asTicketRating == true }
                             .compactMap { $0.answerStars ?? $0.answerScale }.first

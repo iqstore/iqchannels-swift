@@ -11,8 +11,8 @@ import PhotosUI
 extension IQChannelsManager: IQChannelsManagerListOutput {
     func listControllerDismissChat() {
         guard eventListener?.iqChannelsShouldCloseModule() ?? true else { return }
-        
-        logout()
+        listViewModel?.dismissListener.send(())
+//        logout()
     }
     
     func listController(didSelectChat item: IQChatItemModel) {

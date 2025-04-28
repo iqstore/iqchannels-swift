@@ -129,7 +129,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
             }
         
             switch rating.state {
-            case .pending: return "Удалось решить вопрос?\nОцените работу оператора"
+            case .pending: return "Пожалуйста, оцените качество консультации"
             case .ignored: return "Без оценки оператора"
             case .rated, .finished: return "Оценка оператора \(rating.value ?? 0) из \(toValue ?? 5)"
             default: return ""
@@ -147,6 +147,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(text: String, chatType: IQChatType, clientID: Int?, localID: Int, replyMessageID: Int?) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.text = text
+        self.isRead = true
         self.payload = .text
     }
     
@@ -154,12 +155,14 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.payload = .file
         self.text = text
+        self.isRead = true
         self.file = IQFile(dataFile: dataFile)
     }
     
     init(action: IQAction, chatType: IQChatType, clientID: Int?, localID: Int) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
+        self.isRead = true
         self.text = action.title
         self.botpressPayload = action.payload
     }
@@ -167,11 +170,12 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(choice: IQSingleChoice, chatType: IQChatType, clientID: Int?, localID: Int) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
+        self.isRead = true
         self.text = choice.title
         self.botpressPayload = choice.value
     }
     
-    init(text: String, operatorName: String) {
+    init(text: String, operatorName: String, avatarURL: URL?) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = -1
@@ -179,7 +183,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.isRead = true
         self.isReply = false
         self.payload = .text
-        self.user = IQUser(id: 0, displayName: operatorName)
+        self.user = IQUser(id: 0, displayName: operatorName, avatarURL: avatarURL)
     }
     
     init(newMsgHeader: Bool) {
@@ -187,12 +191,14 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = 0
         self.payload = .text
+        self.isRead = true
         self.newMsgHeader = true
         self.isSystem = true
     }
     
     private init(localID: Int, clientID: Int?, chatType: IQChatType, replyMessageID: Int?) {
         self.author = .client
+        self.isRead = true
         self.clientID = clientID
         self.replyToMessageID = replyMessageID
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
@@ -231,6 +237,12 @@ extension IQMessage {
     func withError(_ error: Bool) -> IQMessage {
         var copy = self
         copy.error = error
+        return copy
+    }
+    
+    func withRead(_ isRead: Bool) -> IQMessage {
+        var copy = self
+        copy.isRead = isRead
         return copy
     }
 }

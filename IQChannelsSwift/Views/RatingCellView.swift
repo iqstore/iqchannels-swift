@@ -52,7 +52,7 @@ struct RatingCellView: View {
     var body: some View {
         VStack(spacing: 12) {
             if #available(iOS 16.0, *) {
-                Text("Удалось решить вопрос?\nОцените работу оператора")
+                Text("Пожалуйста, оцените качество консультации")
                     .foregroundColor(titleColor)
                     .font(.system(size: titleFontSize))
                     .minimumScaleFactor(0.8)
@@ -60,7 +60,7 @@ struct RatingCellView: View {
                     .italic(titleIsItalic)
                     .multilineTextAlignment(titleAligment)
             } else {
-                Text("Удалось решить вопрос?\nОцените работу оператора")
+                Text("Пожалуйста, оцените качество консультации")
                     .foregroundColor(titleColor)
                     .font(.system(size: titleFontSize))
                     .minimumScaleFactor(0.8)
