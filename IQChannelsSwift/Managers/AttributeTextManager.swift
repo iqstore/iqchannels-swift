@@ -119,7 +119,8 @@ final class AttributeTextManager {
         
         // Handle generic links
         let linkPatterns = [
-            "^(https?:\\/\\/|www\\.)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(\\:[0-9]{1,5})?(\\/.*)?$"
+//            "^(https?:\\/\\/|www\\.)[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(\\:[0-9]{1,5})?(\\/.*)?$"
+            #"https?:\/\/[^\s/$.?#].[^\s]*"#
         ]
         
         for pattern in linkPatterns {
