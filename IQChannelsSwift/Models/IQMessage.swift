@@ -175,7 +175,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.botpressPayload = choice.value
     }
     
-    init(text: String, operatorName: String) {
+    init(text: String, operatorName: String, avatarURL: URL?) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = -1
@@ -183,7 +183,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.isRead = true
         self.isReply = false
         self.payload = .text
-        self.user = IQUser(id: 0, displayName: operatorName)
+        self.user = IQUser(id: 0, displayName: operatorName, avatarURL: avatarURL)
     }
     
     init(newMsgHeader: Bool) {
