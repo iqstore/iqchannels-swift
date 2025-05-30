@@ -20,7 +20,7 @@ class IQChatDetailViewController: IQViewController {
     
     private lazy var titleLabel: UILabel = {
         let label: UILabel = .init()
-        label.text = "Чат с банком"
+        label.text = "Чат с оператором"
         
         let fontSize = CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15)
         let isBold = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false
