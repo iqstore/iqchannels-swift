@@ -490,15 +490,18 @@ extension IQChannelsManager {
             return "Слишком большая ширина или высота изображения"
         }
         
-        if let fileExtensions = file.filename.components(separatedBy: ".")[safe: 1] {
-            if let allowedExtensions = limits.allowedExtensions,
-               !allowedExtensions.contains(fileExtensions) {
-                return "Неподдерживаемый тип файла"
-            }
-            if let forbiddenExtensions = limits.forbiddenExtensions,
-               forbiddenExtensions.contains(fileExtensions) {
-                return "Запрещенный тип файла"
-            }
+        
+        
+        let parts = file.filename.components(separatedBy: ".")
+        let fileExtension = parts.count > 1 ? parts.last ?? "file" : "file"
+
+        if let allowedExtensions = limits.allowedExtensions,
+           !allowedExtensions.contains(fileExtension) {
+            return "Неподдерживаемый тип файла"
+        }
+        if let forbiddenExtensions = limits.forbiddenExtensions,
+           forbiddenExtensions.contains(fileExtension) {
+            return "Запрещенный тип файла"
         }
         return nil
     }

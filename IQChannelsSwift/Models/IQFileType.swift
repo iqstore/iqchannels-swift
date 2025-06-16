@@ -14,6 +14,6 @@ enum IQFileType: String, Codable, Equatable {
     case image
     
     init(from decoder: any Decoder) throws {
-        self = try IQFileType(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .invalid
+        self = try IQFileType(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .file
     }
 }
