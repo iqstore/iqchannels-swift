@@ -194,7 +194,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: value)
     }
     
-    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?)> {
+    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?, String)> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
@@ -205,12 +205,14 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         guard let result = response.result, var value = result.value else { return .init(error: NSError.failedToParseModel([IQMessage].self)) }
         
         var lifeTime: Int?
+        var chatTitle: String = "Чат с оператором"
         var systemChat: Bool = false
         
         if(getSettings){
             let chatSettings = await getChatSettings(request: .init(clientId: request.clientId))
             
             if let settings = chatSettings.result{
+                chatTitle = settings.chatTitle
                 systemChat = settings.enabled == true
                 
                 if (settings.greetFrom == "bot") {
@@ -252,7 +254,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
         
-        return .init(result: (value, systemChat, lifeTime))
+        return .init(result: (value, systemChat, lifeTime, chatTitle))
     }
     
     func rate(value: Int, ratingID: Int) async -> Error? {

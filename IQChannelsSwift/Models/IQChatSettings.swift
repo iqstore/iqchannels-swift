@@ -14,4 +14,5 @@ struct IQChatSettings: Codable, Equatable {
     var pseudonym: String = "Оператор"
     var avatarID: String = ""
     var totalOpenedTickets: Int = 0
+    var chatTitle: String = "Чат с оператором"
 }

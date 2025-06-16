@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 import SwiftUI
 import PhotosUI
 import SafariServices
@@ -10,6 +11,8 @@ class IQChatDetailViewController: IQViewController {
     
     private let output: IQChannelsManagerDetailOutput
     
+    private var cancellables = Set<AnyCancellable>()
+    
     private lazy var titleStackView: UIStackView = {
         let stackView: UIStackView = .init(arrangedSubviews: [titleLabel, statusView])
         stackView.spacing = 0
@@ -20,7 +23,8 @@ class IQChatDetailViewController: IQViewController {
     
     private lazy var titleLabel: UILabel = {
         let label: UILabel = .init()
-        label.text = "Чат с оператором"
+        label.text = viewModel.chatLabel
+        
         
         let fontSize = CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15)
         let isBold = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false
@@ -175,6 +179,13 @@ class IQChatDetailViewController: IQViewController {
                     self.statusLabel.text = state.description
                 }, completion: nil)
             }.store(in: &subscriptions)
+        
+        viewModel.$chatLabel
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] title in
+                self?.titleLabel.text = title
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - ACTIONS

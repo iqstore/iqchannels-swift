@@ -154,15 +154,7 @@ struct FilePreviewCellView: View {
                     }
                     
                     if let file = message.file {
-                        if let state = file.state {
-                            if state == .approved {
-                                getApprovedStateView(file)
-                            } else {
-                                getNotApprovedStateView(state)
-                            }
-                        } else {
-                            getApprovedStateView(file)
-                        }
+                        getApprovedStateView(file)
                     }
                 }
                 

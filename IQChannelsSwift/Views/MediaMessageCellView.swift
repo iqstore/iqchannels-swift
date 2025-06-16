@@ -164,33 +164,23 @@ struct MediaMessageCellView: View {
         HStack(spacing: 8) {
             Spacer()
             if file.isLoading {
-                if let data = file.dataFile?.data,
-                   let uiImage = UIImage(data: data) {
-                    ZStack {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: imageSize.width, height: imageSize.height)
-                        
-                        Button {
-                            onCancelImageSendCompletion?()
-                        } label: {
-                            ZStack {
-                                Image(name: "loading")
-                                    .resizable()
-                                    .frame(width: 32, height: 32)
-                                    .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
-                                
-                                Image(name: "xmark")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 12, height: 12)
-                            }
-                            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
-                            .onAppear { self.showMessageLoading = true }
+                    Button {
+                        onCancelImageSendCompletion?()
+                    } label: {
+                        ZStack {
+                            Image(name: "loading")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                            
+                            Image(name: "xmark")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 12, height: 12)
                         }
+                        .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                        .onAppear { self.showMessageLoading = true }
                     }
-                }
             } else {
                 Group {
                     let textColor = Style.getUIColor(theme: Style.model?.error?.textError?.color) ?? UIColor(hex: "242729")
@@ -257,26 +247,26 @@ struct MediaMessageCellView: View {
     
     @ViewBuilder
     private func getNotApprovedStateView(_ state: IQFileState) -> some View {
-        let textColor: Color = isSender ? state.titleClientColor : state.titleOperatorColor
-        let fontSize: CGFloat = isSender ? state.titleClientFontSize : state.titleOperatorFontSize
-        let alignment: TextAlignment = isSender ? state.titleClientAligment: state.titleOperatorAligment
-        let isBold: Bool = isSender ? state.titleClientIsBold : state.titleOperatorIsBold
-        let isItalic: Bool = isSender ? state.titleClientIsItalic : state.titleOperatorIsItalic
-        
-        if #available(iOS 16.0, *) {
-            Text(state.title)
-                .foregroundColor(textColor)
-                .font(.system(size: fontSize))
-                .bold(isBold)
-                .italic(isItalic)
-                .multilineTextAlignment(alignment)
-                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
-        } else {
-            Text(state.title)
-                .foregroundColor(textColor)
-                .font(.system(size: fontSize))
-                .multilineTextAlignment(alignment)
-                .padding(EdgeInsets(top: 10, leading: 10, bottom: text == "" ? 30 : 0, trailing: 10))
+        HStack(spacing: 8) {
+            Spacer()
+            Button {
+                onCancelImageSendCompletion?()
+            } label: {
+                ZStack {
+                    Image(name: "loading")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                    
+                    Image(name: "xmark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 12, height: 12)
+                }
+                .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                .onAppear { self.showMessageLoading = true }
+            }
+            Spacer()
         }
     }
     

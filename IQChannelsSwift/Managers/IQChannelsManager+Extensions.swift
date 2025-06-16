@@ -490,15 +490,18 @@ extension IQChannelsManager {
             return "Слишком большая ширина или высота изображения"
         }
         
-        if let fileExtensions = file.filename.components(separatedBy: ".")[safe: 1] {
-            if let allowedExtensions = limits.allowedExtensions,
-               !allowedExtensions.contains(fileExtensions) {
-                return "Неподдерживаемый тип файла"
-            }
-            if let forbiddenExtensions = limits.forbiddenExtensions,
-               forbiddenExtensions.contains(fileExtensions) {
-                return "Запрещенный тип файла"
-            }
+        
+        
+        let parts = file.filename.components(separatedBy: ".")
+        let fileExtension = parts.count > 1 ? parts.last ?? "file" : "file"
+
+        if let allowedExtensions = limits.allowedExtensions,
+           !allowedExtensions.contains(fileExtension) {
+            return "Неподдерживаемый тип файла"
+        }
+        if let forbiddenExtensions = limits.forbiddenExtensions,
+           forbiddenExtensions.contains(fileExtension) {
+            return "Запрещенный тип файла"
         }
         return nil
     }
@@ -690,10 +693,17 @@ extension IQChannelsManager {
                 return
             }
             let lifeTime = result.result?.2
+            let chatLabel = result.result?.3
             self.systemChat = result.result?.1 ?? false
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
             messages = results
+            
+            DispatchQueue.main.async {
+                if let chatLabel = chatLabel {
+                    self.detailViewModel?.chatLabel = chatLabel
+                }
+            }
             
             let chatId = messages.filter {$0.clientID == selectedChat.auth.auth.client?.id}.first?.chatID
             
