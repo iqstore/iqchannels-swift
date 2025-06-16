@@ -28,6 +28,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var messageToReply: IQMessage? = nil
     @Published var selectedFiles: [DataFile]? = nil
     @Published var scrollDown: Bool = false
+    @Published var chatLabel: String = ""
     
     // MARK: - METHODS
     func showMessageControl(_ controlInfo: MessageControlInfo) {

@@ -690,10 +690,17 @@ extension IQChannelsManager {
                 return
             }
             let lifeTime = result.result?.2
+            let chatLabel = result.result?.3
             self.systemChat = result.result?.1 ?? false
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
             messages = results
+            
+            DispatchQueue.main.async {
+                if let chatLabel = chatLabel {
+                    self.detailViewModel?.chatLabel = chatLabel
+                }
+            }
             
             let chatId = messages.filter {$0.clientID == selectedChat.auth.auth.client?.id}.first?.chatID
             
