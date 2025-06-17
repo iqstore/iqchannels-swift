@@ -10,8 +10,8 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "iqchannels-swift",
-            targets: ["iqchannels-swift"]),
+            name: "IQChannelsSwift",
+            targets: ["IQChannelsSwift"]),
     ],
     dependencies: [
         .package(name: "SDWebImageSwiftUI", url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.0.4"),
@@ -19,10 +19,6 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "iqchannels-swift"),
-        .testTarget(
-            name: "iqchannels-swiftTests",
-            dependencies: ["iqchannels-swift"]
-        ),
+            name: "IQChannelsSwift"),
     ]
 )
