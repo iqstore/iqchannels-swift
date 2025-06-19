@@ -1,6 +1,4 @@
-// swift-tools-version: 6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
+// swift-tools-version:5.10
 import PackageDescription
 
 let package = Package(
@@ -14,11 +12,25 @@ let package = Package(
             targets: ["IQChannelsSwift"]),
     ],
     dependencies: [
-        .package(name: "SDWebImageSwiftUI", url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.0.4"),
-        .package(name: "SQLite.swift", url: "https://github.com/stephencelis/SQLite.swift.git", ">=0.13")
+        .package(url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.0.4"),
+        .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.13.0")
     ],
     targets: [
         .target(
-            name: "IQChannelsSwift"),
+            name: "IQChannelsSwift",
+            dependencies: [
+                .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
+                .product(name: "SQLite", package: "SQLite.swift")
+            ],
+            path: "IQChannelsSwift",
+            resources: [
+                .process("Assets")
+            ]
+        ),
+        .testTarget(
+            name: "IQChannelsSwiftTests",
+            dependencies: ["IQChannelsSwift"],
+            path: "Example/Tests"
+        ),
     ]
 )
