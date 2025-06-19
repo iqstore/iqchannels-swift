@@ -20,15 +20,31 @@ let package = Package(
             name: "IQChannelsSwift",
             dependencies: [
                 .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
-                .product(name: "SQLite", package: "SQLite.swift")
+                .product(name: "SQLite", package: "SQLite.swift"),
             ],
             path: "IQChannelsSwift",
+            exclude: [
+                "Managers/TRVSEventSource.m",
+                "Managers/TRVSServerSentEvent.m"
+            ],
+            sources: [
+                "Assets",
+                "Controllers",
+                "Database",
+                "Extensions",
+                "IQLibraryConfiguration.swift",
+                "Managers",
+                "Models",
+                "Protocols",
+                "ViewModels",
+                "Views",
+            ],
             publicHeadersPath: "Managers",
             cSettings: [
                 .headerSearchPath("Managers")
             ],
             resources: [
-                .process("Assets")
+                .process("Assets/Assets.xcassets")
             ]
         ),
         .testTarget(
