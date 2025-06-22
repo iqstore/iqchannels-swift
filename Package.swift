@@ -23,6 +23,7 @@ let package = Package(
                 .product(name: "SQLite", package: "SQLite.swift")
             ],
             path: "IQChannelsSwift",
+            sources: ["."]
             resources: [
                 .process("Assets")
             ]
