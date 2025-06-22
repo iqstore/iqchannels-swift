@@ -17,8 +17,14 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "IQChannelsObjC",
+            path: "IQChannelsSwift/ManagersObjC",
+            publicHeadersPath: "."
+        ),
+        .target(
             name: "IQChannelsSwift",
             dependencies: [
+                "IQChannelsObjC",
                 .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
                 .product(name: "SQLite", package: "SQLite.swift")
             ],

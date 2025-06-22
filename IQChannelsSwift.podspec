@@ -52,6 +52,10 @@ Pod::Spec.new do |s|
         spec.source_files = 'IQChannelsSwift/Managers/**/*'
     end
     
+    s.subspec 'ManagersObjC' do |spec|
+        spec.source_files = 'IQChannelsSwift/ManagersObjC/**/*'
+    end
+    
     s.subspec 'Protocols' do |spec|
         spec.source_files = 'IQChannelsSwift/Protocols/**/*'
     end
