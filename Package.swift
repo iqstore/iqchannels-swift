@@ -19,7 +19,6 @@ let package = Package(
         .target(
             name: "IQChannelsSwift",
             dependencies: [
-                "IQChannelsObjC",
                 .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
                 .product(name: "SQLite", package: "SQLite.swift")
             ],
