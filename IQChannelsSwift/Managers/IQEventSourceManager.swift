@@ -6,6 +6,9 @@
 //
 
 import UIKit
+#if canImport(IQChannelsObjC)
+import IQChannelsObjC
+#endif
 
 class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
     
@@ -20,10 +23,19 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
         self.onOpen = onOpen
         super.init()
         
+//        var additionalHeaders = ["Cookie": "client-session=\(authToken)"]
+//        var additionalHeaders = ["Cookie": "x-client-token=\(authToken)"]
         var additionalHeaders = ["Authorization": "Client \(authToken ?? "")"]
+        
         if let customHeaders = customHeaders {
             additionalHeaders.merge(customHeaders) { (_, new) in new }
         }
+        
+//        print("SSE URL: \(url.absoluteString)")
+//        print("SSE Headers:")
+//        for (key, value) in additionalHeaders {
+//            print("  \(key): \(value)")
+//        }
         
         let config = URLSessionConfiguration.ephemeral
         config.httpAdditionalHeaders = additionalHeaders
@@ -58,6 +70,7 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
         if error?.localizedDescription.isEmpty ?? true {
             finalError = NSError.clientError("Unknown event stream error")
         }
+        print("\(error)")
         callback?(nil, finalError)
     }
 }
