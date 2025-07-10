@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public protocol IQLibraryConfigurationProtocol {
     /// Returns the main navigation controller of the library.
