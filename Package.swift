@@ -17,11 +17,6 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "IQChannelsObjC",
-            path: "IQChannelsSwift/ManagersObjC",
-            publicHeadersPath: "."
-        ),
-        .target(
             name: "IQChannelsSwift",
             dependencies: [
                 "IQChannelsObjC",
@@ -35,11 +30,13 @@ let package = Package(
                 "Extensions",
                 "IQLibraryConfiguration.swift",
                 "Managers",
+                "ManagersObjC",
                 "Models",
                 "Protocols",
                 "ViewModels",
                 "Views",
             ],
+            publicHeadersPath: "ManagersObjC",
             resources: [
                 .process("Assets")
             ]

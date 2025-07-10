@@ -6,6 +6,7 @@
 //
 
 import SQLite
+import Foundation
 
 class IQDatabaseManager {
     static let shared = IQDatabaseManager()
