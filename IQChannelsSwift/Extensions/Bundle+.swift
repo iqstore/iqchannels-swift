@@ -8,8 +8,10 @@
 import Foundation
 
 extension Bundle {
-
     static func libraryBundle() -> Bundle {
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
         let podBundle = Bundle(for: IQViewController.self)
         
         guard let resourceBundleUrl = podBundle.url(forResource: "IQChannelsSwift", withExtension: "bundle") else {
@@ -21,6 +23,6 @@ extension Bundle {
         }
         
         return resourceBundle
+        #endif
     }
-
 }
