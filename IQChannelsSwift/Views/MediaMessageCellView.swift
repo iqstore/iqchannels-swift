@@ -71,6 +71,59 @@ struct MediaMessageCellView: View {
         return self.isSender ? clientAlignment : operatorAlignment
     }
     
+    
+    var fileNameTextColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameClient?.color) ?? Color.white
+        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
+        return self.isSender ? clientColor : operatorColor
+    }
+    var fileNameFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFilenameClient?.textSize ?? 17)
+        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        return self.isSender ? clientFontSize : operatorFontSize
+    }
+    var fileNameIsBold: Bool {
+        let clientIsBold = Style.model?.messagesFile?.textFilenameClient?.textStyle?.bold ?? false
+        let operatorIsBold = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
+        return self.isSender ? clientIsBold : operatorIsBold
+    }
+    var fileNameIsItalic: Bool {
+        let clientIsItalic = Style.model?.messagesFile?.textFilenameClient?.textStyle?.italic ?? false
+        let operatorIsItalic = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
+        return self.isSender ? clientIsItalic : operatorIsItalic
+    }
+    var fileNameAligment: TextAlignment {
+        let clientIsItalic = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameClient?.textAlign) ?? .leading
+        let operatorIsItalic = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
+        return self.isSender ? clientIsItalic : operatorIsItalic
+    }
+    
+    
+    
+    var fileSizeTextColor: Color {
+        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeClient?.color) ?? Color(hex: "919399")
+        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
+        return self.isSender ? clientColor : operatorColor
+    }
+    var fileSizeFontSize: CGFloat {
+        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeClient?.textSize ?? 15)
+        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        return self.isSender ? clientFontSize : operatorFontSize
+    }
+    var fileSizeIsBold: Bool {
+        let clientIsBold = Style.model?.messagesFile?.textFileSizeClient?.textStyle?.bold ?? false
+        let operatorIsBold = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
+        return self.isSender ? clientIsBold : operatorIsBold
+    }
+    var fileSizeIsItalic: Bool {
+        let clientIsItalic = Style.model?.messagesFile?.textFileSizeClient?.textStyle?.italic ?? false
+        let operatorIsItalic = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
+        return self.isSender ? clientIsItalic : operatorIsItalic
+    }
+    
+    
+    
+    
     // MARK: - INIT
     init(message: IQMessage,
          replyMessage: IQMessage? = nil,
@@ -101,19 +154,20 @@ struct MediaMessageCellView: View {
                 ZStack(alignment: .bottomTrailing) {
                     if let file = message.file {
                         if let state = file.state {
-                            if state == .approved {
-                                getApprovedStateView(file)
+                            if state == .approved || state == .onChecking{
+                                getApprovedStateView(file, state)
                             } else {
                                 getNotApprovedStateView(state)
                             }
                         } else {
-                            getApprovedStateView(file)
+                            getApprovedStateView(file, nil)
                         }
-                    }
-                    
-                    if(text == ""){
-                        MessageStatusView(message: message, withBackground: uiImage != nil)
-                            .padding(8)
+                        
+                        
+                        if(text == "" && !file.isLoading){
+                            MessageStatusView(message: message, withBackground: uiImage != nil)
+                                .padding(8)
+                        }
                     }
                 }
                 
@@ -159,28 +213,57 @@ struct MediaMessageCellView: View {
     
     // MARK: - VIEWS
     @ViewBuilder
-    private func getApprovedStateView(_ file: IQFile) -> some View {
+    private func getApprovedStateView(_ file: IQFile, _ state: IQFileState?) -> some View {
         let imageSize = calculateImageSize(file: message.file)
         HStack(spacing: 8) {
-            Spacer()
-            if file.isLoading {
-                    Button {
-                        onCancelImageSendCompletion?()
-                    } label: {
-                        ZStack {
-                            Image(name: "loading")
-                                .resizable()
-                                .frame(width: 32, height: 32)
-                                .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
-                            
-                            Image(name: "xmark")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 12, height: 12)
+            if file.isLoading || state == .onChecking{
+                    HStack(spacing: 8) {
+                        Button {
+                            onCancelImageSendCompletion?()
+                        } label: {
+                            ZStack {
+                                Image(name: "loading")
+                                    .resizable()
+                                    .frame(width: 32, height: 32)
+                                    .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
+                                
+                                Image(name: "xmark")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 12, height: 12)
+                            }
+                            .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
+                            .onAppear { self.showMessageLoading = true }
                         }
-                        .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
-                        .onAppear { self.showMessageLoading = true }
+                        VStack(alignment: .leading, spacing: 4) {
+                            if #available(iOS 16.0, *) {
+                                Text(file.name ?? "")
+                                    .foregroundColor(fileNameTextColor)
+                                    .font(.system(size: fileNameFontSize))
+                                    .bold(fileNameIsBold)
+                                    .italic(fileNameIsItalic)
+                                    .multilineTextAlignment(fileNameAligment)
+                            } else {
+                                Text(file.name ?? "")
+                                    .foregroundColor(fileNameTextColor)
+                                    .font(.system(size: fileNameFontSize))
+                                    .multilineTextAlignment(fileNameAligment)
+                            }
+                            
+                            if #available(iOS 16.0, *) {
+                                Text(file.convertedSize)
+                                    .foregroundColor(fileSizeTextColor)
+                                    .font(.system(size: fileSizeFontSize))
+                                    .bold(fileSizeIsBold)
+                                    .italic(fileSizeIsItalic)
+                            } else {
+                                Text(file.convertedSize)
+                                    .foregroundColor(fileSizeTextColor)
+                                    .font(.system(size: fileSizeFontSize))
+                            }
+                        }
                     }
+                    .padding(8)
             } else {
                 Group {
                     let textColor = Style.getUIColor(theme: Style.model?.error?.textError?.color) ?? UIColor(hex: "242729")
@@ -220,9 +303,7 @@ struct MediaMessageCellView: View {
                     loadImage()
                 }
             }
-            Spacer()
         }
-        .frame(maxWidth: 290)
     }
     
     private func loadImage() {
@@ -268,6 +349,7 @@ struct MediaMessageCellView: View {
             }
             Spacer()
         }
+        .padding(8)
     }
     
     // MARK: - METHODS

@@ -31,9 +31,9 @@ struct AuthorizationView: View {
     @ViewBuilder
     private func getLoadingView() -> some View {
         HStack(spacing: 4) {
-            Text(state.description)
-                .foregroundColor(.gray)
-                .font(.system(size: 16))
+//            Text(state.description)
+//                .foregroundColor(.gray)
+//                .font(.system(size: 16))
             
             ProgressView()
         }
