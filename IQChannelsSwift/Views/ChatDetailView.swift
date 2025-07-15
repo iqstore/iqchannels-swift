@@ -31,14 +31,8 @@ struct ChatDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                ZStack(alignment: .bottom){
-                    ChatMessagesView(delegate: delegate)
-                    
-                    if let typingUser = viewModel.typingUser {
-                        getTypingView(user: typingUser)
-                        .zIndex(2)
-                    }
-                }
+                ChatMessagesView(delegate: delegate)
+                
                 ChatInputView(text: $viewModel.inputText,
                               messageToReply: $viewModel.messageToReply,
                               selectedFiles: $viewModel.selectedFiles,
