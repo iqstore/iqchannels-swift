@@ -147,7 +147,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(text: String, chatType: IQChatType, clientID: Int?, localID: Int, replyMessageID: Int?) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.text = text
-        self.isRead = true
+        self.isRead = false
         self.payload = .text
     }
     
@@ -155,14 +155,14 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.payload = .file
         self.text = text
-        self.isRead = true
+        self.isRead = false
         self.file = IQFile(dataFile: dataFile)
     }
     
     init(action: IQAction, chatType: IQChatType, clientID: Int?, localID: Int) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
-        self.isRead = true
+        self.isRead = false
         self.text = action.title
         self.botpressPayload = action.payload
     }
@@ -170,7 +170,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     init(choice: IQSingleChoice, chatType: IQChatType, clientID: Int?, localID: Int) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
         self.payload = .text
-        self.isRead = true
+        self.isRead = false
         self.text = choice.title
         self.botpressPayload = choice.value
     }

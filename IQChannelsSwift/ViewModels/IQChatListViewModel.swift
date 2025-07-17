@@ -10,7 +10,7 @@ import Combine
 
 class IQChatListViewModel: IQBaseViewModel {
     @Published var chatsInfo: [IQChatItemModel] = []
-    var chatToPresentListener = PassthroughSubject<IQChatDetailViewController, Never>()
+    var chatToPresentListener = CurrentValueSubject<IQChatDetailViewController?, Never>(nil)
     var dismissListener = PassthroughSubject<Void, Never>()
     var popListener = PassthroughSubject<Void, Never>()
 }

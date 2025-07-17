@@ -45,10 +45,12 @@ class IQChatListViewController: IQViewController {
     
     override func bindViewModel() {
         viewModel.chatToPresentListener
+            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
-            .sink { [unowned self] controller in
-                navigationController?.pushViewController(controller, animated: true)
-            }.store(in: &subscriptions)
+            .sink { [weak self] controller in
+                self?.navigationController?.pushViewController(controller, animated: true)
+            }
+            .store(in: &subscriptions)
         
         viewModel.dismissListener
             .receive(on: DispatchQueue.main)

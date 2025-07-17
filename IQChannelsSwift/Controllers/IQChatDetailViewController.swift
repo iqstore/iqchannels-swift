@@ -180,6 +180,22 @@ class IQChatDetailViewController: IQViewController {
                 }, completion: nil)
             }.store(in: &subscriptions)
         
+        viewModel.$typingUser
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] user in
+                guard let self else { return }
+                UIView.transition(with: titleStackView,
+                                  duration: 0,
+                                  options: .transitionCrossDissolve,
+                                  animations: {
+                    if (user != nil){
+                        self.statusLabel.text = "\(user?.displayName ?? "Оператор") печатает..."
+                    } else {
+                        self.statusLabel.text = IQChannelsState.authenticated.description
+                    }
+                }, completion: nil)
+            }.store(in: &subscriptions)
+        
         viewModel.$chatLabel
             .receive(on: DispatchQueue.main)
             .sink { [weak self] title in
