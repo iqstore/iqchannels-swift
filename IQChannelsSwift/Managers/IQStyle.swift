@@ -18,9 +18,13 @@ class IQStyle {
             self.model = nil
             return
         }
-                
+
+        let currentTheme = self.model?.theme ?? .system
+
         do {
-            self.model = try JSONDecoder().decode(IQStyleModel.self, from: data)
+            var newModel = try JSONDecoder().decode(IQStyleModel.self, from: data)
+            newModel.theme = currentTheme
+            self.model = newModel
         } catch {
             IQLog.error(message: "Ошибка декодирования стилей: \(error)")
         }
