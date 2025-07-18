@@ -23,28 +23,28 @@ struct ChatMessageCellView: View {
     @State private var isMenuVisible = false
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.chat?.background) ?? Color(hex: "919399")
+        return IQStyle.getColor(theme: IQStyle.model?.chat?.background) ?? Color(hex: "919399")
     }
     
     var senderTextColor: Color {
-        return Style.getColor(theme: Style.model?.messages?.textUp?.color) ?? Color(hex: "919399")
+        return IQStyle.getColor(theme: IQStyle.model?.messages?.textUp?.color) ?? Color(hex: "919399")
     }
     var senderFontSize: CGFloat {
-        return CGFloat(Style.model?.messages?.textUp?.textSize ?? 13)
+        return CGFloat(IQStyle.model?.messages?.textUp?.textSize ?? 13)
     }
     var senderIsBold: Bool {
-        return Style.model?.messages?.textUp?.textStyle?.bold ?? false
+        return IQStyle.model?.messages?.textUp?.textStyle?.bold ?? false
     }
     var senderIsItalic: Bool {
-        return Style.model?.messages?.textUp?.textStyle?.italic ?? false
+        return IQStyle.model?.messages?.textUp?.textStyle?.italic ?? false
     }
     var senderAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.messages?.textUp?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.messages?.textUp?.textAlign) ?? .leading
     }
     
     
     var avatarURL: URL? {
-        return Style.model?.chat?.iconOperator ?? message.user?.avatarURL
+        return IQStyle.model?.chat?.iconOperator ?? message.user?.avatarURL
     }
     
     // MARK: - BODY
@@ -126,7 +126,6 @@ struct ChatMessageCellView: View {
         } else{
             SystemMessageCellView(message: message)
         }
-            
     }
     
     // MARK: - VIEWS

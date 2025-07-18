@@ -41,20 +41,20 @@ struct AuthorizationView: View {
     
     @ViewBuilder
     private func getLogoutView() -> some View {
-        let titleColor = Style.getColor(theme: Style.model?.error?.titleError?.color) ?? Color(hex: "242729")
-        let titleFontSize = CGFloat(Style.model?.error?.titleError?.textSize ?? 17)
-        let titleIsBold = Style.model?.error?.titleError?.textStyle?.bold ?? false
-        let titleIsItalic = Style.model?.error?.titleError?.textStyle?.italic ?? false
-        let titleAlignment = stringToAlignment(stringAlignment: Style.model?.error?.titleError?.textAlign) ?? .leading
+        let titleColor = IQStyle.getColor(theme: IQStyle.model?.error?.titleError?.color) ?? Color(hex: "242729")
+        let titleFontSize = CGFloat(IQStyle.model?.error?.titleError?.textSize ?? 17)
+        let titleIsBold = IQStyle.model?.error?.titleError?.textStyle?.bold ?? false
+        let titleIsItalic = IQStyle.model?.error?.titleError?.textStyle?.italic ?? false
+        let titleAlignment = stringToAlignment(stringAlignment: IQStyle.model?.error?.titleError?.textAlign) ?? .leading
         
-        let descriptionColor = Style.getColor(theme: Style.model?.error?.textError?.color) ?? Color(hex: "242729")
-        let descriptionFontSize = CGFloat(Style.model?.error?.textError?.textSize ?? 15)
-        let descriptionIsBold = Style.model?.error?.textError?.textStyle?.bold ?? false
-        let descriptionIsItalic = Style.model?.error?.textError?.textStyle?.italic ?? false
-        let descriptionAlignment = stringToAlignment(stringAlignment: Style.model?.error?.textError?.textAlign) ?? .leading
+        let descriptionColor = IQStyle.getColor(theme: IQStyle.model?.error?.textError?.color) ?? Color(hex: "242729")
+        let descriptionFontSize = CGFloat(IQStyle.model?.error?.textError?.textSize ?? 15)
+        let descriptionIsBold = IQStyle.model?.error?.textError?.textStyle?.bold ?? false
+        let descriptionIsItalic = IQStyle.model?.error?.textError?.textStyle?.italic ?? false
+        let descriptionAlignment = stringToAlignment(stringAlignment: IQStyle.model?.error?.textError?.textAlign) ?? .leading
         
         VStack(spacing: 20) {
-            AnimatedImage(url: Style.model?.error?.iconError, 
+            AnimatedImage(url: IQStyle.model?.error?.iconError, 
                           placeholderImage: UIImage(name: "circle_error"))
                 .resizable()
                 .indicator(SDWebImageActivityIndicator.gray)
@@ -64,21 +64,21 @@ struct AuthorizationView: View {
             
             VStack(spacing: 8) {
                 if #available(iOS 16.0, *) {
-                    Text("Чат временно недоступен")
+                    Text(IQLanguageTexts.model.titleError ?? "Чат временно недоступен")
                         .foregroundColor(titleColor)
                         .font(.system(size: titleFontSize, weight: .semibold))
                         .bold(titleIsBold)
                         .italic(titleIsItalic)
                         .multilineTextAlignment(titleAlignment)
                 } else {
-                    Text("Чат временно недоступен")
+                    Text(IQLanguageTexts.model.titleError ?? "Чат временно недоступен")
                         .foregroundColor(titleColor)
                         .font(.system(size: titleFontSize, weight: .semibold))
                         .multilineTextAlignment(titleAlignment)
                 }
                 
                 if #available(iOS 16.0, *) {
-                    Text("Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
+                    Text(IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
                         .foregroundColor(descriptionColor)
                         .font(.system(size: descriptionFontSize))
                         .multilineTextAlignment(.center)
@@ -86,7 +86,7 @@ struct AuthorizationView: View {
                         .italic(descriptionIsItalic)
                         .multilineTextAlignment(descriptionAlignment)
                 } else {
-                    Text("Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
+                    Text(IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
                         .foregroundColor(descriptionColor)
                         .font(.system(size: descriptionFontSize))
                         .multilineTextAlignment(.center)
@@ -97,7 +97,7 @@ struct AuthorizationView: View {
             Button {
                 onDismissChat?()
             } label: {
-                Text("Вернуться")
+                Text(IQLanguageTexts.model.buttonError ?? "Вернуться")
                     .font(.system(size: 17, weight: .medium))
                     .foregroundColor(.black)
                     .padding(.vertical, 12)

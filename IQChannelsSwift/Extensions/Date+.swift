@@ -9,7 +9,7 @@ extension Date {
     
     func formatRelatively(dateStyle: DateFormatter.Style = .medium) -> String {
         let relativeDateFormatter: DateFormatter = .init()
-        relativeDateFormatter.locale = Locale(identifier: "ru")
+        relativeDateFormatter.locale = Locale(identifier: IQLanguageTexts.model.code ?? "ru")
         relativeDateFormatter.timeStyle = .none
         relativeDateFormatter.dateStyle = dateStyle
         relativeDateFormatter.doesRelativeDateFormatting = true

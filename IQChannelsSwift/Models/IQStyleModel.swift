@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct StyleModel: Decodable {
+struct IQStyleModel: Decodable {
     let chat: ChatStyle?
     let messages: MessagesStyle?
     let answer: AnswerStyle?
@@ -223,7 +223,7 @@ struct Theme: Decodable {
     let dark: String?
 }
 
-extension StyleModel {
+extension IQStyleModel {
     struct ColorTheme: Decodable {
         let color: Theme?
     }

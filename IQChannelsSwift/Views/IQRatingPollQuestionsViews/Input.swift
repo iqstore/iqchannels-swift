@@ -25,47 +25,47 @@ struct InputView: View {
     }
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.inputBackground?.color) ?? Color(hex: "ffffff")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.inputBackground?.color) ?? Color(hex: "ffffff")
     }
     var backgroundRadius: CGFloat {
-        return Style.model?.rating?.inputBackground?.border?.borderRadius ?? 12
+        return IQStyle.model?.rating?.inputBackground?.border?.borderRadius ?? 12
     }
     var backgroundBorderSize: CGFloat {
-        return Style.model?.rating?.inputBackground?.border?.size ?? 0
+        return IQStyle.model?.rating?.inputBackground?.border?.size ?? 0
     }
     var backgroundBorderColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.inputBackground?.border?.color) ?? Color(hex: "000000")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.inputBackground?.border?.color) ?? Color(hex: "000000")
     }
     
     
     
     var textColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.inputText?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.inputText?.color) ?? Color(hex: "242729")
     }
     
     var textFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.inputText?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.inputText?.textSize ?? 17)
     }
     
     
     // MARK: - BODY
     var body: some View {
-        let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
-        let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let enabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
+        let disabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
+        let enabledRatingFontSize = CGFloat(IQStyle.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
+        let disabledRatingFontSize = CGFloat(IQStyle.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
+        let enabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
+        let disabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
         
         
-        let enabledRatingRadius = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.borderRadius ?? 8
-        let disabledRatingRadius = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.borderRadius ?? 8
-        let enabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.size ?? 0
-        let disabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.size ?? 0
-        let enabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
-        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let enabledRatingRadius = IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.borderRadius ?? 8
+        let disabledRatingRadius = IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.borderRadius ?? 8
+        let enabledRatingBorderSize = IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.size ?? 0
+        let disabledRatingBorderSize = IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.size ?? 0
+        let enabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
+        let disabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
-        let cursorColor = Style.getColor(theme: Style.model?.toolsToMessage?.cursorColor) ?? Color(hex: "525252")
+        let cursorColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.cursorColor) ?? Color(hex: "525252")
         
         if #available(iOS 16.0, *) {
             TextEditor(text: $userInput)

@@ -38,7 +38,7 @@ struct StarsView: View {
                     selectedRating = i
                 } label: {
                     if i <= selectedRating ?? 0 {
-                        if let fullStarUrl = Style.model?.rating?.fullStar {
+                        if let fullStarUrl = IQStyle.model?.rating?.fullStar {
                             AnimatedImage(url: fullStarUrl)
                                 .resizable()
                                 .indicator(SDWebImageActivityIndicator.gray)
@@ -52,7 +52,7 @@ struct StarsView: View {
                                 .frame(width: starWidth, height: starWidth)
                         }
                     } else {
-                        if let emptyStarUrl = Style.model?.rating?.emptyStar {
+                        if let emptyStarUrl = IQStyle.model?.rating?.emptyStar {
                             AnimatedImage(url: emptyStarUrl)
                                 .resizable()
                                 .indicator(SDWebImageActivityIndicator.gray)

@@ -179,8 +179,8 @@ enum MessageControlType: Identifiable {
     
     var title: String {
         switch self {
-        case .copy: return "Копировать"
-        case .reply: return "Ответить"
+        case .copy: return IQLanguageTexts.model.copy ?? "Копировать"
+        case .reply: return IQLanguageTexts.model.reply ?? "Ответить"
         }
     }
     

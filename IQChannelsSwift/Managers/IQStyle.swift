@@ -1,5 +1,5 @@
 //
-//  Style.swift
+//  IQStyle.swift
 //  IQChannelsSwift
 //
 //  Created by Muhammed Aralbek on 29.05.2024.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-class Style {
+class IQStyle {
     
-    static var model: StyleModel?
+    static var model: IQStyleModel?
     
     private init() { }
     
@@ -18,8 +18,16 @@ class Style {
             self.model = nil
             return
         }
-                
-        self.model = try? JSONDecoder().decode(StyleModel.self, from: data)
+
+        let currentTheme = self.model?.theme ?? .system
+
+        do {
+            var newModel = try JSONDecoder().decode(IQStyleModel.self, from: data)
+            newModel.theme = currentTheme
+            self.model = newModel
+        } catch {
+            IQLog.error(message: "Ошибка декодирования стилей: \(error)")
+        }
     }
     
     static func newTheme(_ styleType: IQTheme) {

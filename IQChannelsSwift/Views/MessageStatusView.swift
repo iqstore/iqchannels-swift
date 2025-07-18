@@ -12,37 +12,37 @@ struct MessageStatusView: View {
     
     var textColor: Color {
         if(message.isMy ?? false){
-            return Style.getColor(theme: Style.model?.messages?.textTimeClient?.color) ?? Color(hex: "919399")
+            return IQStyle.getColor(theme: IQStyle.model?.messages?.textTimeClient?.color) ?? Color(hex: "919399")
         }else{
-            return Style.getColor(theme: Style.model?.messages?.textTimeOperator?.color) ?? Color(hex: "919399")
+            return IQStyle.getColor(theme: IQStyle.model?.messages?.textTimeOperator?.color) ?? Color(hex: "919399")
         }
     }
     var fontSize: CGFloat {
         if(message.isMy ?? false){
-            return CGFloat(Style.model?.messages?.textTimeClient?.textSize ?? 13)
+            return CGFloat(IQStyle.model?.messages?.textTimeClient?.textSize ?? 13)
         }else{
-            return CGFloat(Style.model?.messages?.textTimeOperator?.textSize ?? 13)
+            return CGFloat(IQStyle.model?.messages?.textTimeOperator?.textSize ?? 13)
         }
     }
     var alignment: TextAlignment {
         if(message.isMy ?? false){
-            return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeClient?.textAlign) ?? .leading
+            return stringToAlignment(stringAlignment: IQStyle.model?.messages?.textTimeClient?.textAlign) ?? .leading
         }else{
-            return stringToAlignment(stringAlignment: Style.model?.messages?.textTimeOperator?.textAlign) ?? .leading
+            return stringToAlignment(stringAlignment: IQStyle.model?.messages?.textTimeOperator?.textAlign) ?? .leading
         }
     }
     var isBold: Bool {
         if(message.isMy ?? false){
-            return Style.model?.messages?.textTimeClient?.textStyle?.bold ?? false
+            return IQStyle.model?.messages?.textTimeClient?.textStyle?.bold ?? false
         }else{
-            return Style.model?.messages?.textTimeOperator?.textStyle?.bold ?? false
+            return IQStyle.model?.messages?.textTimeOperator?.textStyle?.bold ?? false
         }
     }
     var isItalic: Bool {
         if(message.isMy ?? false){
-            return Style.model?.messages?.textTimeClient?.textStyle?.italic ?? false
+            return IQStyle.model?.messages?.textTimeClient?.textStyle?.italic ?? false
         }else{
-            return Style.model?.messages?.textTimeOperator?.textStyle?.italic ?? false
+            return IQStyle.model?.messages?.textTimeOperator?.textStyle?.italic ?? false
         }
     }
     

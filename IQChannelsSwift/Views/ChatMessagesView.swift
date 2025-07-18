@@ -13,7 +13,7 @@ struct ChatMessagesView: View {
     @State private var isMenuVisibleMessage: IQMessage? = nil
     
     var loaderColor: Color {
-        return Style.getColor(theme: Style.model?.chat?.chatLoader) ?? Color(hex: "555555")
+        return IQStyle.getColor(theme: IQStyle.model?.chat?.chatLoader) ?? Color(hex: "555555")
     }
     
     // MARK: - BODY
@@ -149,11 +149,11 @@ struct ChatMessagesView: View {
     // MARK: - VIEWS
     @ViewBuilder
     private func getDatePreviewView(date: String) -> some View {
-        let color = Style.getColor(theme: Style.model?.chat?.dateText?.color) ?? Color(hex: "919399")
-        let fontSize = CGFloat(Style.model?.chat?.dateText?.textSize ?? 13)
-        let alignment = stringToAlignment(stringAlignment: Style.model?.chat?.dateText?.textAlign) ?? .leading
-        let isBold = Style.model?.chat?.dateText?.textStyle?.bold ?? false
-        let isItalic = Style.model?.chat?.dateText?.textStyle?.italic ?? false
+        let color = IQStyle.getColor(theme: IQStyle.model?.chat?.dateText?.color) ?? Color(hex: "919399")
+        let fontSize = CGFloat(IQStyle.model?.chat?.dateText?.textSize ?? 13)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.chat?.dateText?.textAlign) ?? .leading
+        let isBold = IQStyle.model?.chat?.dateText?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.chat?.dateText?.textStyle?.italic ?? false
         if #available(iOS 16.0, *) {
             Text(date)
                 .font(.system(size: fontSize))
@@ -216,11 +216,11 @@ struct ChatMessagesView: View {
     
     @ViewBuilder
     private func getNewMessagesView() -> some View {
-        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
-        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
-        let alignment = stringToAlignment(stringAlignment: Style.model?.chat?.systemText?.textAlign) ?? .leading
-        let isBold = Style.model?.chat?.systemText?.textStyle?.bold ?? false
-        let isItalic = Style.model?.chat?.systemText?.textStyle?.italic ?? false
+        let textColor = IQStyle.getColor(theme: IQStyle.model?.chat?.systemText?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(IQStyle.model?.chat?.systemText?.textSize ?? 17)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.chat?.systemText?.textAlign) ?? .leading
+        let isBold = IQStyle.model?.chat?.systemText?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.chat?.systemText?.textStyle?.italic ?? false
         
         if #available(iOS 16.0, *) {
             Text("Новые сообщения")
@@ -282,7 +282,7 @@ struct ChatMessagesView: View {
                 delegate?.onResendMessage(isMenuVisibleMessage!.withError(false))
                 isMenuVisibleMessage = nil
             }) {
-                Text("Повторить отправку")
+                Text(IQLanguageTexts.model.resend ?? "Повторить отправку")
                     .frame(width: 200, alignment: .leading)
                     .font(.system(size: 16))
                     .padding(3)
@@ -295,7 +295,7 @@ struct ChatMessagesView: View {
                 delegate?.onCancelSend(isMenuVisibleMessage!)
                 isMenuVisibleMessage = nil
             }) {
-                Text("Удалить")
+                Text(IQLanguageTexts.model.delete ?? "Удалить")
                     .frame(width: 200, alignment: .leading)
                     .font(.system(size: 16))
                     .padding(3)

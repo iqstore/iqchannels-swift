@@ -145,20 +145,20 @@ class PreviewViewController: UIViewController, UIScrollViewDelegate {
             request.addResource(with: .photo, data: data, options: nil)
         }) { success, error in
             DispatchQueue.main.async {
-                let title = success ? "Успешно!" : "Ошибка!"
-                let message = success ? "Фото успешно сохранено в галерею." : "Не удалось сохранить фото."
+                let title = success ? IQLanguageTexts.model.photoSavedSuccessTitle ?? "Успешно!": IQLanguageTexts.model.photoSavedErrorTitle ?? "Ошибка!"
+                let message = success ? IQLanguageTexts.model.photoSavedSuccessText ?? "Фото успешно сохранено в галерею." : IQLanguageTexts.model.photoSavedErrorText ?? "Не удалось сохранить фото."
                 self.showAlert(title: title, message: message)
             }
         }
     }
 
     private func showAccessDeniedAlert() {
-        let alert: UIAlertController = .init(title: "Доступ к галерее запрещён",
-                                             message: "Пожалуйста, разрешите доступ в настройках, чтобы сохранять фото.",
+        let alert: UIAlertController = .init(title: IQLanguageTexts.model.galleryPermissionDeniedTitle ?? "Доступ к галерее запрещён",
+                                             message: IQLanguageTexts.model.galleryPermissionDeniedText ?? "Пожалуйста, разрешите доступ в настройках, чтобы сохранять фото.",
                                              preferredStyle: .alert)
         
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "В настройки", style: .default) { _ in
+        alert.addAction(UIAlertAction(title: IQLanguageTexts.model.galleryPermissionAlertCancel ?? "Отмена", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: IQLanguageTexts.model.galleryPermissionAlertSettings ?? "В настройки", style: .default) { _ in
             if let appSettingsURL = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(appSettingsURL, options: [:], completionHandler: nil)
             }

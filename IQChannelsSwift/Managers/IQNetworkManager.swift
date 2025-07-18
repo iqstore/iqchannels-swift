@@ -179,6 +179,22 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return response.error
     }
     
+    func getAvailableLanguages() async -> ResponseCallback<[IQLanguage]> {
+        let path = "/widget/localization/\(channel)/languages"
+        
+        let response = await get(path, responseType: IQLanguageResponse.self)
+        
+        guard response.error == nil else {
+            IQLog.error(message: "getAvailableLanguages: \n error: \(String(describing: response.error))")
+            return .init(error: response.error)
+        }
+        guard let result = response.result, let value = result.value?.languages else { return .init(error: NSError.failedToParseModel(IQLanguageResponse.self)) }
+        
+        IQLog.debug(message: "getAvailableLanguages: \n success")
+        
+        return .init(result: value)
+    }
+    
     func getChatSettings(request: IQChatSettingsRequest) async -> ResponseCallback<IQChatSettings> {
         let path = "/chats/channel/chat/get_settings/\(channel)"
         let response = await post(path, body: request, responseType: IQChatSettings.self)
@@ -194,7 +210,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: value)
     }
     
-    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?, String)> {
+    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?)> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
@@ -207,6 +223,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         var lifeTime: Int?
         var chatTitle: String = "Чат с оператором"
         var systemChat: Bool = false
+        var availableLanguages: [IQLanguage]?
+        
+        let availableLanguagesResponse = await getAvailableLanguages()
+        
+        if let availableLanguagesResult = availableLanguagesResponse.result{
+            availableLanguages = availableLanguagesResult
+        }
         
         if(getSettings){
             let chatSettings = await getChatSettings(request: .init(clientId: request.clientId))
@@ -254,7 +277,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
         
-        return .init(result: (value, systemChat, lifeTime, chatTitle))
+        return .init(result: (value, systemChat, lifeTime, chatTitle, availableLanguages))
     }
     
     func rate(value: Int, ratingID: Int) async -> Error? {
@@ -367,4 +390,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: auth)
     }
     
+    func setLanguage(languageCode: String) async -> Error? {
+        let path = "/clients/set_language"
+        let params = ["code": languageCode]
+        let response = await post(path, body: params, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "setLanguage: \n languageCode: \(languageCode) \n response: \(response)")
+        
+        return response.error
+    }
 }

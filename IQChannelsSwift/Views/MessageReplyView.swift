@@ -11,28 +11,28 @@ struct MessageReplyView: View {
     let onReplyMessageTapCompletion: ((Int) -> Void)?
     
     var textColor: Color {
-        let clientColor = Style.getColor(theme: Style.model?.messages?.replyTextClient?.color) ?? Color(hex: "919399")
-        let operatorColor = Style.getColor(theme: Style.model?.messages?.replyTextOperator?.color) ?? Color(hex: "919399")
+        let clientColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replyTextClient?.color) ?? Color(hex: "919399")
+        let operatorColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replyTextOperator?.color) ?? Color(hex: "919399")
         return isMy ? clientColor : operatorColor
     }
     var textFontSize: CGFloat {
-        let clientFontSize = CGFloat(Style.model?.messages?.replyTextClient?.textSize ?? 15)
-        let operatorFontSize = CGFloat(Style.model?.messages?.replyTextOperator?.textSize ?? 15)
+        let clientFontSize = CGFloat(IQStyle.model?.messages?.replyTextClient?.textSize ?? 15)
+        let operatorFontSize = CGFloat(IQStyle.model?.messages?.replyTextOperator?.textSize ?? 15)
         return isMy ? clientFontSize : operatorFontSize
     }
     var textIsBold: Bool {
-        let clientIsBold = Style.model?.messages?.replyTextClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messages?.replyTextOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messages?.replyTextClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messages?.replyTextOperator?.textStyle?.bold ?? false
         return isMy ? clientIsBold : operatorIsBold
     }
     var textIsItalic: Bool {
-        let clientIsItalic = Style.model?.messages?.replyTextClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messages?.replyTextOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messages?.replyTextClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messages?.replyTextOperator?.textStyle?.italic ?? false
         return isMy ? clientIsItalic : operatorIsItalic
     }
     var textAlignment: TextAlignment {
-        let clientIsItalic = stringToAlignment(stringAlignment: Style.model?.messages?.replyTextClient?.textAlign)  ?? .leading
-        let operatorIsItalic = stringToAlignment(stringAlignment: Style.model?.messages?.replyTextOperator?.textAlign) ?? .leading
+        let clientIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messages?.replyTextClient?.textAlign)  ?? .leading
+        let operatorIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messages?.replyTextOperator?.textAlign) ?? .leading
         return isMy ? clientIsItalic : operatorIsItalic
     }
     
@@ -43,28 +43,28 @@ struct MessageReplyView: View {
     
     
     var senderTextColor: Color {
-        let clientColor = Style.getColor(theme: Style.model?.messages?.replySenderTextClient?.color) ?? Color.white
-        let operatorColor = Style.getColor(theme: Style.model?.messages?.replySenderTextOperator?.color) ?? Color(hex: "242729")
+        let clientColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replySenderTextClient?.color) ?? Color.white
+        let operatorColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replySenderTextOperator?.color) ?? Color(hex: "242729")
         return isMy ? clientColor : operatorColor
     }
     var senderTextFontSize: CGFloat {
-        let clientFontSize = CGFloat(Style.model?.messages?.replySenderTextClient?.textSize ?? 13)
-        let operatorFontSize = CGFloat(Style.model?.messages?.replySenderTextOperator?.textSize ?? 13)
+        let clientFontSize = CGFloat(IQStyle.model?.messages?.replySenderTextClient?.textSize ?? 13)
+        let operatorFontSize = CGFloat(IQStyle.model?.messages?.replySenderTextOperator?.textSize ?? 13)
         return isMy ? clientFontSize : operatorFontSize
     }
     var senderTextIsBold: Bool {
-        let clientIsBold = Style.model?.messages?.replySenderTextClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messages?.replySenderTextOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messages?.replySenderTextClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messages?.replySenderTextOperator?.textStyle?.bold ?? false
         return isMy ? clientIsBold : operatorIsBold
     }
     var senderTextIsItalic: Bool {
-        let clientIsItalic = Style.model?.messages?.replySenderTextClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messages?.replySenderTextOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messages?.replySenderTextClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messages?.replySenderTextOperator?.textStyle?.italic ?? false
         return isMy ? clientIsItalic : operatorIsItalic
     }
     var senderTextAlignment: TextAlignment {
-        let clientIsItalic = stringToAlignment(stringAlignment: Style.model?.messages?.replySenderTextClient?.textAlign)  ?? .leading
-        let operatorIsItalic = stringToAlignment(stringAlignment: Style.model?.messages?.replySenderTextOperator?.textAlign) ?? .leading
+        let clientIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messages?.replySenderTextClient?.textAlign)  ?? .leading
+        let operatorIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messages?.replySenderTextOperator?.textAlign) ?? .leading
         return isMy ? clientIsItalic : operatorIsItalic
     }
     

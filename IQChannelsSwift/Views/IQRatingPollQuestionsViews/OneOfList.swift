@@ -29,17 +29,17 @@ struct OneOfListView: View {
     
     // MARK: - BODY
     var body: some View {
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let disabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
+        let disabledRatingFontSize = CGFloat(IQStyle.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
+        let disabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
         
-        let disabledRatingIsBold = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
-        let disabledRatingIsItalic = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
-        let disabledRatingAlignment = stringToAlignment(stringAlignment: Style.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
+        let disabledRatingIsBold = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
+        let disabledRatingIsItalic = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
+        let disabledRatingAlignment = stringToAlignment(stringAlignment: IQStyle.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
         
-        let disabledRatingRadius = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
-        let disabledRatingBorderSize = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
-        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let disabledRatingRadius = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
+        let disabledRatingBorderSize = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
+        let disabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
         VStack() {
             ForEach(answers) { answer in

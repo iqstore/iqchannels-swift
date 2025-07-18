@@ -38,53 +38,53 @@ struct RatingPollCellView: View {
     }
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
     var backgroundRadius: CGFloat {
-        return Style.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
+        return IQStyle.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
     }
     var backgroundBorderSize: CGFloat {
-        return Style.model?.rating?.backgroundContainer?.border?.size ?? 0
+        return IQStyle.model?.rating?.backgroundContainer?.border?.size ?? 0
     }
     var backgroundBorderColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
     }
     
     
     
     
     var titleColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
     }
     var titleFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.ratingTitle?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.ratingTitle?.textSize ?? 17)
     }
     var titleIsBold: Bool {
-        return Style.model?.rating?.ratingTitle?.textStyle?.bold ?? false
+        return IQStyle.model?.rating?.ratingTitle?.textStyle?.bold ?? false
     }
     var titleIsItalic: Bool {
-        return Style.model?.rating?.ratingTitle?.textStyle?.italic ?? false
+        return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
     var titleAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.rating?.ratingTitle?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
     
     
     var thanksColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.feedbackThanksText?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.feedbackThanksText?.color) ?? Color(hex: "242729")
     }
     var thanksFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.feedbackThanksText?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.feedbackThanksText?.textSize ?? 17)
     }
     var thanksIsBold: Bool {
-        return Style.model?.rating?.feedbackThanksText?.textStyle?.bold ?? false
+        return IQStyle.model?.rating?.feedbackThanksText?.textStyle?.bold ?? false
     }
     var thanksIsItalic: Bool {
-        return Style.model?.rating?.feedbackThanksText?.textStyle?.italic ?? false
+        return IQStyle.model?.rating?.feedbackThanksText?.textStyle?.italic ?? false
     }
     var thanksAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.rating?.feedbackThanksText?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.feedbackThanksText?.textAlign) ?? .leading
     }
     
     
@@ -139,7 +139,7 @@ struct RatingPollCellView: View {
             VStack(spacing: 12) {
                 if showOffer && needShowOffer {
                     if #available(iOS 16.0, *) {
-                        Text("Желаете пройти опрос?")
+                        Text(IQLanguageTexts.model.ratingOfferTitle ?? "Желаете пройти опрос?")
                             .foregroundColor(titleColor)
                             .font(.system(size: titleFontSize))
                             .bold(titleIsBold)
@@ -148,7 +148,7 @@ struct RatingPollCellView: View {
                             .minimumScaleFactor(0.8)
                             .multilineTextAlignment(.center)
                     } else {
-                        Text("Желаете пройти опрос?")
+                        Text(IQLanguageTexts.model.ratingOfferTitle ?? "Желаете пройти опрос?")
                             .foregroundColor(titleColor)
                             .font(.system(size: titleFontSize))
                             .multilineTextAlignment(titleAligment)
@@ -260,7 +260,7 @@ struct RatingPollCellView: View {
                                 currentQuestionIndex += 1
                             }
                         case .invalid:
-                            Text("Ошибка опроса!")
+                            Text("Rating error!")
                     }
                 }else{
                     Text("").onAppear() {

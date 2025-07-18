@@ -15,6 +15,7 @@ public struct IQChannelsConfig {
     var channels: [String]
     var chatToOpen: ChatToOpen?
     var styleJson: Data?
+    var languageJson: Data?
     var disableUnreadBadge: Bool = false
     var attachment: IQAttachment? = nil
     var preFillMessages: IQPreFillMessages? = nil
@@ -23,6 +24,7 @@ public struct IQChannelsConfig {
                 channels: [String],
                 chatToOpen: ChatToOpen? = nil,
                 styleJson: Data? = nil,
+                languageJson: Data? = nil,
                 attachment: IQAttachment? = nil,
                 disableUnreadBadge: Bool = false,
                 preFillMessages: IQPreFillMessages? = nil) {
@@ -30,6 +32,7 @@ public struct IQChannelsConfig {
         self.channels = channels
         self.chatToOpen = chatToOpen
         self.styleJson = styleJson
+        self.languageJson = languageJson
         self.attachment = attachment
         self.disableUnreadBadge = disableUnreadBadge
         self.preFillMessages = preFillMessages

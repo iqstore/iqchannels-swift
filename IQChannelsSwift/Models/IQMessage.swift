@@ -86,13 +86,13 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var senderName: String {
         switch author {
         case .anonymous:
-            return "Аноним"
+            return IQLanguageTexts.model.senderNameAnonym ?? "Аноним"
         case .client:
             return client?.name ?? ""
         case .user:
             return user?.displayName ?? ""
         case .system:
-            return "Система"
+            return IQLanguageTexts.model.senderNameSystem ?? "Система"
         case nil:
             return ""
         }
@@ -113,7 +113,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         if let file {
             switch file.type {
             case .file: return file.name ?? ""
-            case .image: return "Фотография"
+            case .image: return "Image"
             default: return ""
             }
         }
@@ -129,15 +129,15 @@ struct IQMessage: Codable, Identifiable, Equatable {
             }
         
             switch rating.state {
-            case .pending: return "Пожалуйста, оцените качество консультации"
-            case .ignored: return "Без оценки оператора"
-            case .rated, .finished: return "Оценка оператора \(rating.value ?? 0) из \(toValue ?? 5)"
+            case .pending: return IQLanguageTexts.model.ratingStatePending ?? "Пожалуйста, оцените качество консультации"
+            case .ignored: return IQLanguageTexts.model.ratingStateIgnored ?? "Без оценки оператора"
+            case .rated, .finished: return "\(IQLanguageTexts.model.ratingStateRated ?? "Оценка оператора") \(rating.value ?? 0)/\(toValue ?? 5)"
             default: return ""
             }
         }
         
         if payload == nil || payload == .invalid {
-            return "Неподдерживаемый тип сообщения"
+            return IQLanguageTexts.model.invalidMesssage ?? "Неподдерживаемый тип сообщения"
         }
         
         return text ?? ""

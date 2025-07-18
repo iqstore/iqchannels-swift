@@ -20,32 +20,32 @@ struct RatingCellView: View {
     }
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
     var backgroundRadius: CGFloat {
-        return Style.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
+        return IQStyle.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
     }
     var backgroundBorderSize: CGFloat {
-        return Style.model?.rating?.backgroundContainer?.border?.size ?? 0
+        return IQStyle.model?.rating?.backgroundContainer?.border?.size ?? 0
     }
     var backgroundBorderColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
     }
     
     var titleColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
     }
     var titleFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.ratingTitle?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.ratingTitle?.textSize ?? 17)
     }
     var titleIsBold: Bool {
-        return Style.model?.rating?.ratingTitle?.textStyle?.bold ?? false
+        return IQStyle.model?.rating?.ratingTitle?.textStyle?.bold ?? false
     }
     var titleIsItalic: Bool {
-        return Style.model?.rating?.ratingTitle?.textStyle?.italic ?? false
+        return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
     var titleAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.rating?.ratingTitle?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
     // MARK: - BODY
@@ -73,7 +73,7 @@ struct RatingCellView: View {
                         selectedRating = i
                     } label: {
                         if i <= selectedRating ?? 0 {
-                            if let fullStarUrl = Style.model?.rating?.fullStar {
+                            if let fullStarUrl = IQStyle.model?.rating?.fullStar {
                                 AnimatedImage(url: fullStarUrl)
                                     .resizable()
                                     .indicator(SDWebImageActivityIndicator.gray)
@@ -87,7 +87,7 @@ struct RatingCellView: View {
                                     .frame(width: starWidth, height: starWidth)
                             }
                         } else {
-                            if let emptyStarUrl = Style.model?.rating?.emptyStar {
+                            if let emptyStarUrl = IQStyle.model?.rating?.emptyStar {
                                 AnimatedImage(url: emptyStarUrl)
                                     .resizable()
                                     .indicator(SDWebImageActivityIndicator.gray)

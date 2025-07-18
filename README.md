@@ -18,7 +18,7 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.1-rc4'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.1'
 ```
 
 Затем выполните команду:
@@ -256,18 +256,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, IQChannelsEventListenerPr
 
 Для переключения темы следует использовать метод IQChannelsConfig.setTheme
 
-<details>
-  <summary>Пример переключения темы</summary>
+Пример переключения темы
   
 ```swift
 let config = IQChannelsConfig(address: "https://example.com", channels: ["channel1"], styleJson: json)
 config.setTheme(.dark)
 configurationManager.configure(config)
 ```
-</details>
 
-<details>
-  <summary>Поддерживаемые темы (IQTheme)</summary>
+Поддерживаемые темы (IQTheme)
   
 ```swift
 public enum IQTheme {
@@ -276,7 +273,6 @@ public enum IQTheme {
     /** Автоматически меняется вместе с темой устройства */ case system
 }
 ```
-</details>
 
 Для того чтобы поменять стили элементов внутри SDK, нужно передать поддерживаемый JSON файл. Его можно передать как при инициализации, так и после нее, channelManager при этом не переопределяется
 
@@ -1188,5 +1184,105 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   },
   "theme": "light"                      //Выбранная тема (светлая/темная)
 }
+```
+</details>
+
+
+
+
+## Пример использования мультиязычности
+
+Для подключения перевода необходимо добавить поддерживаемые JSON файлы с локализацией (в том числе и русской)
+Имя файлов обязательно должно быть `ru.json`, `en.json` и т.д.
+
+
+<details>
+  <summary>Пример добавления файла с локализацией</summary>
+  
+```swift
+extension ViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        controller.dismiss(animated: true)
+        guard let url = urls.first,
+              url.startAccessingSecurityScopedResource() else { return }
+        
+        selectedLanguage = try? Data(contentsOf: url)
+        saveLanguageFile(url)
+        
+        url.stopAccessingSecurityScopedResource()
+    }
+    
+    func saveLanguageFile(_ url: URL) {
+        do {
+            let fileName = url.lastPathComponent
+            let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            try FileManager.default.createDirectory(at: appSupportDir, withIntermediateDirectories: true, attributes: nil)
+            let destinationURL = appSupportDir.appendingPathComponent(fileName)
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.copyItem(at: url, to: destinationURL)
+        } catch {
+            print("Ошибка при копировании файла: \(error)")
+        }
+    }
+}
+```
+</details>
+
+--------------------
+
+<details>
+  <summary>Пример JSON файла с локализацией для передачи в SDK</summary>
+
+```json
+{
+ "code": "ru",
+ "title_error": "Чат временно недоступен",
+ "text_error": "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже",
+ "button_error": "Вернуться",
+ "status_label": "На связи",
+ "operator_typing": "печатает",
+ "input_message_placeholder": "Сообщение",
+ "text_file_state_rejected": "Небезопасный файл",
+ "text_file_state_on_checking": "Файл на проверке",
+ "text_file_state_sent_for_check": "Файл отправлен на проверку",
+ "text_file_state_check_error": "Ошибка проверки файла",
+ "rating_state_pending": "Пожалуйста, оцените качество консультации",
+ "rating_state_ignored": "Без оценки оператора",
+ "rating_state_rated": "Оценка оператора",
+ "sent_rating": "Отправить",
+ "invalid_messsage": "Неподдерживаемый тип сообщения",
+ "image_load_error": "Ошибка загрузки",
+ "rating_offer_title": "Желаете пройти опрос?",
+ "rating_offer_yes": "Да",
+ "rating_offer_no": "Нет",
+ "sender_name_anonym": "Аноним",
+ "sender_name_system": "Система",
+ "text_copied": "Сообщение скопировано",
+ "copy": "Копировать",
+ "reply": "Ответить",
+ "resend": "Повторить отправку",
+ "delete": "Удалить",
+ "file_saved_title": "Успешно!",
+ "file_saved_text": "Файл успешно сохранен.",
+ "file_saved_error": "Не удалось загрузить файл",
+ "photo_saved_success_title": "Успешно!",
+ "photo_saved_error_title": "Ошибка!",
+ "photo_saved_success_text": "Фото успешно сохранено в галерею.",
+ "photo_saved_error_text": "Не удалось сохранить фото.",
+ "gallery_permission_denied_title": "Доступ к галерее запрещён",
+ "gallery_permission_denied_text": "Пожалуйста, разрешите доступ в настройках, чтобы сохранять фото.",
+ "gallery_permission_alert_cancel": "Отмена",
+ "gallery_permission_alert_settings": "В настройки",
+ "file_size_error": "Слишком большая ширина или высота изображения",
+ "file_weight_error": "Превышен максимально допустимый размер файла",
+ "file_not_allowed": "Неподдерживаемый тип файла",
+ "file_forbidden": "Запрещенный тип файла",
+ "gallery": "Галерея",
+ "file": "Файл",
+ "camera": "Камера",
+ "cancel": "Отмена",
+ }
 ```
 </details>

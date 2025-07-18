@@ -24,7 +24,7 @@ struct ChatDetailView: View {
     weak var delegate: ChatDetailViewDelegate?
     
     var backgroundColor: Color {
-        return Style.getColor(theme: Style.model?.chat?.background) ?? .white
+        return IQStyle.getColor(theme: IQStyle.model?.chat?.background) ?? .white
     }
     
     // MARK: - BODY
@@ -92,7 +92,7 @@ struct ChatDetailView: View {
                 .resizable()
                 .frame(width: 20, height: 20)
             
-            Text("Сообщение скопировано")
+            Text(IQLanguageTexts.model.textCopied ?? "Сообщение скопировано")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.white)
             
@@ -114,26 +114,6 @@ struct ChatDetailView: View {
         .shadow(radius: 10)
         .padding(16)
         .transition(.move(edge: .top))
-    }
-    
-    @ViewBuilder
-    private func getTypingView(user: IQUser) -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.white
-        let textColor = Style.getColor(theme: Style.model?.chat?.systemText?.color) ?? Color(hex: "242729")
-        let fontSize = CGFloat(Style.model?.chat?.systemText?.textSize ?? 17)
-        ZStack {
-            Text("\(user.displayName ?? "") печатает...")
-                .font(.system(size: fontSize))
-                .foregroundColor(textColor)
-                .padding(.vertical, 3)
-                .padding(.horizontal, 12)
-                .background(backgroundColor)
-                .clipShape(
-                    RoundedCorner(radius: 12, corners: [.topLeft, .topRight])
-                )
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.leading, 48)
     }
     
     struct RoundedCorner: Shape {
