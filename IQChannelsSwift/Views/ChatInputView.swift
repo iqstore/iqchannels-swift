@@ -80,13 +80,13 @@ struct ChatInputView: View {
     // MARK: - VIEWS
     @ViewBuilder
     private func getTextFieldView() -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.background) ?? Color.clear
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.background) ?? Color.clear
         
         HStack(alignment: .bottom, spacing: 8) {
             Button {
                 onAttachmentCompletion?()
             } label: {
-                if let iconClipUrl = Style.model?.toolsToMessage?.iconClip {
+                if let iconClipUrl = IQStyle.model?.toolsToMessage?.iconClip {
                     AnimatedImage(url: iconClipUrl)
                         .resizable()
                         .indicator(SDWebImageActivityIndicator.gray)
@@ -107,13 +107,13 @@ struct ChatInputView: View {
                 }
             }
             
-            let inputBackgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundInput?.color) ?? Color(hex: "F4F4F8")
-            let textColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.textInput?.color) ?? UIColor(hex: "242729")
-            let fontSize = CGFloat(Style.model?.toolsToMessage?.textInput?.textSize ?? 17)
+            let inputBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundInput?.color) ?? Color(hex: "F4F4F8")
+            let textColor = IQStyle.getUIColor(theme: IQStyle.model?.toolsToMessage?.textInput?.color) ?? UIColor(hex: "242729")
+            let fontSize = CGFloat(IQStyle.model?.toolsToMessage?.textInput?.textSize ?? 17)
             
-            let radius = Style.model?.toolsToMessage?.backgroundInput?.border?.borderRadius ?? 8
-            let borderSize = Style.model?.toolsToMessage?.backgroundInput?.border?.size ?? 0
-            let borderColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundInput?.border?.color) ?? Color(hex: "000000")
+            let radius = IQStyle.model?.toolsToMessage?.backgroundInput?.border?.borderRadius ?? 8
+            let borderSize = IQStyle.model?.toolsToMessage?.backgroundInput?.border?.size ?? 0
+            let borderColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundInput?.border?.color) ?? Color(hex: "000000")
             
             
             ComposerInputView(text: $text,
@@ -123,7 +123,7 @@ struct ChatInputView: View {
                               currentHeight: finalTextAreaHeight)
                 .frame(height: finalTextAreaHeight)
                 .placeholder(when: text.isEmpty) {
-                    Text("Сообщение")
+                    Text(IQLanguageTexts.model.inputMessagePlaceholder ?? "Сообщение")
                         .font(.system(size: fontSize))
                         .foregroundColor(Color(hex: "919399"))
                         .padding(.leading, 8)
@@ -138,11 +138,11 @@ struct ChatInputView: View {
             
             Group {
                 if showSendButton {
-                    let backgroundColor = Style.getColor(theme: Style.model?.toolsToMessage?.backgroundIcon) ?? Color(hex: "242729")
+                    let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIcon) ?? Color(hex: "242729")
                     Button {
                         onSendCompletion?()
                     } label: {
-                        if let iconSentUrl = Style.model?.toolsToMessage?.iconSent {
+                        if let iconSentUrl = IQStyle.model?.toolsToMessage?.iconSent {
                             AnimatedImage(url: iconSentUrl)
                                 .resizable()
                                 .indicator(SDWebImageActivityIndicator.gray)
@@ -175,9 +175,9 @@ struct ChatInputView: View {
     
     @ViewBuilder
     private func getReplyPreview(message: IQMessage) -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.clear
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.answer?.backgroundTextUpMessage) ?? Color.clear
         HStack(spacing: 8) {
-            let capsuleTintColor = Style.getColor(theme: Style.model?.answer?.leftLine) ?? Color(hex: "DD0A34")
+            let capsuleTintColor = IQStyle.getColor(theme: IQStyle.model?.answer?.leftLine) ?? Color(hex: "DD0A34")
             Capsule()
                 .fill(capsuleTintColor)
                 .frame(width: 2, height: 32)
@@ -194,11 +194,11 @@ struct ChatInputView: View {
             }
             
             VStack(alignment: .leading, spacing: 0) {
-                let senderTextColor = Style.getColor(theme: Style.model?.answer?.textSender?.color) ?? Color(hex: "919399")
-                let senderFontSize = CGFloat(Style.model?.answer?.textSender?.textSize ?? 13)
-                let senderAlignment = stringToAlignment(stringAlignment: Style.model?.answer?.textSender?.textAlign) ?? .leading
-                let senderIsBold = Style.model?.answer?.textSender?.textStyle?.bold ?? false
-                let senderIsItalic = Style.model?.answer?.textSender?.textStyle?.italic ?? false
+                let senderTextColor = IQStyle.getColor(theme: IQStyle.model?.answer?.textSender?.color) ?? Color(hex: "919399")
+                let senderFontSize = CGFloat(IQStyle.model?.answer?.textSender?.textSize ?? 13)
+                let senderAlignment = stringToAlignment(stringAlignment: IQStyle.model?.answer?.textSender?.textAlign) ?? .leading
+                let senderIsBold = IQStyle.model?.answer?.textSender?.textStyle?.bold ?? false
+                let senderIsItalic = IQStyle.model?.answer?.textSender?.textStyle?.italic ?? false
                 
                 if #available(iOS 16.0, *) {
                     Text(message.senderName)
@@ -216,11 +216,11 @@ struct ChatInputView: View {
                         .lineLimit(1)
                 }
                 
-                let messageTextColor = Style.getColor(theme: Style.model?.answer?.textMessage?.color) ?? Color(hex: "242729")
-                let messageFontSize = CGFloat(Style.model?.answer?.textMessage?.textSize ?? 15)
-                let messageAlignment = stringToAlignment(stringAlignment: Style.model?.answer?.textMessage?.textAlign) ?? .leading
-                let messageIsBold = Style.model?.answer?.textMessage?.textStyle?.bold ?? false
-                let messageIsItalic = Style.model?.answer?.textMessage?.textStyle?.italic ?? false
+                let messageTextColor = IQStyle.getColor(theme: IQStyle.model?.answer?.textMessage?.color) ?? Color(hex: "242729")
+                let messageFontSize = CGFloat(IQStyle.model?.answer?.textMessage?.textSize ?? 15)
+                let messageAlignment = stringToAlignment(stringAlignment: IQStyle.model?.answer?.textMessage?.textAlign) ?? .leading
+                let messageIsBold = IQStyle.model?.answer?.textMessage?.textStyle?.bold ?? false
+                let messageIsItalic = IQStyle.model?.answer?.textMessage?.textStyle?.italic ?? false
                 
                 if #available(iOS 16.0, *) {
                     Text(message.messageText)
@@ -244,7 +244,7 @@ struct ChatInputView: View {
             Button {
                 messageToReply = nil
             } label: {
-                if let iconCancelUrl = Style.model?.answer?.iconCancel {
+                if let iconCancelUrl = IQStyle.model?.answer?.iconCancel {
                     AnimatedImage(url: iconCancelUrl)
                         .resizable()
                         .indicator(SDWebImageActivityIndicator.gray)
@@ -271,20 +271,20 @@ struct ChatInputView: View {
     
     @ViewBuilder
     private func getFilePreview(files: [DataFile]) -> some View {
-        let backgroundColor = Style.getColor(theme: Style.model?.answer?.backgroundTextUpMessage) ?? Color.clear
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.answer?.backgroundTextUpMessage) ?? Color.clear
         
-        let fileNameTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
-        let fileNameFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
-        let fileNameAlignment = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
-        let fileNameIsBold = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
-        let fileNameIsItalic = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
+        let fileNameTextColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
+        let fileNameFontSize = CGFloat(IQStyle.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        let fileNameAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
+        let fileNameIsBold = IQStyle.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
+        let fileNameIsItalic = IQStyle.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
         
         
-        let fileSizeTextColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
-        let fileSizeFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
-        let fileSizeAlignment = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFileSizeOperator?.textAlign) ?? .leading
-        let fileSizeIsBold = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
-        let fileSizeIsItalic = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
+        let fileSizeTextColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
+        let fileSizeFontSize = CGFloat(IQStyle.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        let fileSizeAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFileSizeOperator?.textAlign) ?? .leading
+        let fileSizeIsBold = IQStyle.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
+        let fileSizeIsItalic = IQStyle.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
         
         HStack(spacing: 8) {
             Image(name: "file")
@@ -295,7 +295,7 @@ struct ChatInputView: View {
             
             VStack(alignment: .leading, spacing: 0) {
                 if #available(iOS 16.0, *) {
-                    Text(files.first?.filename ?? "Файл")
+                    Text(files.first?.filename ?? "File")
                         .font(.system(size: fileNameFontSize))
                         .foregroundColor(fileNameTextColor)
                         .multilineTextAlignment(fileNameAlignment)
@@ -303,7 +303,7 @@ struct ChatInputView: View {
                         .italic(fileNameIsItalic)
                         .lineLimit(2)
                 } else {
-                    Text(files.first?.filename ?? "Файл")
+                    Text(files.first?.filename ?? "File")
                         .font(.system(size: fileNameFontSize))
                         .foregroundColor(fileNameTextColor)
                         .multilineTextAlignment(fileNameAlignment)
@@ -350,7 +350,7 @@ struct ChatInputView: View {
             Button {
                 selectedFiles = nil
             } label: {
-                if let iconCancelUrl = Style.model?.answer?.iconCancel {
+                if let iconCancelUrl = IQStyle.model?.answer?.iconCancel {
                     AnimatedImage(url: iconCancelUrl)
                         .resizable()
                         .indicator(SDWebImageActivityIndicator.gray)

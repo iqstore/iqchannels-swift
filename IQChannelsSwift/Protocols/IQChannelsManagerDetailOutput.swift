@@ -25,4 +25,5 @@ protocol IQChannelsManagerDetailOutput {
     func detailController(didResend message: IQMessage)
     func detailController(didPick items: [(URL?, UIImage?)])
     func detailController(didPick results: [PHPickerResult])
+    func detailControllerSelectLanguage(didSelect language: IQLanguage)
 }

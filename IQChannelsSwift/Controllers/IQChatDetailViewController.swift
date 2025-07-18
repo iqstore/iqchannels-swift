@@ -26,9 +26,9 @@ class IQChatDetailViewController: IQViewController {
         label.text = viewModel.chatLabel
         
         
-        let fontSize = CGFloat(Style.model?.chat?.titleLabel?.textSize ?? 15)
-        let isBold = Style.model?.chat?.titleLabel?.textStyle?.bold ?? false
-        let isItalic = Style.model?.chat?.titleLabel?.textStyle?.italic ?? false
+        let fontSize = CGFloat(IQStyle.model?.chat?.titleLabel?.textSize ?? 15)
+        let isBold = IQStyle.model?.chat?.titleLabel?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.chat?.titleLabel?.textStyle?.italic ?? false
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
 
@@ -48,16 +48,16 @@ class IQChatDetailViewController: IQViewController {
         }
         
         
-        label.textColor = Style.getUIColor(theme: Style.model?.chat?.titleLabel?.color) ?? UIColor(hex: "242729")
+        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.chat?.titleLabel?.color) ?? UIColor(hex: "242729")
         return label
     }()
     
     private lazy var statusLabel: UILabel = {
         let label: UILabel = .init()
         
-        let fontSize = CGFloat(Style.model?.chat?.statusLabel?.textSize ?? 15)
-        let isBold = Style.model?.chat?.statusLabel?.textStyle?.bold ?? false
-        let isItalic = Style.model?.chat?.statusLabel?.textStyle?.italic ?? false
+        let fontSize = CGFloat(IQStyle.model?.chat?.statusLabel?.textSize ?? 15)
+        let isBold = IQStyle.model?.chat?.statusLabel?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.chat?.statusLabel?.textStyle?.italic ?? false
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
 
@@ -76,7 +76,7 @@ class IQChatDetailViewController: IQViewController {
             label.font = systemFont
         }
         
-        label.textColor = Style.getUIColor(theme: Style.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
+        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
         return label
     }()
     
@@ -89,7 +89,7 @@ class IQChatDetailViewController: IQViewController {
     
     private lazy var loadingView: UIActivityIndicatorView = {
         let view: UIActivityIndicatorView = .init()
-        view.color = Style.getUIColor(theme: Style.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
+        view.color = IQStyle.getUIColor(theme: IQStyle.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
         view.hidesWhenStopped = true
         view.widthAnchor.constraint(equalToConstant: 24).isActive = true
         return view
@@ -114,6 +114,15 @@ class IQChatDetailViewController: IQViewController {
         return btn
     }()
     
+    private lazy var languageButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitleColor(.black, for: .normal)
+        btn.contentHorizontalAlignment = .right
+        btn.frame.size = CGSize(width: 150, height: 20)
+        btn.addTarget(self, action: #selector(languageButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    
     // MARK: - INIT
     init(viewModel: IQChatDetailViewModel,
          output: IQChannelsManagerDetailOutput) {
@@ -133,9 +142,63 @@ class IQChatDetailViewController: IQViewController {
         setupConstructedSwiftUI(interactor: controller)
     }
     
+    // MARK: - LANGUAGE
+    private var dropdown: LanguageDropdownView?
+
+    @objc private func languageButtonTapped() {
+        if dropdown != nil {
+            dropdown?.hide()
+            dropdown = nil
+            return
+        }
+        let menu = LanguageDropdownView()
+        menu.languages = viewModel.availableLanguages ?? []
+        menu.selectedCode = viewModel.selectedLanguage?.code
+        menu.onSelect = { [weak self] selected in
+            if let code = selected.code {
+                self?.output.detailControllerSelectLanguage(didSelect: selected)
+                self?.loadLanguageDataFromAppSupport(code)
+            }
+            
+            if let label = selected.name {
+                self?.languageButton.setTitle(label, for: .normal)
+            }
+            
+            self?.dropdown = nil
+            self?.viewModel.selectedLanguage = selected
+            self?.statusLabel.text = IQChannelsState.authenticated.description
+        }
+        menu.show(from: languageButton, in: view)
+        dropdown = menu
+    }
+    
+    func loadLanguageDataFromAppSupport(_ code: String) {
+        let supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let fileURL = supportURL.appendingPathComponent("\(code).json")
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            IQLog.error(message: "Файл \(code).json не найден")
+            return
+        }
+        let data = try? Data(contentsOf: fileURL)
+        IQLog.debug(message: "Язык изменен на \(code)")
+        IQLanguageTexts.configure(data)
+    }
+    
     override func setupNavBar() {
+        if let language = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String] {
+            let code = language["code"]
+            let name = language["name"]
+            
+            if let code = code, let name = name {
+                self.loadLanguageDataFromAppSupport(code)
+                self.viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
+                self.languageButton.setTitle(name, for: .normal)
+            }
+        }
         navigationItem.titleView = titleStackView
         navigationItem.leftBarButtonItem = .init(customView: backButton)
+        navigationItem.rightBarButtonItem = .init(customView: languageButton)
     }
     
     override func bindViewModel() {
@@ -189,7 +252,7 @@ class IQChatDetailViewController: IQViewController {
                                   options: .transitionCrossDissolve,
                                   animations: {
                     if (user != nil){
-                        self.statusLabel.text = "\(user?.displayName ?? "Оператор") печатает..."
+                        self.statusLabel.text = "\(user?.displayName ?? "Оператор") \(IQLanguageTexts.model.operatorTyping ?? "печатает")..."
                     } else {
                         self.statusLabel.text = IQChannelsState.authenticated.description
                     }
@@ -202,6 +265,21 @@ class IQChatDetailViewController: IQViewController {
                 self?.titleLabel.text = title
             }
             .store(in: &cancellables)
+        
+        viewModel.$availableLanguages
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] availableLanguages in
+                
+                if self?.viewModel.selectedLanguage == nil {
+                    self?.viewModel.selectedLanguage = availableLanguages?.filter {$0.isDefault == true}.first ?? IQLanguage(code: "ru", name: "Русский", isDefault: true, iconURL: nil)
+                    
+                    if let newLabel = self?.viewModel.selectedLanguage?.name {
+                        self?.languageButton.setTitle(newLabel, for: .normal)
+                    }
+                }
+                
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - ACTIONS
@@ -209,10 +287,8 @@ class IQChatDetailViewController: IQViewController {
     private func onTapBack() {
         if viewModel.backDismisses {
             output.detailControllerDismissChat()
-//            dismiss(animated: true)
         } else {
             output.detailControllerDidPop()
-//            navigationController?.popViewController(animated: true)
         }
     }
     
@@ -247,18 +323,18 @@ class IQChatDetailViewController: IQViewController {
     
     private func displayAttachmentOptions() {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        alert.addAction(.init(title: "Галерея", style: .default, handler: { _ in
+        alert.addAction(.init(title: IQLanguageTexts.model.gallery ?? "Галерея", style: .default, handler: { _ in
             self.photoSourceDidTap(source: .photoLibrary)
         }))
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            alert.addAction(.init(title: "Камера", style: .default, handler: { _ in
+            alert.addAction(.init(title: IQLanguageTexts.model.camera ?? "Камера", style: .default, handler: { _ in
                 self.photoSourceDidTap(source: .camera)
             }))
         }
-        alert.addAction(.init(title: "Файл", style: .default, handler: { _ in
+        alert.addAction(.init(title: IQLanguageTexts.model.file ?? "Файл", style: .default, handler: { _ in
             self.fileSourceDidTap()
         }))
-        alert.addAction(.init(title: "Отмена", style: .cancel))
+        alert.addAction(.init(title: IQLanguageTexts.model.cancel ?? "Отмена", style: .cancel))
         present(alert, animated: true)
     }
     
@@ -361,5 +437,127 @@ extension IQChatDetailViewController: UIDocumentPickerDelegate & UINavigationCon
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         controller.dismiss(animated: true)
         confirmDocumentSubmission(fileUrls: urls)
+    }
+}
+
+
+final class LanguageDropdownView: UIView, UITableViewDelegate, UITableViewDataSource {
+
+    var languages: [IQLanguage] = []
+    var selectedCode: String?
+    var onSelect: ((IQLanguage) -> Void)?
+
+    private let tableView = UITableView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupUI() {
+        overrideUserInterfaceStyle = .light
+        backgroundColor = .white
+        
+        layer.cornerRadius = 10
+        layer.borderColor = UIColor.lightGray.cgColor
+        layer.borderWidth = 1.0
+        
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = 44
+        tableView.separatorStyle = .none
+        tableView.layer.cornerRadius = 10
+        tableView.register(LanguageCell.self, forCellReuseIdentifier: "LanguageCell")
+
+        addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: topAnchor),
+            tableView.leftAnchor.constraint(equalTo: leftAnchor),
+            tableView.rightAnchor.constraint(equalTo: rightAnchor),
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
+
+    func show(from anchor: UIView, in parent: UIView) {
+        guard anchor.superview != nil else { return }
+        parent.addSubview(self)
+
+        let anchorFrame = anchor.convert(anchor.bounds, to: parent)
+        frame = CGRect(x: anchorFrame.minX,
+                       y: anchorFrame.maxY + 8,
+                       width: 150,
+                       height: CGFloat(min(languages.count, 5)) * 44)
+    }
+
+    func hide() {
+        removeFromSuperview()
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return languages.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "LanguageCell", for: indexPath) as? LanguageCell else {
+            return UITableViewCell()
+        }
+
+        let lang = languages[indexPath.row]
+        let isSelected = lang.code == selectedCode
+        cell.configure(with: lang, selected: isSelected)
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let lang = languages[indexPath.row]
+        selectedCode = lang.code
+        tableView.reloadData()
+        onSelect?(lang)
+        hide()
+    }
+}
+
+final class LanguageCell: UITableViewCell {
+    private let iconImageView = UIImageView()
+    private let nameLabel = UILabel()
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setup()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setup() {
+        nameLabel.font = .systemFont(ofSize: 16)
+
+        let stack = UIStackView(arrangedSubviews: [nameLabel])
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        contentView.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 6),
+            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
+            stack.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12),
+            stack.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -12)
+        ])
+    }
+
+    func configure(with language: IQLanguage, selected: Bool) {
+        nameLabel.text = language.name
+        
+        if (selected){
+            nameLabel.font = .boldSystemFont(ofSize: nameLabel.font.pointSize)
+        }
     }
 }

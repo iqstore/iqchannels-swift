@@ -23,37 +23,37 @@ struct ScaleView: View {
     
     
     var minTextColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.scaleMinText?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.scaleMinText?.color) ?? Color(hex: "242729")
     }
     var minTextFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.scaleMinText?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.scaleMinText?.textSize ?? 17)
     }
     var minTextIsBold: Bool {
-        return Style.model?.rating?.scaleMinText?.textStyle?.bold ?? false
+        return IQStyle.model?.rating?.scaleMinText?.textStyle?.bold ?? false
     }
     var minTextIsItalic: Bool {
-        return Style.model?.rating?.scaleMinText?.textStyle?.italic ?? false
+        return IQStyle.model?.rating?.scaleMinText?.textStyle?.italic ?? false
     }
     var minTextAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.rating?.scaleMinText?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.scaleMinText?.textAlign) ?? .leading
     }
     
     
     
     var maxTextColor: Color {
-        return Style.getColor(theme: Style.model?.rating?.scaleMaxText?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.rating?.scaleMaxText?.color) ?? Color(hex: "242729")
     }
     var maxTextFontSize: CGFloat {
-        return CGFloat(Style.model?.rating?.scaleMaxText?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.rating?.scaleMaxText?.textSize ?? 17)
     }
     var maxTextIsBold: Bool {
-        return Style.model?.rating?.scaleMaxText?.textStyle?.bold ?? false
+        return IQStyle.model?.rating?.scaleMaxText?.textStyle?.bold ?? false
     }
     var maxTextIsItalic: Bool {
-        return Style.model?.rating?.scaleMaxText?.textStyle?.italic ?? false
+        return IQStyle.model?.rating?.scaleMaxText?.textStyle?.italic ?? false
     }
     var maxTextAligment: TextAlignment {
-        return stringToAlignment(stringAlignment: Style.model?.rating?.scaleMaxText?.textAlign) ?? .trailing
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.scaleMaxText?.textAlign) ?? .trailing
     }
     
     
@@ -86,38 +86,38 @@ struct ScaleView: View {
     
     // MARK: - BODY
     var body: some View {
-        let enabledScaleTextColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.textEnabled?.color) ?? Color.white
-        let disabledScaleTextColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.textDisabled?.color) ?? Color.white
-        let enabledScaleFontSize = CGFloat(Style.model?.rating?.scaleButton?.textEnabled?.textSize ?? 15)
-        let disabledScaleFontSize = CGFloat(Style.model?.rating?.scaleButton?.textDisabled?.textSize ?? 15)
-        let enabledScaleIsBold = Style.model?.rating?.scaleButton?.textEnabled?.textStyle?.bold ?? false
-        let disabledScaleIsBold = Style.model?.rating?.scaleButton?.textDisabled?.textStyle?.bold ?? false
-        let enabledScaleIsItalic = Style.model?.rating?.scaleButton?.textEnabled?.textStyle?.italic ?? false
-        let disabledScaleIsItalic = Style.model?.rating?.scaleButton?.textDisabled?.textStyle?.italic ?? false
+        let enabledScaleTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.textEnabled?.color) ?? Color.white
+        let disabledScaleTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.textDisabled?.color) ?? Color.white
+        let enabledScaleFontSize = CGFloat(IQStyle.model?.rating?.scaleButton?.textEnabled?.textSize ?? 15)
+        let disabledScaleFontSize = CGFloat(IQStyle.model?.rating?.scaleButton?.textDisabled?.textSize ?? 15)
+        let enabledScaleIsBold = IQStyle.model?.rating?.scaleButton?.textEnabled?.textStyle?.bold ?? false
+        let disabledScaleIsBold = IQStyle.model?.rating?.scaleButton?.textDisabled?.textStyle?.bold ?? false
+        let enabledScaleIsItalic = IQStyle.model?.rating?.scaleButton?.textEnabled?.textStyle?.italic ?? false
+        let disabledScaleIsItalic = IQStyle.model?.rating?.scaleButton?.textDisabled?.textStyle?.italic ?? false
         
-        let enabledScaleBackgroundColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
-        let disabledScaleBackgroundColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
-        let enabledScaleRadius = Style.model?.rating?.scaleButton?.backgroundEnabled?.border?.borderRadius ?? 7
-        let disabledScaleRadius = Style.model?.rating?.scaleButton?.backgroundDisabled?.border?.borderRadius ?? 7
-        let enabledScaleBorderSize = Style.model?.rating?.scaleButton?.backgroundEnabled?.border?.size ?? 0
-        let disabledScaleBorderSize = Style.model?.rating?.scaleButton?.backgroundDisabled?.border?.size ?? 0
-        let enabledScaleBorderColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
-        let disabledScaleBorderColor = Style.getColor(theme: Style.model?.rating?.scaleButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let enabledScaleBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
+        let disabledScaleBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let enabledScaleRadius = IQStyle.model?.rating?.scaleButton?.backgroundEnabled?.border?.borderRadius ?? 7
+        let disabledScaleRadius = IQStyle.model?.rating?.scaleButton?.backgroundDisabled?.border?.borderRadius ?? 7
+        let enabledScaleBorderSize = IQStyle.model?.rating?.scaleButton?.backgroundEnabled?.border?.size ?? 0
+        let disabledScaleBorderSize = IQStyle.model?.rating?.scaleButton?.backgroundDisabled?.border?.size ?? 0
+        let enabledScaleBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
+        let disabledScaleBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.scaleButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
         
-        let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
-        let enabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
+        let enabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.textEnabled?.color) ?? Color.white
+        let disabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.textDisabled?.color) ?? Color.white
+        let enabledRatingFontSize = CGFloat(IQStyle.model?.rating?.sentRating?.textEnabled?.textSize ?? 15)
+        let disabledRatingFontSize = CGFloat(IQStyle.model?.rating?.sentRating?.textDisabled?.textSize ?? 15)
         
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
-        let enabledRatingRadius = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.borderRadius ?? 8
-        let disabledRatingRadius = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.borderRadius ?? 8
-        let enabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundEnabled?.border?.size ?? 0
-        let disabledRatingBorderSize = Style.model?.rating?.sentRating?.backgroundDisabled?.border?.size ?? 0
-        let enabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
-        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.sentRating?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let enabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
+        let disabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let enabledRatingRadius = IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.borderRadius ?? 8
+        let disabledRatingRadius = IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.borderRadius ?? 8
+        let enabledRatingBorderSize = IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.size ?? 0
+        let disabledRatingBorderSize = IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.size ?? 0
+        let enabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
+        let disabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.sentRating?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
         let textAlignments: [TextAlignment: Alignment] = [
             .leading: Alignment.leading,

@@ -17,26 +17,26 @@ struct OfferView: View {
     
     // MARK: - BODY
     var body: some View {
-        let enabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.answerButton?.textEnabled?.color) ?? Color.white
-        let disabledRatingTextColor = Style.getColor(theme: Style.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
-        let enabledRatingFontSize = CGFloat(Style.model?.rating?.answerButton?.textEnabled?.textSize ?? 15)
-        let disabledRatingFontSize = CGFloat(Style.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
-        let enabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
-        let disabledRatingBackgroundColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let enabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.textEnabled?.color) ?? Color.white
+        let disabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
+        let enabledRatingFontSize = CGFloat(IQStyle.model?.rating?.answerButton?.textEnabled?.textSize ?? 15)
+        let disabledRatingFontSize = CGFloat(IQStyle.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
+        let enabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundEnabled?.color) ?? Color(hex: "DD0A34")
+        let disabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
         
-        let enabledRatingIsBold = Style.model?.rating?.answerButton?.textEnabled?.textStyle?.bold ?? false
-        let disabledRatingIsBold = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
-        let enabledRatingIsItalic = Style.model?.rating?.answerButton?.textEnabled?.textStyle?.italic ?? false
-        let disabledRatingIsItalic = Style.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
-        let enabledRatingAlignment = stringToAlignment(stringAlignment: Style.model?.rating?.answerButton?.textEnabled?.textAlign) ?? .center
-        let disabledRatingAlignment = stringToAlignment(stringAlignment: Style.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
+        let enabledRatingIsBold = IQStyle.model?.rating?.answerButton?.textEnabled?.textStyle?.bold ?? false
+        let disabledRatingIsBold = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
+        let enabledRatingIsItalic = IQStyle.model?.rating?.answerButton?.textEnabled?.textStyle?.italic ?? false
+        let disabledRatingIsItalic = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
+        let enabledRatingAlignment = stringToAlignment(stringAlignment: IQStyle.model?.rating?.answerButton?.textEnabled?.textAlign) ?? .center
+        let disabledRatingAlignment = stringToAlignment(stringAlignment: IQStyle.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
         
-        let enabledRatingRadius = Style.model?.rating?.answerButton?.backgroundEnabled?.border?.borderRadius ?? 8
-        let disabledRatingRadius = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
-        let enabledRatingBorderSize = Style.model?.rating?.answerButton?.backgroundEnabled?.border?.size ?? 0
-        let disabledRatingBorderSize = Style.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
-        let enabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
-        let disabledRatingBorderColor = Style.getColor(theme: Style.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let enabledRatingRadius = IQStyle.model?.rating?.answerButton?.backgroundEnabled?.border?.borderRadius ?? 8
+        let disabledRatingRadius = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
+        let enabledRatingBorderSize = IQStyle.model?.rating?.answerButton?.backgroundEnabled?.border?.size ?? 0
+        let disabledRatingBorderSize = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
+        let enabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundEnabled?.border?.color) ?? Color(hex: "000000")
+        let disabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
         
         
         HStack() {
@@ -44,7 +44,7 @@ struct OfferView: View {
                 questionAnswered(false)
             } label: {
                 if #available(iOS 16.0, *) {
-                    Text("Нет")
+                    Text(IQLanguageTexts.model.ratingOfferNo ?? "Нет")
                         .foregroundColor(disabledRatingTextColor)
                         .font(.system(size: disabledRatingFontSize))
                         .bold(disabledRatingIsBold)
@@ -61,7 +61,7 @@ struct OfferView: View {
                                     lineWidth: disabledRatingBorderSize)
                         )
                 } else {
-                    Text("Нет")
+                    Text(IQLanguageTexts.model.ratingOfferNo ?? "Нет")
                         .foregroundColor(disabledRatingTextColor)
                         .font(.system(size: disabledRatingFontSize))
                         .multilineTextAlignment(disabledRatingAlignment)
@@ -84,7 +84,7 @@ struct OfferView: View {
                 questionAnswered(true)
             } label: {
                 if #available(iOS 16.0, *) {
-                    Text("Да")
+                    Text(IQLanguageTexts.model.ratingOfferYes ?? "Да")
                         .foregroundColor(enabledRatingTextColor)
                         .font(.system(size: enabledRatingFontSize))
                         .bold(enabledRatingIsBold)
@@ -101,7 +101,7 @@ struct OfferView: View {
                                     lineWidth: enabledRatingBorderSize)
                         )
                 } else {
-                    Text("Да")
+                    Text(IQLanguageTexts.model.ratingOfferYes ?? "Да")
                         .foregroundColor(enabledRatingTextColor)
                         .font(.system(size: enabledRatingFontSize))
                         .multilineTextAlignment(enabledRatingAlignment)

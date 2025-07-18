@@ -107,7 +107,7 @@ class InputTextView: UITextView {
     }
 
     open func setUpAppearance() {
-        let cursorColor = Style.getUIColor(theme: Style.model?.toolsToMessage?.cursorColor) ?? UIColor(hex: "525252")
+        let cursorColor = IQStyle.getUIColor(theme: IQStyle.model?.toolsToMessage?.cursorColor) ?? UIColor(hex: "525252")
         backgroundColor = .clear
         textContainer.lineFragmentPadding = 8
         textAlignment = .natural

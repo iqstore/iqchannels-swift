@@ -136,7 +136,7 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
         let session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
         let downloadTask = session.downloadTask(with: request) { [weak self] url, response, error in
             guard let self, let url, let data = try? Data(contentsOf: url), error == nil else {
-                self?.showAlert(message: "Не удалось загрузить файл")
+                self?.showAlert(message: IQLanguageTexts.model.fileSavedError ?? "Не удалось загрузить файл")
                 return
             }
             
@@ -156,8 +156,8 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         if let selectedURL = urls.first {
-            let title = "Успешно!"
-            let message = "Файл успешно сохранен."
+            let title = IQLanguageTexts.model.fileSavedTitle ?? "Успешно!"
+            let message = IQLanguageTexts.model.fileSavedText ?? "Файл успешно сохранен."
             self.showAlert(title: title, message: message)
         }
     }

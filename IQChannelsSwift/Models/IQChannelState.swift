@@ -16,7 +16,7 @@ enum IQChannelsState {
     var description: String {
         switch self {
         case .authenticated:
-            return "На связи"
+            return IQLanguageTexts.model.statusLabel ?? "На связи"
         case .awaitingNetwork:
             return "Ожидание сети..."
         case .authenticating:

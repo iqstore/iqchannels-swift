@@ -15,22 +15,22 @@ struct StackedSingleChoicesView: View {
             
             if let singleChoices = message.singleChoices {
                 ForEach(singleChoices) { singleChoice in
-                    let backgroundColor = Style.getColor(theme: Style.model?.singleChoice?.backgroundButton) ?? Color(hex: "AFB8BE")
-                    let textColor = Style.getColor(theme: Style.model?.singleChoice?.textButton?.color) ?? Color.white
-                    let fontSize = CGFloat(Style.model?.singleChoice?.textButton?.textSize ?? 12)
+                    let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.singleChoice?.backgroundButton) ?? Color(hex: "AFB8BE")
+                    let textColor = IQStyle.getColor(theme: IQStyle.model?.singleChoice?.textButton?.color) ?? Color.white
+                    let fontSize = CGFloat(IQStyle.model?.singleChoice?.textButton?.textSize ?? 12)
                     
-                    let isBold = Style.model?.singleChoice?.textButton?.textStyle?.bold ?? false
-                    let isItalic = Style.model?.singleChoice?.textButton?.textStyle?.italic ?? false
-                    let alignment = stringToAlignment(stringAlignment: Style.model?.singleChoice?.textButton?.textAlign) ?? .center
+                    let isBold = IQStyle.model?.singleChoice?.textButton?.textStyle?.bold ?? false
+                    let isItalic = IQStyle.model?.singleChoice?.textButton?.textStyle?.italic ?? false
+                    let alignment = stringToAlignment(stringAlignment: IQStyle.model?.singleChoice?.textButton?.textAlign) ?? .center
                     let textAlignments: [TextAlignment: Alignment] = [
                         .leading: Alignment.leading,
                         .center: Alignment.center,
                         .trailing: Alignment.trailing
                     ]
                     
-                    let borderColor = Style.getColor(theme: Style.model?.singleChoice?.borderButton?.color) ?? Color.clear
-                    let lineWidth = CGFloat(Style.model?.singleChoice?.borderButton?.size ?? 0)
-                    let borderRadius = CGFloat(Style.model?.singleChoice?.borderButton?.borderRadius ?? 4)
+                    let borderColor = IQStyle.getColor(theme: IQStyle.model?.singleChoice?.borderButton?.color) ?? Color.clear
+                    let lineWidth = CGFloat(IQStyle.model?.singleChoice?.borderButton?.size ?? 0)
+                    let borderRadius = CGFloat(IQStyle.model?.singleChoice?.borderButton?.borderRadius ?? 4)
                     
                     Button {
                         onSingleChoiceTapCompletion?(singleChoice)

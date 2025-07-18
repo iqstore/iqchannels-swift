@@ -10,6 +10,8 @@ import UIKit
 import IQChannelsSwift
 
 class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
+    var isPickingStyle = false
+    
     var id: String {
         UUID().uuidString
     }
@@ -123,9 +125,19 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         return button
     }()
     
+    private lazy var languageButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Загрузить файл локализации", for: .normal)
+        button.addTarget(self, action: #selector(languageDidTap), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     private lazy var stackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, unreadLabel, loginButton, anonButton, preFilledMsgButton, styleButton, styleDark, styleLight, styleSystem
+            serverField, emailField, channelsField, unreadLabel, loginButton, anonButton, preFilledMsgButton, styleButton, languageButton, styleDark, styleLight, styleSystem
         ])
         view.spacing = 16
         view.distribution = .fillEqually
@@ -144,7 +156,6 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setDismissKeyboardOnTap()
         view.addSubview(stackView)
         view.backgroundColor = .white
@@ -192,7 +203,16 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         }
     }
     
+    @objc func languageDidTap(){
+        isPickingStyle = false
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.json])
+        picker.allowsMultipleSelection = false
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
     @objc func styleDidTap(){
+        isPickingStyle = true
         let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.json])
         picker.allowsMultipleSelection = false
         picker.delegate = self
@@ -267,16 +287,36 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         view.endEditing(true)
     }
     
+    func saveLanguageFile(_ url: URL) {
+        do {
+            let fileName = url.lastPathComponent
+            let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            try FileManager.default.createDirectory(at: appSupportDir, withIntermediateDirectories: true, attributes: nil)
+            let destinationURL = appSupportDir.appendingPathComponent(fileName)
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.copyItem(at: url, to: destinationURL)
+            
+            print("Файл успешно скопирован в: \(destinationURL.path)")
+        } catch {
+            print("Ошибка при копировании файла: \(error)")
+        }
+    }
 }
 
 extension ViewController: UIDocumentPickerDelegate {
-    
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         controller.dismiss(animated: true)
         guard let url = urls.first,
               url.startAccessingSecurityScopedResource() else { return }
         
-        selectedStyle = try? Data(contentsOf: url)
+        if isPickingStyle {
+            selectedStyle = try? Data(contentsOf: url)
+        } else {
+            saveLanguageFile(url)
+        }
+        
         url.stopAccessingSecurityScopedResource()
     }
 }

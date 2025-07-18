@@ -29,6 +29,8 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var selectedFiles: [DataFile]? = nil
     @Published var scrollDown: Bool = false
     @Published var chatLabel: String = ""
+    @Published var availableLanguages: [IQLanguage]?
+    @Published var selectedLanguage: IQLanguage?
     
     // MARK: - METHODS
     func showMessageControl(_ controlInfo: MessageControlInfo) {

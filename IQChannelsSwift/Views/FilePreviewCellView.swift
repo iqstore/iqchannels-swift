@@ -18,110 +18,110 @@ struct FilePreviewCellView: View {
     
     
     var textColor: UIColor {
-        let textOperator = Style.getUIColor(theme: Style.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
-        let textClient = Style.getUIColor(theme: Style.model?.messages?.textClient?.color) ?? UIColor.white
+        let textOperator = IQStyle.getUIColor(theme: IQStyle.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
+        let textClient = IQStyle.getUIColor(theme: IQStyle.model?.messages?.textClient?.color) ?? UIColor.white
         return self.isSender ? textClient : textOperator
     }
     var fontSize: CGFloat {
-        let sizeOperator = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
-        let sizeClient = CGFloat(Style.model?.messages?.textClient?.textSize ?? 17)
+        let sizeOperator = CGFloat(IQStyle.model?.messages?.textOperator?.textSize ?? 17)
+        let sizeClient = CGFloat(IQStyle.model?.messages?.textClient?.textSize ?? 17)
         return self.isSender ? sizeClient : sizeOperator
     }
     var isBold: Bool {
-        let clientIsBold = Style.model?.messages?.textClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messages?.textOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messages?.textClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messages?.textOperator?.textStyle?.bold ?? false
         return self.isSender ? clientIsBold : operatorIsBold
     }
     var isItalic: Bool {
-        let clientIsItalic = Style.model?.messages?.textClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messages?.textOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messages?.textClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messages?.textOperator?.textStyle?.italic ?? false
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     var aligment: TextAlignment {
-        let clientAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textClient?.textAlign) ?? .leading
-        let operatorAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textOperator?.textAlign) ?? .leading
+        let clientAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messages?.textClient?.textAlign) ?? .leading
+        let operatorAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messages?.textOperator?.textAlign) ?? .leading
         return self.isSender ? clientAlignment : operatorAlignment
     }
     
     
     
     var backgroundColor: Color {
-        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
-        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
+        let backgroundOperator = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
+        let backgroundClient = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundRadius: CGFloat {
-        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.borderRadius ?? 12
-        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.borderRadius ?? 12
+        let backgroundOperator = IQStyle.model?.messages?.backgroundOperator?.border?.borderRadius ?? 12
+        let backgroundClient = IQStyle.model?.messages?.backgroundClient?.border?.borderRadius ?? 12
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundBorderSize: CGFloat {
-        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.size ?? 0
-        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.size ?? 0
+        let backgroundOperator = IQStyle.model?.messages?.backgroundOperator?.border?.size ?? 0
+        let backgroundClient = IQStyle.model?.messages?.backgroundClient?.border?.size ?? 0
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundBorderColor: Color {
-        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.border?.color) ?? Color(hex: "000000")
-        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.border?.color) ?? Color(hex: "000000")
+        let backgroundOperator = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundOperator?.border?.color) ?? Color(hex: "000000")
+        let backgroundClient = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundClient?.border?.color) ?? Color(hex: "000000")
         return self.isSender ? backgroundClient : backgroundOperator
     }
     
     
     
     var fileNameTextColor: Color {
-        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameClient?.color) ?? Color.white
-        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
+        let clientColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFilenameClient?.color) ?? Color.white
+        let operatorColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFilenameOperator?.color) ?? Color(hex: "242729")
         return self.isSender ? clientColor : operatorColor
     }
     var fileNameFontSize: CGFloat {
-        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFilenameClient?.textSize ?? 17)
-        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
+        let clientFontSize = CGFloat(IQStyle.model?.messagesFile?.textFilenameClient?.textSize ?? 17)
+        let operatorFontSize = CGFloat(IQStyle.model?.messagesFile?.textFilenameOperator?.textSize ?? 17)
         return self.isSender ? clientFontSize : operatorFontSize
     }
     var fileNameIsBold: Bool {
-        let clientIsBold = Style.model?.messagesFile?.textFilenameClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messagesFile?.textFilenameClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messagesFile?.textFilenameOperator?.textStyle?.bold ?? false
         return self.isSender ? clientIsBold : operatorIsBold
     }
     var fileNameIsItalic: Bool {
-        let clientIsItalic = Style.model?.messagesFile?.textFilenameClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messagesFile?.textFilenameClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messagesFile?.textFilenameOperator?.textStyle?.italic ?? false
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     var fileNameAligment: TextAlignment {
-        let clientIsItalic = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameClient?.textAlign) ?? .leading
-        let operatorIsItalic = stringToAlignment(stringAlignment: Style.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
+        let clientIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameClient?.textAlign) ?? .leading
+        let operatorIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     
     
     
     var fileIcon: URL? {
-        let clientFile = Style.model?.messagesFile?.iconFileClient
-        let operatorFile = Style.model?.messagesFile?.iconFileOperator
+        let clientFile = IQStyle.model?.messagesFile?.iconFileClient
+        let operatorFile = IQStyle.model?.messagesFile?.iconFileOperator
         return self.isSender ? clientFile : operatorFile
     }
     
     
     
     var fileSizeTextColor: Color {
-        let clientColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeClient?.color) ?? Color(hex: "919399")
-        let operatorColor = Style.getColor(theme: Style.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
+        let clientColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFileSizeClient?.color) ?? Color(hex: "919399")
+        let operatorColor = IQStyle.getColor(theme: IQStyle.model?.messagesFile?.textFileSizeOperator?.color) ?? Color(hex: "919399")
         return self.isSender ? clientColor : operatorColor
     }
     var fileSizeFontSize: CGFloat {
-        let clientFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeClient?.textSize ?? 15)
-        let operatorFontSize = CGFloat(Style.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
+        let clientFontSize = CGFloat(IQStyle.model?.messagesFile?.textFileSizeClient?.textSize ?? 15)
+        let operatorFontSize = CGFloat(IQStyle.model?.messagesFile?.textFileSizeOperator?.textSize ?? 15)
         return self.isSender ? clientFontSize : operatorFontSize
     }
     var fileSizeIsBold: Bool {
-        let clientIsBold = Style.model?.messagesFile?.textFileSizeClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messagesFile?.textFileSizeClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messagesFile?.textFileSizeOperator?.textStyle?.bold ?? false
         return self.isSender ? clientIsBold : operatorIsBold
     }
     var fileSizeIsItalic: Bool {
-        let clientIsItalic = Style.model?.messagesFile?.textFileSizeClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messagesFile?.textFileSizeClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     

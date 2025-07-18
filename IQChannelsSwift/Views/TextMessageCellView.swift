@@ -21,51 +21,51 @@ struct TextMessageCellView: View {
     @State private var frame: CGRect = .zero
     
     var backgroundColor: Color {
-        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
-        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
+        let backgroundOperator = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
+        let backgroundClient = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundRadius: CGFloat {
-        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.borderRadius ?? 12
-        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.borderRadius ?? 12
+        let backgroundOperator = IQStyle.model?.messages?.backgroundOperator?.border?.borderRadius ?? 12
+        let backgroundClient = IQStyle.model?.messages?.backgroundClient?.border?.borderRadius ?? 12
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundBorderSize: CGFloat {
-        let backgroundOperator = Style.model?.messages?.backgroundOperator?.border?.size ?? 0
-        let backgroundClient = Style.model?.messages?.backgroundClient?.border?.size ?? 0
+        let backgroundOperator = IQStyle.model?.messages?.backgroundOperator?.border?.size ?? 0
+        let backgroundClient = IQStyle.model?.messages?.backgroundClient?.border?.size ?? 0
         return self.isSender ? backgroundClient : backgroundOperator
     }
     var backgroundBorderColor: Color {
-        let backgroundOperator = Style.getColor(theme: Style.model?.messages?.backgroundOperator?.border?.color) ?? Color(hex: "000000")
-        let backgroundClient = Style.getColor(theme: Style.model?.messages?.backgroundClient?.border?.color) ?? Color(hex: "000000")
+        let backgroundOperator = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundOperator?.border?.color) ?? Color(hex: "000000")
+        let backgroundClient = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundClient?.border?.color) ?? Color(hex: "000000")
         return self.isSender ? backgroundClient : backgroundOperator
     }
     
     
     
     var textColor: UIColor {
-        let textOperator = Style.getUIColor(theme: Style.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
-        let textClient = Style.getUIColor(theme: Style.model?.messages?.textClient?.color) ?? UIColor.white
+        let textOperator = IQStyle.getUIColor(theme: IQStyle.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
+        let textClient = IQStyle.getUIColor(theme: IQStyle.model?.messages?.textClient?.color) ?? UIColor.white
         return self.isSender ? textClient : textOperator
     }
     var fontSize: CGFloat {
-        let sizeOperator = CGFloat(Style.model?.messages?.textOperator?.textSize ?? 17)
-        let sizeClient = CGFloat(Style.model?.messages?.textClient?.textSize ?? 17)
+        let sizeOperator = CGFloat(IQStyle.model?.messages?.textOperator?.textSize ?? 17)
+        let sizeClient = CGFloat(IQStyle.model?.messages?.textClient?.textSize ?? 17)
         return self.isSender ? sizeClient : sizeOperator
     }
     var isBold: Bool {
-        let clientIsBold = Style.model?.messages?.textClient?.textStyle?.bold ?? false
-        let operatorIsBold = Style.model?.messages?.textOperator?.textStyle?.bold ?? false
+        let clientIsBold = IQStyle.model?.messages?.textClient?.textStyle?.bold ?? false
+        let operatorIsBold = IQStyle.model?.messages?.textOperator?.textStyle?.bold ?? false
         return self.isSender ? clientIsBold : operatorIsBold
     }
     var isItalic: Bool {
-        let clientIsItalic = Style.model?.messages?.textClient?.textStyle?.italic ?? false
-        let operatorIsItalic = Style.model?.messages?.textOperator?.textStyle?.italic ?? false
+        let clientIsItalic = IQStyle.model?.messages?.textClient?.textStyle?.italic ?? false
+        let operatorIsItalic = IQStyle.model?.messages?.textOperator?.textStyle?.italic ?? false
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     var aligment: TextAlignment {
-        let clientAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textClient?.textAlign) ?? .leading
-        let operatorAlignment = stringToAlignment(stringAlignment: Style.model?.messages?.textOperator?.textAlign) ?? .leading
+        let clientAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messages?.textClient?.textAlign) ?? .leading
+        let operatorAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messages?.textOperator?.textAlign) ?? .leading
         return self.isSender ? clientAlignment : operatorAlignment
     }
     
@@ -90,7 +90,7 @@ struct TextMessageCellView: View {
     
     // MARK: - BODY
     var body: some View {
-        let cursorColor = Style.getColor(theme: Style.model?.toolsToMessage?.cursorColor) ?? Color(hex: "3d3d3d")
+        let cursorColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.cursorColor) ?? Color(hex: "3d3d3d")
         
         VStack(alignment: .trailing, spacing: 4) {
             VStack(alignment: .leading, spacing: 4) {

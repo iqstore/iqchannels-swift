@@ -95,4 +95,8 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     func detailControllerIsTyping() {
         sendTypingEvent()
     }
+    
+    func detailControllerSelectLanguage(didSelect language: IQLanguage) {
+        setLanguage(language)
+    }
 }

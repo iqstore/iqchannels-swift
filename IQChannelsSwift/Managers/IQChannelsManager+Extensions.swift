@@ -215,7 +215,23 @@ extension IQChannelsManager {
         
         UIApplication.shared.open(url)
     }
-    
+}
+
+//MARK: - Language
+extension IQChannelsManager {
+    func setLanguage(_ language: IQLanguage) {
+        Task {
+            let error = await currentNetworkManager?.setLanguage(languageCode: language.code ?? "ru")
+            if error != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    self?.setLanguage(language)
+                }
+            } else {
+                let languageMap: [String: String] = ["code": language.code ?? "ru", "name": language.name ?? "Русский"]
+                UserDefaults.standard.set(languageMap, forKey: "selectedLanguage")
+            }
+        }
+    }
 }
 
 //MARK: - APNs
@@ -480,14 +496,14 @@ extension IQChannelsManager {
         
         let dataMB = file.data.count / 1024 / 1024
         if let size = limits.maxFileSizeMb, dataMB > size {
-            return "Превышен максимально допустимый размер файла"
+            return IQLanguageTexts.model.fileWeightError ?? "Превышен максимально допустимый размер файла"
         }
         
         if let maxImageHeight = limits.maxImageHeight,
            let maxImageWidth = limits.maxImageWidth,
            let image = UIImage(data: file.data),
            Int(image.size.height) > maxImageHeight || Int(image.size.width) > maxImageWidth {
-            return "Слишком большая ширина или высота изображения"
+            return IQLanguageTexts.model.fileSizeError ?? "Слишком большая ширина или высота изображения"
         }
         
         
@@ -497,11 +513,11 @@ extension IQChannelsManager {
 
         if let allowedExtensions = limits.allowedExtensions,
            !allowedExtensions.contains(fileExtension) {
-            return "Неподдерживаемый тип файла"
+            return IQLanguageTexts.model.fileNotAllowed ?? "Неподдерживаемый тип файла"
         }
         if let forbiddenExtensions = limits.forbiddenExtensions,
            forbiddenExtensions.contains(fileExtension) {
-            return "Запрещенный тип файла"
+            return IQLanguageTexts.model.fileForbidden ?? "Запрещенный тип файла"
         }
         return nil
     }
@@ -692,16 +708,20 @@ extension IQChannelsManager {
                 baseViewModels.sendError(error)
                 return
             }
+            let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
+            self.systemChat = result.result?.1 ?? false
             let lifeTime = result.result?.2
             let chatLabel = result.result?.3
-            self.systemChat = result.result?.1 ?? false
-            let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
+            let availableLanguages = result.result?.4
             
             messages = results
             
             DispatchQueue.main.async {
                 if let chatLabel = chatLabel {
                     self.detailViewModel?.chatLabel = chatLabel
+                }
+                if let availableLanguages = availableLanguages {
+                    self.detailViewModel?.availableLanguages = availableLanguages
                 }
             }
             
