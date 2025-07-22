@@ -1251,6 +1251,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "rating_state_pending": "Пожалуйста, оцените качество консультации",
  "rating_state_ignored": "Без оценки оператора",
  "rating_state_rated": "Оценка оператора",
+ "new_messages": "Новые сообщения",
  "sent_rating": "Отправить",
  "invalid_messsage": "Неподдерживаемый тип сообщения",
  "image_load_error": "Ошибка загрузки",
