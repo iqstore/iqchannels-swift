@@ -23,6 +23,7 @@ struct IQLanguageTextsModel: Decodable {
     var ratingStatePending: String?
     var ratingStateIgnored: String?
     var ratingStateRated: String?
+    var newMessages: String?
     var sentRating: String?
     var invalidMesssage: String?
     var imageLoadError: String?
@@ -71,6 +72,7 @@ struct IQLanguageTextsModel: Decodable {
         case ratingStatePending = "rating_state_pending"
         case ratingStateIgnored = "rating_state_ignored"
         case ratingStateRated = "rating_state_rated"
+        case newMessages = "new_messages"
         case sentRating = "sent_rating"
         case invalidMesssage = "invalid_messsage"
         case imageLoadError = "image_load_error"

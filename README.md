@@ -18,7 +18,7 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.1'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.2'
 ```
 
 Затем выполните команду:
@@ -1192,12 +1192,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ## Пример использования мультиязычности
 
-Для подключения перевода необходимо добавить поддерживаемые JSON файлы с локализацией (в том числе и русской)
-Имя файлов обязательно должно быть `ru.json`, `en.json` и т.д.
+Для подключения перевода необходимо добавить поддерживаемые JSON файлы с локализацией (в том числе и русской). Имя файлов обязательно должно быть `ru.json`, `en.json` и т.д.
 
-
-<details>
-  <summary>Пример добавления файла с локализацией</summary>
+Пример добавления файла с локализацией
   
 ```swift
 extension ViewController: UIDocumentPickerDelegate {
@@ -1228,7 +1225,6 @@ extension ViewController: UIDocumentPickerDelegate {
     }
 }
 ```
-</details>
 
 --------------------
 
@@ -1251,6 +1247,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "rating_state_pending": "Пожалуйста, оцените качество консультации",
  "rating_state_ignored": "Без оценки оператора",
  "rating_state_rated": "Оценка оператора",
+ "new_messages": "Новые сообщения",
  "sent_rating": "Отправить",
  "invalid_messsage": "Неподдерживаемый тип сообщения",
  "image_load_error": "Ошибка загрузки",

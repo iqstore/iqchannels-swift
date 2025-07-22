@@ -223,7 +223,7 @@ struct ChatMessagesView: View {
         let isItalic = IQStyle.model?.chat?.systemText?.textStyle?.italic ?? false
         
         if #available(iOS 16.0, *) {
-            Text("Новые сообщения")
+            Text(IQLanguageTexts.model.newMessages ?? "Новые сообщения")
                 .foregroundColor(textColor)
                 .font(.system(size: fontSize))
                 .multilineTextAlignment(alignment)
@@ -235,7 +235,7 @@ struct ChatMessagesView: View {
                 .padding(.top, 12)
                 .padding(.horizontal, -16)
         } else {
-            Text("Новые сообщения")
+            Text(IQLanguageTexts.model.newMessages ?? "Новые сообщения")
                 .foregroundColor(textColor)
                 .font(.system(size: fontSize))
                 .multilineTextAlignment(alignment)
