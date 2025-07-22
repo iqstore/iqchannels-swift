@@ -1192,12 +1192,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ## Пример использования мультиязычности
 
-Для подключения перевода необходимо добавить поддерживаемые JSON файлы с локализацией (в том числе и русской)
-Имя файлов обязательно должно быть `ru.json`, `en.json` и т.д.
+Для подключения перевода необходимо добавить поддерживаемые JSON файлы с локализацией (в том числе и русской). Имя файлов обязательно должно быть `ru.json`, `en.json` и т.д.
 
-
-<details>
-  <summary>Пример добавления файла с локализацией</summary>
+Пример добавления файла с локализацией
   
 ```swift
 extension ViewController: UIDocumentPickerDelegate {
@@ -1228,7 +1225,6 @@ extension ViewController: UIDocumentPickerDelegate {
     }
 }
 ```
-</details>
 
 --------------------
 
