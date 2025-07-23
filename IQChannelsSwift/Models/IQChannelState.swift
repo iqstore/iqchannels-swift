@@ -18,11 +18,11 @@ enum IQChannelsState {
         case .authenticated:
             return IQLanguageTexts.model.statusLabel ?? "На связи"
         case .awaitingNetwork:
-            return "Ожидание сети..."
+            return IQLanguageTexts.model.statusLabelAwaitingNetwork ?? "Ожидание сети..."
         case .authenticating:
-            return "Авторизация..."
+            return ""
         case .loggedOut:
-            return "Не удалось подключиться"
+            return ""
         }
     }
 }
