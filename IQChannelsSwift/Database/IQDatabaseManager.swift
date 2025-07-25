@@ -14,7 +14,6 @@ class IQDatabaseManager {
     
     typealias Expression = SQLite.Expression
 
-    // Таблица и поля
     private let messages = Table("messages")
     private let uid = Expression<Int>("uid")
     private let messageID = Expression<Int>("messageId")
@@ -84,17 +83,16 @@ class IQDatabaseManager {
                 t.column(upload)
                 t.column(error)
             })
+            IQLog.debug(message: "Initializing database")
             
             checkColumns()
         } catch {
-            print("Error initializing database: \(error)")
+            IQLog.error(message: "Error initializing database: \(error)")
         }
     }
     
-    // Проверка колон в базе
     func checkColumns() {
         do {
-            // Проверка существования колонки "error"
             let checkColumnExists = try db.scalar("""
                SELECT COUNT(*)
                FROM pragma_table_info('messages')
@@ -102,19 +100,17 @@ class IQDatabaseManager {
             """) as! Int64
 
             if checkColumnExists == 0 {
-                // Если колонка "error" не существует, добавляем её
                 do {
                     try db.run(messages.addColumn(error, defaultValue: false))
                 } catch {
-                    print("Error add columns: \(error)")
+                    IQLog.error(message: "Error add columns: \(error)")
                 }
             }
         } catch {
-            print("Error check columns: \(error)")
+            IQLog.error(message: "Error check columns: \(error)")
         }
     }
     
-    // Вставка или обновление сообщения
     func insertMessage(_ message: IQDatabaseMessage) {
         if(message.localID != 0){
             do {
@@ -147,13 +143,13 @@ class IQDatabaseManager {
                    upload <- message.upload,
                    error <- message.error
                   ))
+                IQLog.debug(message: "Inserted message to database  \(message)")
             } catch {
-                print("Error inserting message: \(error)")
+                IQLog.error(message: "Error inserting message: \(error)")
             }
         }
     }
 
-    // Получение всех сообщений
     func getAllMessages() -> [IQDatabaseMessage] {
         var messagesArray: [IQDatabaseMessage] = []
         do {
@@ -188,46 +184,46 @@ class IQDatabaseManager {
                     upload: message[upload],
                     error: message[error]
                 ))
+                IQLog.debug(message: "GetAllMessages from database")
             }
         } catch {
-            print("Error retrieving all messages: \(error)")
+            IQLog.error(message: "Error retrieving all messages: \(error)")
         }
         return messagesArray
     }
 
-    // Удаление сообщения по localId
     func deleteMessageByLocalId(_ localIdValue: Int) -> Bool {
         do {
             let query = messages.filter(localID == localIdValue)
             if try db.run(query.delete()) > 0 {
+                IQLog.debug(message: "DeleteMessageByLocalId \(localIdValue)")
                 return true
             }
         } catch {
-            print("Error deleting message by localId: \(error)")
+            IQLog.error(message: "Error deleting message by localId: \(error)")
         }
         return false
     }
 
-    // Удаление сообщений по chatId
     func deleteMessageByChatId(_ chatIdValue: Int?) -> Bool {
         do {
             let query = messages.filter(chatID == chatIdValue)
             if try db.run(query.delete()) > 0 {
+                IQLog.debug(message: "DeleteMessageByChatId \(chatIdValue)")
                 return true
             }
         } catch {
-            print("Error deleting messages by chatId: \(error)")
+            IQLog.error(message: "Error deleting messages by chatId: \(error)")
         }
         return false
     }
     
-    // Прочитывание сообщений по chatId
     func readMessageByChatId(_ chatIdValue: Int?) {
         do {
-            let query = messages.filter(chatID == chatIdValue)
-            try db.run(messages.filter(chatID == chatIdValue).update(isRead <- true))
+           try db.run(messages.filter(chatID == chatIdValue).update(isRead <- true))
+            IQLog.debug(message: "ReadMessageByChatId \(chatIdValue)")
         } catch {
-            print("Error reading messages by chatId: \(error)")
+            IQLog.error(message: "Error reading messages by chatId: \(error)")
         }
     }
 }
