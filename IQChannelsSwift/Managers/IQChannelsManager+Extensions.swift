@@ -806,6 +806,9 @@ extension IQChannelsManager {
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
         
+        IQLog.debug(message: "unreadListeners:  \(unreadListeners)")
+        IQLog.debug(message: "unread value:  \(unread)")
+        
         unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
         
         if let index = indexOfMyMessage(localID: message.localID){
@@ -847,8 +850,7 @@ extension IQChannelsManager {
         
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
-        
-        print("unread_5 \(unread)")
+
         unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
 
     }

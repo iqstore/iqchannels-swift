@@ -1238,6 +1238,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "text_error": "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже",
  "button_error": "Вернуться",
  "status_label": "На связи",
+ "status_label_awaiting_network": "Ожидание сети...",
  "operator_typing": "печатает",
  "input_message_placeholder": "Сообщение",
  "text_file_state_rejected": "Небезопасный файл",

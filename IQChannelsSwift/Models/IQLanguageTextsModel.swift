@@ -14,6 +14,7 @@ struct IQLanguageTextsModel: Decodable {
     var textError: String?
     var buttonError: String?
     var statusLabel: String?
+    var statusLabelAwaitingNetwork: String?
     var operatorTyping: String?
     var inputMessagePlaceholder: String?
     var textFileStateRejected: String?
@@ -63,6 +64,7 @@ struct IQLanguageTextsModel: Decodable {
         case textError = "text_error"
         case buttonError = "button_error"
         case statusLabel = "status_label"
+        case statusLabelAwaitingNetwork = "status_label_awaiting_network"
         case operatorTyping = "operator_typing"
         case inputMessagePlaceholder = "input_message_placeholder"
         case textFileStateRejected = "text_file_state_rejected"
