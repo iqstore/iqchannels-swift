@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 public protocol IQChannelsUnreadListenerProtocol: AnyObject {
     var id: String { get }
     func iqChannelsUnreadDidChange(_ unread: Int)

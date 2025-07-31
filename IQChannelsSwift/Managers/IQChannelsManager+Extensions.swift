@@ -369,7 +369,11 @@ extension IQChannelsManager {
                     self?.listenToUnread()
                 }
             } else {
-                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
+                Task {
+                    await MainActor.run {
+                        self.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
+                    }
+                }
             }
         }
     }
@@ -601,8 +605,11 @@ extension IQChannelsManager {
         IQDatabaseManager.shared.readMessageByChatId(chatId)
         
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
-    
-        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+        Task {
+            await MainActor.run {
+                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+            }
+        }
         
         readMessages.update(with: messageID)
         
@@ -806,11 +813,12 @@ extension IQChannelsManager {
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
         
-        IQLog.debug(message: "unreadListeners:  \(unreadListeners)")
-        IQLog.debug(message: "unread value:  \(unread)")
-        
-        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
-        
+        Task {
+            await MainActor.run {
+                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+            }
+        }
+
         if let index = indexOfMyMessage(localID: message.localID){
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
@@ -850,8 +858,11 @@ extension IQChannelsManager {
         
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
-
-        unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+        Task {
+            await MainActor.run {
+                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+            }
+        }
 
     }
     
