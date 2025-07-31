@@ -38,6 +38,12 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         return navigationController
     }
     
+    public func getChatViewController() -> UIViewController? {
+        guard let channelManager else { return nil }
+        let viewController = channelManager.getViewController()
+        return viewController
+    }
+    
     public func setCustomHeaders(_ headers: [String : String]) {
         channelManager?.setCustomHeaders(headers)
     }
@@ -61,8 +67,8 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         IQStyle.configure(json)
     }
     
-    public func login(_ loginType: IQLoginType) {
-        channelManager?.login(loginType)
+    public func login(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
+        channelManager?.login(loginType, completion)
     }
     
     public func logout() {
@@ -92,5 +98,10 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
     public func setTheme(_ styleType: IQTheme) {
         IQStyle.newTheme(styleType)
     }
-    
+}
+
+extension IQLibraryConfigurationProtocol {
+    public func login(_ loginType: IQLoginType) {
+        login(loginType, nil)
+    }
 }

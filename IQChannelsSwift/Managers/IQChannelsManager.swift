@@ -68,6 +68,15 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         setupFileLimits()
     }
     
+    func getViewController() -> IQChatDetailViewController? {
+        if let selectedChat = self.selectedChat {
+            return getDetailViewController(for: selectedChat)
+        } else {
+            return nil
+        }
+    }
+    
+    
     func configure(configuration: IQChannelsConfig) {
         logout()
         
@@ -113,9 +122,9 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         unreadListeners.removeAll(where: { $0.id == listener.id })
     }
     
-    func login(_ loginType: IQLoginType) {
+    func login(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
         logout()
-        auth(loginType)
+        auth(loginType, completion)
     }
     
     func logout() {

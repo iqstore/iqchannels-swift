@@ -11,12 +11,14 @@ import UIKit
 public protocol IQLibraryConfigurationProtocol {
     /// Returns the main navigation controller of the library.
     func getViewController() -> UINavigationController?
+    /// Returns the library's chat controller.
+    func getChatViewController() -> UIViewController?
     /// Configures the library with the provided configuration settings.
     func configure(_ config: IQChannelsConfig)
     /// Sets custom HTTP headers for network requests.
     func setCustomHeaders(_ headers: [String: String])
     /// Logs in the user with the specified login type.
-    func login(_ loginType: IQLoginType)
+    func login(_ loginType: IQLoginType, _ completion: (() -> Void)?)
     /// Logs out the current user and closes chat.
     func logout()
     /// Adds event listener to handle events
