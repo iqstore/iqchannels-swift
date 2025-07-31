@@ -45,7 +45,7 @@ extension IQChannelsManager {
             Task { [weak self] in
                 DispatchQueue.main.async { [weak self] in
                     if let self, let chat {
-                        listViewModel?.chatToPresentListener.send(getDetailViewController(for: chat))
+                        listViewModel?.chatToPresentListener.send(getDetailViewController(for: chat, showNavBar: true))
 //                        listenToUnread()
                         loadMessages()
                     }
@@ -92,7 +92,7 @@ extension IQChannelsManager {
         })
     }
     
-    func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
+    func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType), showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
         viewModel.backDismisses = getChatItems(from: authResults).count == 1
@@ -100,7 +100,7 @@ extension IQChannelsManager {
         viewModel.client = chat.auth.auth.client
         viewModel.session = chat.auth.auth.session
         viewModel.messages = messages.reversed()
-        return IQChatDetailViewController(viewModel: viewModel, output: self)
+        return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
     }
     
     func getChatItems(from results: [AuthResult]) -> [IQChatItemModel] {

@@ -70,7 +70,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     
     func getViewController() -> IQChatDetailViewController? {
         if let selectedChat = self.selectedChat {
-            return getDetailViewController(for: selectedChat)
+            return getDetailViewController(for: selectedChat, showNavBar: false)
         } else {
             return nil
         }

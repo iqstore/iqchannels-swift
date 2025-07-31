@@ -11,6 +11,8 @@ class IQChatDetailViewController: IQViewController {
     
     private let output: IQChannelsManagerDetailOutput
     
+    private let showNavBar: Bool
+    
     private var cancellables = Set<AnyCancellable>()
     
     private lazy var titleStackView: UIStackView = {
@@ -125,9 +127,11 @@ class IQChatDetailViewController: IQViewController {
     
     // MARK: - INIT
     init(viewModel: IQChatDetailViewModel,
-         output: IQChannelsManagerDetailOutput) {
+         output: IQChannelsManagerDetailOutput,
+         showNavBar: Bool) {
         self.viewModel = viewModel
         self.output = output
+        self.showNavBar = showNavBar
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -217,7 +221,11 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$messageControlShown
             .receive(on: DispatchQueue.main)
             .sink { [weak self] messageControlShown in
-                self?.navigationController?.setNavigationBarHidden(true, animated: false)
+                if(self?.showNavBar ?? true){
+                    self?.navigationController?.setNavigationBarHidden(messageControlShown, animated: false)
+                }else{
+                    self?.navigationController?.setNavigationBarHidden(true, animated: false)
+                }
             }.store(in: &subscriptions)
         
         viewModel.$hidesBackButton
