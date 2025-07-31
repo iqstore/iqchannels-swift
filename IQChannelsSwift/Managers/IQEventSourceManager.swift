@@ -70,7 +70,6 @@ class IQEventSourceManager: NSObject, TRVSEventSourceDelegate {
         if error?.localizedDescription.isEmpty ?? true {
             finalError = NSError.clientError("Unknown event stream error")
         }
-        print("\(error)")
         callback?(nil, finalError)
     }
 }

@@ -153,6 +153,17 @@ func showMessages() {
 }
 ```
 
+Метод getChatViewController предназначен для получения контроллера окна с чатом (UIViewController) библиотеки IQChannelsSwift. Этот контроллер используется только для показа определенного чата и может быть получен только после успешной авторизации.
+
+```swift
+configuration.login(.anonymous) {
+    DispatchQueue.main.async { [weak self] in
+        guard let self = self else { return }
+        let сhatViewController = self.configuration.getChatViewController()
+    }
+}
+```
+
 Отображение непрочитанных сообщений
 -----------------------------------
 Для отображения непрочитанных сообщений нужно добавить слушателя, в который будет присылаться количество
