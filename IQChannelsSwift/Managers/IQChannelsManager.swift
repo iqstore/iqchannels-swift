@@ -37,7 +37,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var didSendAttachments = false
     var fileLimit: IQFileConfig?
     var eventListener: IQChannelsEventListenerProtocol?
-    var unreadListeners: [IQChannelsUnreadListenerProtocol] = []
+    var unreadListeners: [any IQChannelsUnreadListenerProtocol] = []
     var subscriptions = Set<AnyCancellable>()
     
     //MARK: - Managers
@@ -119,7 +119,11 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     }
     
     func removeUnread(listener: IQChannelsUnreadListenerProtocol) {
-        unreadListeners.removeAll(where: { $0.id == listener.id })
+        Task {
+            await MainActor.run {
+                unreadListeners.removeAll(where: { $0.id == listener.id })
+            }
+        }
     }
     
     func login(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
