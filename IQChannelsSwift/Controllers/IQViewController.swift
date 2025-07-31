@@ -16,8 +16,7 @@ public class IQViewController: UIViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        setupNavBar()
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        setupNavBar()
     }
     
     func setupNavBar() {}

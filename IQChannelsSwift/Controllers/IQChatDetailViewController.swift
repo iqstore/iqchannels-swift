@@ -186,19 +186,19 @@ class IQChatDetailViewController: IQViewController {
     }
     
     override func setupNavBar() {
-//        if let language = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String] {
-//            let code = language["code"]
-//            let name = language["name"]
-//            
-//            if let code = code, let name = name {
-//                self.loadLanguageDataFromAppSupport(code)
-//                self.viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
-//                self.languageButton.setTitle(name, for: .normal)
-//            }
-//        }
-//        navigationItem.titleView = titleStackView
+        if let language = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String] {
+            let code = language["code"]
+            let name = language["name"]
+            
+            if let code = code, let name = name {
+                self.loadLanguageDataFromAppSupport(code)
+                self.viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
+                self.languageButton.setTitle(name, for: .normal)
+            }
+        }
+        navigationItem.titleView = titleStackView
 //        navigationItem.leftBarButtonItem = .init(customView: backButton)
-//        navigationItem.rightBarButtonItem = .init(customView: languageButton)
+        navigationItem.rightBarButtonItem = .init(customView: languageButton)
     }
     
     override func bindViewModel() {
