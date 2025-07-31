@@ -184,7 +184,6 @@ class IQDatabaseManager {
                     upload: message[upload],
                     error: message[error]
                 ))
-                IQLog.debug(message: "GetAllMessages from database")
             }
         } catch {
             IQLog.error(message: "Error retrieving all messages: \(error)")

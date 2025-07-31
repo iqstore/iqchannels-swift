@@ -92,7 +92,7 @@ extension IQChannelsManager {
         })
     }
     
-    private func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
+    func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
         viewModel.backDismisses = getChatItems(from: authResults).count == 1
@@ -927,7 +927,7 @@ extension IQChannelsManager {
         listViewModel = nil
     }
     
-    func auth(_ loginType: IQLoginType) {
+    func auth(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
         self.loginType = loginType
         guard authResults.isEmpty,
               networkStatusManager.isReachable else { return }
@@ -960,17 +960,17 @@ extension IQChannelsManager {
             
             if let error = errors.compactMap({$0}).first{
                 IQLog.debug(message: "Error authentication \n error: \(error)")
-                self.auth(loginType, failedWith: error)
+                self.auth(loginType, failedWith: error, completion)
             } else {
                 IQLog.debug(message: "Success authentication \n results: \(results)")
-                self.auth(loginType, succeededWith: results)
+                self.auth(loginType, succeededWith: results, completion)
             }
         }
     }
     
-    private func auth(_ type: IQLoginType, succeededWith results: [(channel: String, auth: IQClientAuth?)]) {
+    private func auth(_ type: IQLoginType, succeededWith results: [(channel: String, auth: IQClientAuth?)], _ completion: (() -> Void)?) {
         guard results.allSatisfy({ $0.auth?.client != nil && $0.auth?.session != nil }) else {
-            self.auth(type, failedWith: nil)
+            self.auth(type, failedWith: nil, completion)
             return
         }
         
@@ -991,15 +991,19 @@ extension IQChannelsManager {
         authResults = results
         authAttempt = 0
         state = .authenticated
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            completion?()
+        }
     }
     
-    private func auth(_ type: IQLoginType, failedWith error: Error?) {
+    private func auth(_ type: IQLoginType, failedWith error: Error?, _ completion: (() -> Void)?) {
         authResults = []
         state = networkStatusManager.isReachable ? .loggedOut : .awaitingNetwork
         if networkStatusManager.isReachable {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
                 let isAuthError = error?.iqIsAuthError ?? false
-                self?.auth(isAuthError ? .anonymous : type)
+                self?.auth(isAuthError ? .anonymous : type, completion)
             }
         }
     }
@@ -1027,7 +1031,7 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
                 }
             } else if let loginType, state != .authenticating {
                 authAttempt = 0
-                auth(loginType)
+                auth(loginType, nil)
             }
         }
     }

@@ -8,8 +8,9 @@
 import Foundation
 
 protocol IQChannelsManagerProtocol {
+    func getViewController() -> IQChatDetailViewController?
     func configure(configuration: IQChannelsConfig)
-    func login(_ loginType: IQLoginType)
+    func login(_ loginType: IQLoginType, _ completion: (() -> Void)?)
     func logout()
     func setCustomHeaders(_ headers: [String: String])
     func setListViewModel(_ viewModel: IQChatListViewModel?)
