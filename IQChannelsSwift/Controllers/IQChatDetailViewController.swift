@@ -197,7 +197,7 @@ class IQChatDetailViewController: IQViewController {
             }
         }
         navigationItem.titleView = titleStackView
-//        navigationItem.leftBarButtonItem = .init(customView: backButton)
+        navigationItem.leftBarButtonItem = .init(customView: backButton)
         navigationItem.rightBarButtonItem = .init(customView: languageButton)
     }
     
@@ -217,7 +217,7 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$messageControlShown
             .receive(on: DispatchQueue.main)
             .sink { [weak self] messageControlShown in
-                self?.navigationController?.setNavigationBarHidden(messageControlShown, animated: false)
+                self?.navigationController?.setNavigationBarHidden(true, animated: false)
             }.store(in: &subscriptions)
         
         viewModel.$hidesBackButton
