@@ -1291,7 +1291,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "gallery": "Галерея",
  "file": "Файл",
  "camera": "Камера",
- "cancel": "Отмена",
+ "cancel": "Отмена"
  }
 ```
 </details>

@@ -9,9 +9,6 @@ final class AttributeTextManager {
     
     func getString(from markdown: String, textColor: UIColor, fontSize: CGFloat, alingment: TextAlignment, isBold: Bool, isItalic: Bool) -> (NSAttributedString, [Link]) {
         var formattedMarkdown = markdown.replacingOccurrences(of: "\\n", with: "\n")
-        if isList(formattedMarkdown) {
-            formattedMarkdown = formatStringWithList(formattedMarkdown)
-        }
         
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
