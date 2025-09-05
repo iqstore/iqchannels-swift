@@ -110,6 +110,8 @@ struct ChatInputView: View {
             let inputBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundInput?.color) ?? Color(hex: "F4F4F8")
             let textColor = IQStyle.getUIColor(theme: IQStyle.model?.toolsToMessage?.textInput?.color) ?? UIColor(hex: "242729")
             let fontSize = CGFloat(IQStyle.model?.toolsToMessage?.textInput?.textSize ?? 17)
+            let isBold = IQStyle.model?.toolsToMessage?.textInput?.textStyle?.bold ?? false
+            let isItalic = IQStyle.model?.toolsToMessage?.textInput?.textStyle?.italic ?? false
             
             let radius = IQStyle.model?.toolsToMessage?.backgroundInput?.border?.borderRadius ?? 8
             let borderSize = IQStyle.model?.toolsToMessage?.backgroundInput?.border?.size ?? 0
@@ -120,13 +122,24 @@ struct ChatInputView: View {
                               height: $textAreaHeight,
                               textColor: textColor,
                               fontSize: fontSize,
+                              isBold: isBold,
+                              isItalic: isItalic,
                               currentHeight: finalTextAreaHeight)
                 .frame(height: finalTextAreaHeight)
                 .placeholder(when: text.isEmpty) {
-                    Text(IQLanguageTexts.model.inputMessagePlaceholder ?? "Сообщение")
-                        .font(.system(size: fontSize))
-                        .foregroundColor(Color(hex: "919399"))
-                        .padding(.leading, 8)
+                    if #available(iOS 16.0, *) {
+                        Text(IQLanguageTexts.model.inputMessagePlaceholder ?? "Сообщение")
+                            .font(.system(size: fontSize))
+                            .foregroundColor(Color(hex: "919399"))
+                            .padding(.leading, 8)
+                            .bold(isBold)
+                            .italic(isItalic)
+                    } else {
+                        Text(IQLanguageTexts.model.inputMessagePlaceholder ?? "Сообщение")
+                            .font(.system(size: fontSize))
+                            .foregroundColor(Color(hex: "919399"))
+                            .padding(.leading, 8)
+                    }
                 }
                 .padding(.horizontal, 8)
                 .background(inputBackgroundColor)
