@@ -18,7 +18,7 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.3-rc3'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.3'
 ```
 
 Затем выполните команду:
@@ -1064,7 +1064,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#000000"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "feedback_thanks_text": {             //Текст благодарности за прохождение опроса
       "color": {
@@ -1108,7 +1112,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
     },
     "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png",  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
     "cursor_color": {                     //Цвет курсора
@@ -1245,8 +1253,14 @@ extension ViewController: UIDocumentPickerDelegate {
 ```json
 {
  "code": "ru",
+ "signup_title": "Представьтесь, пожалуйста,",
+ "signup_subtitle": "желательно указать фамилию и имя:",
+ "signup_name_placeholder": "Ваше имя",
+ "signup_checkbox_text": "Согласие на обработку персональных данных",
+ "signup_button_text": "Начать чат",
+ "signup_error": "Ошибка: длина имени должна быть не менее 3-х символов.",
  "title_error": "Чат временно недоступен",
- "text_error": "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже",
+ "text_error": "Мы уже все исправляем. Обновите страницу или попробуйте позже",
  "button_error": "Вернуться",
  "status_label": "На связи",
  "status_label_awaiting_network": "Ожидание сети...",
@@ -1292,6 +1306,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "file": "Файл",
  "camera": "Камера",
  "cancel": "Отмена",
+ "today": "Сегодня"
  }
 ```
 </details>

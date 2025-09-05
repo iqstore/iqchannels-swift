@@ -9,6 +9,8 @@ struct ComposerInputView: UIViewRepresentable {
     
     let textColor: UIColor
     let fontSize: CGFloat
+    let isBold: Bool
+    let isItalic: Bool
     
     var currentHeight: CGFloat
     
@@ -19,8 +21,22 @@ struct ComposerInputView: UIViewRepresentable {
         } else {
             inputTextView = InputTextView()
         }
+        
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+        var font = UIFont.systemFont(ofSize: fontSize)
+
+        if let descriptor = font.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            font = UIFont(descriptor: descriptor, size: fontSize)
+        }
+        
         context.coordinator.textView = inputTextView
-        inputTextView.font = .systemFont(ofSize: fontSize)
+        inputTextView.font = font
         inputTextView.textColor = textColor
         inputTextView.delegate = context.coordinator
         inputTextView.layoutManager.delegate = context.coordinator

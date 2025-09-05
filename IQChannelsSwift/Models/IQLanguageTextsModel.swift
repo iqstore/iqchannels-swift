@@ -10,6 +10,12 @@ import SwiftUI
 
 struct IQLanguageTextsModel: Decodable {
     var code: String?
+    var signupTitle: String?
+    var signupSubtitle: String?
+    var signupNamePlaceholder: String?
+    var signupCheckboxText: String?
+    var signupButtonText: String?
+    var signupError: String?
     var titleError: String?
     var textError: String?
     var buttonError: String?
@@ -57,9 +63,16 @@ struct IQLanguageTextsModel: Decodable {
     var file: String?
     var camera: String?
     var cancel: String?
+    var today: String?
     
     enum CodingKeys: String, CodingKey {
         case code
+        case signupTitle = "signup_title"
+        case signupSubtitle = "signup_subtitle"
+        case signupNamePlaceholder = "signup_name_placeholder"
+        case signupCheckboxText = "signup_checkbox_text"
+        case signupButtonText = "signup_button_text"
+        case signupError = "signup_error"
         case titleError = "title_error"
         case textError = "text_error"
         case buttonError = "button_error"
@@ -107,5 +120,6 @@ struct IQLanguageTextsModel: Decodable {
         case file
         case camera
         case cancel
+        case today
     }
 }

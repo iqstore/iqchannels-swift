@@ -47,6 +47,14 @@ struct InputView: View {
         return CGFloat(IQStyle.model?.rating?.inputText?.textSize ?? 17)
     }
     
+    var isBold: Bool {
+        return IQStyle.model?.rating?.inputText?.textStyle?.bold ?? false
+    }
+    
+    var isItalic: Bool {
+        return IQStyle.model?.rating?.inputText?.textStyle?.italic ?? false
+    }
+    
     
     // MARK: - BODY
     var body: some View {
@@ -76,6 +84,8 @@ struct InputView: View {
                 .font(.system(size: textFontSize))
                 .cornerRadius(backgroundRadius)
                 .tint(cursorColor)
+                .bold(isBold)
+                .italic(isItalic)
                 .overlay(
                     RoundedRectangle(cornerRadius: backgroundRadius)
                         .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
