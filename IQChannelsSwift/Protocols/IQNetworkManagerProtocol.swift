@@ -14,9 +14,9 @@ protocol IQNetworkManagerProtocol {
     func setCustomHeaders(_ headers: [String: String])
     func cancelTask(with taskIdentifier: Int)
     func listenToEvents(request: IQListenEventsRequest, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<[IQChatEvent]>)
-    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>)
+//    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>)
     func stopListenToEvents()
-    func stopListenToUnread()
+//    func stopListenToUnread()
     func pushToken(token: String) async -> Error?
     func sendReceivedEvent(_ messageIDs: [Int]) async -> Error?
     func sendReadEvent(_ messageIDs: [Int]) async -> Error?
