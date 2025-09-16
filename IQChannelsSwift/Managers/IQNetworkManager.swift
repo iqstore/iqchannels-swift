@@ -7,7 +7,7 @@
 
 import Foundation
 
-var unreadListeners: [IQEventSourceManager] = []
+//var unreadListeners: [IQEventSourceManager] = []
 
 class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
@@ -19,7 +19,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     let relationManager: IQRelationManager
     var eventsListener: IQEventSourceManager?
-    var unreadListener: IQEventSourceManager?
+//    var unreadListener: IQEventSourceManager?
     var unreadCount: Int?
     
     lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
@@ -83,42 +83,42 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
     }
     
-    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>) {
-        let path = "/sse/chats/channel/unread/\(channel)"
-        
-        unreadListeners.forEach { $0.close() }
-        unreadListeners.removeAll()
-        
-        unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
-            if let error = error {
-                callback(nil, error)
-                IQLog.error(message: "listenToUnread: \(error)")
-                return
-            }
-            if result == nil {
-                callback(nil, nil)
-                return
-            }
-            self.unreadCount = result?.value ?? 0
-            IQLog.debug(message: "listenToUnread: \(String(describing: self.unreadCount))")
-            
-            callback(result?.value ?? 0, nil)
-        }
-        
-        if let unreadListener = unreadListener {
-            unreadListeners.append(unreadListener)
-        }
-    }
+//    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>) {
+//        let path = "/sse/chats/channel/unread/\(channel)"
+//        
+//        unreadListeners.forEach { $0.close() }
+//        unreadListeners.removeAll()
+//        
+//        unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
+//            if let error = error {
+//                callback(nil, error)
+//                IQLog.error(message: "listenToUnread: \(error)")
+//                return
+//            }
+//            if result == nil {
+//                callback(nil, nil)
+//                return
+//            }
+//            self.unreadCount = result?.value ?? 0
+//            IQLog.debug(message: "listenToUnread: \(String(describing: self.unreadCount))")
+//            
+//            callback(result?.value ?? 0, nil)
+//        }
+//        
+//        if let unreadListener = unreadListener {
+//            unreadListeners.append(unreadListener)
+//        }
+//    }
     
     func stopListenToEvents(){
         eventsListener?.close()
         eventsListener = nil
     }
     
-    func stopListenToUnread(){
-        unreadListener?.close()
-        unreadListener = nil
-    }
+//    func stopListenToUnread(){
+//        unreadListener?.close()
+//        unreadListener = nil
+//    }
     
     func pushToken(token: String) async -> Error? {
         let path = "/push/channel/apns/\(channel)"
@@ -266,6 +266,11 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                     IQMessage(newMsgHeader: true),
                     at: value.count - unreadMessagesCount
                 )
+            }
+        }
+        Task {
+            await MainActor.run {
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadMessagesCount) }
             }
         }
         

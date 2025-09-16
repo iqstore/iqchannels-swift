@@ -37,7 +37,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var didSendAttachments = false
     var fileLimit: IQFileConfig?
     var eventListener: IQChannelsEventListenerProtocol?
-    var unreadListeners: [any IQChannelsUnreadListenerProtocol] = []
+    static var unreadListeners: [any IQChannelsUnreadListenerProtocol] = []
     var subscriptions = Set<AnyCancellable>()
     
     //MARK: - Managers
@@ -52,6 +52,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         guard let channel = selectedChat?.auth.channel else { return nil}
         return networkManagers[channel]
     }
+    var lifecycleObserver: AppLifecycleObserver?
     
     init(configuration: IQChannelsConfig) {
         self.config = configuration
@@ -115,13 +116,13 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     }
     
     func addUnread(listener: IQChannelsUnreadListenerProtocol) {
-        unreadListeners.append(listener)
+        IQChannelsManager.unreadListeners.append(listener)
     }
     
     func removeUnread(listener: IQChannelsUnreadListenerProtocol) {
         Task {
             await MainActor.run {
-                unreadListeners.removeAll(where: { $0.id == listener.id })
+                IQChannelsManager.unreadListeners.removeAll(where: { $0.id == listener.id })
             }
         }
     }

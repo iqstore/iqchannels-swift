@@ -48,6 +48,11 @@ extension IQChannelsManager {
                         listViewModel?.chatToPresentListener.send(getDetailViewController(for: chat, showNavBar: true))
 //                        listenToUnread()
                         loadMessages()
+                        
+                        lifecycleObserver = AppLifecycleObserver()
+                        lifecycleObserver?.onDidBecomeActive = {
+                            self.getUnreadMessagesCount()
+                        }
                     }
                 }
             }
@@ -357,26 +362,26 @@ extension IQChannelsManager {
 //MARK: - Unread
 extension IQChannelsManager {
     
-    private func listenToUnread(){
-        guard networkStatusManager.isReachable else { return }
-        
-        currentNetworkManager?.listenToUnread { [weak self] value, error in
-            guard let self else { return }
-            
-            if error != nil {
-                currentNetworkManager?.stopListenToUnread()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                    self?.listenToUnread()
-                }
-            } else {
-                Task {
-                    await MainActor.run {
-                        self.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
-                    }
-                }
-            }
-        }
-    }
+//    private func listenToUnread(){
+//        guard networkStatusManager.isReachable else { return }
+//        
+//        currentNetworkManager?.listenToUnread { [weak self] value, error in
+//            guard let self else { return }
+//            
+//            if error != nil {
+//                currentNetworkManager?.stopListenToUnread()
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+//                    self?.listenToUnread()
+//                }
+//            } else {
+//                Task {
+//                    await MainActor.run {
+//                        self.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
 }
 
@@ -607,7 +612,7 @@ extension IQChannelsManager {
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
         Task {
             await MainActor.run {
-                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
             }
         }
         
@@ -732,10 +737,6 @@ extension IQChannelsManager {
                 }
             }
             
-            let chatId = messages.filter {$0.clientID == selectedChat.auth.auth.client?.id}.first?.chatID
-            
-            let unread = messages.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user && $0.chatID == chatId}.count
-            
             if let lifeTime {
                 DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime)) {
                     if let index = self.messages.firstIndex(where: { $0.localID == -1 }) {
@@ -761,6 +762,20 @@ extension IQChannelsManager {
                 } else {
                     detailViewModel?.idOfNewMessage = nil
                 }
+            }
+        }
+    }
+    
+    private func getUnreadMessagesCount() {
+        Task {
+            guard let networkManager = currentNetworkManager, let selectedChat else { return }
+            
+            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true)
+            DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
+            
+            if let error = result.error {
+                baseViewModels.sendError(error)
+                return
             }
         }
     }
@@ -815,7 +830,7 @@ extension IQChannelsManager {
         
         Task {
             await MainActor.run {
-                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
             }
         }
 
@@ -860,7 +875,7 @@ extension IQChannelsManager {
         let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
         Task {
             await MainActor.run {
-                unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
             }
         }
 
@@ -1029,7 +1044,7 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
             guard status != .notReachable else {
                 state = .awaitingNetwork
                 currentNetworkManager?.stopListenToEvents()
-                currentNetworkManager?.stopListenToUnread()
+//                currentNetworkManager?.stopListenToUnread()
                 return
             }
             
@@ -1047,4 +1062,27 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
         }
     }
     
+}
+
+
+
+final class AppLifecycleObserver {
+    var onDidBecomeActive: (() -> Void)?
+
+    init() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+    }
+
+    @objc private func appDidBecomeActive() {
+        onDidBecomeActive?()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }
