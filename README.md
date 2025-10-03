@@ -1272,7 +1272,7 @@ extension ViewController: UIDocumentPickerDelegate {
  "text_file_state_check_error": "Ошибка проверки файла",
  "rating_state_pending": "Пожалуйста, оцените качество консультации",
  "rating_state_ignored": "Без оценки оператора",
- "rating_state_rated": "Оценка оператора",
+ "rating_state_rated": "Оценка оператора {{client_rating}} из {{max_rating}}",
  "new_messages": "Новые сообщения",
  "sent_rating": "Отправить",
  "invalid_messsage": "Неподдерживаемый тип сообщения",
