@@ -131,7 +131,17 @@ struct IQMessage: Codable, Identifiable, Equatable {
             switch rating.state {
             case .pending: return IQLanguageTexts.model.ratingStatePending ?? "Пожалуйста, оцените качество консультации"
             case .ignored: return IQLanguageTexts.model.ratingStateIgnored ?? "Без оценки оператора"
-            case .rated, .finished: return "\(IQLanguageTexts.model.ratingStateRated ?? "Оценка оператора") \(rating.value ?? 0)/\(toValue ?? 5)"
+//            case .rated, .finished: return "\(IQLanguageTexts.model.ratingStateRated ?? "Оценка оператора") \(rating.value ?? 0)/\(toValue ?? 5)"
+            case .rated, .finished:
+                let value = rating.value ?? 0
+                let maxValue = toValue ?? 5
+                let template = IQLanguageTexts.model.ratingStateRated ?? "Оценка оператора {{client_rating}} из {{max_rating}}"
+                
+                let text = template
+                    .replacingOccurrences(of: "{{client_rating}}", with: "\(value)")
+                    .replacingOccurrences(of: "{{max_rating}}", with: "\(maxValue)")
+                
+                return text
             default: return ""
             }
         }
