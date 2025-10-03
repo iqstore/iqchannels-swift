@@ -125,6 +125,10 @@ class IQChatDetailViewController: IQViewController {
         return btn
     }()
     
+    lazy var languageBarButton: UIBarButtonItem = {
+        return UIBarButtonItem(customView: languageButton)
+    }()
+    
     // MARK: - INIT
     init(viewModel: IQChatDetailViewModel,
          output: IQChannelsManagerDetailOutput,
@@ -202,7 +206,6 @@ class IQChatDetailViewController: IQViewController {
         }
         navigationItem.titleView = titleStackView
         navigationItem.leftBarButtonItem = .init(customView: backButton)
-        navigationItem.rightBarButtonItem = .init(customView: languageButton)
     }
     
     override func bindViewModel() {
@@ -277,6 +280,10 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$availableLanguages
             .receive(on: DispatchQueue.main)
             .sink { [weak self] availableLanguages in
+                
+                if(!(availableLanguages?.isEmpty ?? true)){
+                    self?.navigationItem.rightBarButtonItem = self?.languageBarButton
+                }
                 
                 if self?.viewModel.selectedLanguage == nil {
                     self?.viewModel.selectedLanguage = availableLanguages?.filter {$0.isDefault == true}.first ?? IQLanguage(code: "ru", name: "Русский", isDefault: true, iconURL: nil)
