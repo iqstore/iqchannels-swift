@@ -241,18 +241,15 @@ class IQChatDetailViewController: IQViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 guard let self else { return }
-                UIView.transition(with: titleStackView,
-                                  duration: 0.25,
-                                  options: .transitionCrossDissolve,
-                                  animations: {
-                    let hasNetwork = state == .authenticated
-                    self.titleLabel.isHidden = !hasNetwork
-                    hasNetwork ? self.loadingView.stopAnimating() : self.loadingView.startAnimating()
-                    self.loadingView.isHidden = hasNetwork
-                    self.loadingView.alpha = hasNetwork ? 0 : 1
-                    self.statusLabel.text = state.description
-                }, completion: nil)
-            }.store(in: &subscriptions)
+                
+                let hasNetwork = state == .authenticated
+                self.titleLabel.isHidden = !hasNetwork
+                hasNetwork ? self.loadingView.stopAnimating() : self.loadingView.startAnimating()
+                self.loadingView.isHidden = hasNetwork
+                self.loadingView.alpha = hasNetwork ? 0 : 1
+                self.statusLabel.text = state.description
+            }
+            .store(in: &subscriptions)
         
         viewModel.$typingUser
             .receive(on: DispatchQueue.main)
