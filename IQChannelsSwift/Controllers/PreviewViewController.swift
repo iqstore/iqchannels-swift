@@ -46,7 +46,12 @@ class PreviewViewController: UIViewController, UIScrollViewDelegate {
         SDWebImageManager.shared.loadImage(with: url, progress: nil) { [weak self] image, data, _, _, _, _ in
             indicator.stopAnimatingIndicator()
             self?.imageView.image = image
-            self?.data = data
+            
+            if let data = data {
+                self?.data = data
+            } else if let image = image {
+                self?.data = image.jpegData(compressionQuality: 100)
+            }
         }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(imageView)
