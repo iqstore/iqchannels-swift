@@ -50,6 +50,9 @@ struct OfferView: View {
                         .bold(disabledRatingIsBold)
                         .italic(disabledRatingIsItalic)
                         .multilineTextAlignment(disabledRatingAlignment)
+                        .frame(maxWidth: .infinity, alignment:
+                                textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                        )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
                         .background(disabledRatingBackgroundColor)
@@ -65,6 +68,9 @@ struct OfferView: View {
                         .foregroundColor(disabledRatingTextColor)
                         .font(.system(size: disabledRatingFontSize))
                         .multilineTextAlignment(disabledRatingAlignment)
+                        .frame(maxWidth: .infinity, alignment:
+                                textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                        )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
                         .background(disabledRatingBackgroundColor)
@@ -90,6 +96,9 @@ struct OfferView: View {
                         .bold(enabledRatingIsBold)
                         .italic(enabledRatingIsItalic)
                         .multilineTextAlignment(enabledRatingAlignment)
+                        .frame(maxWidth: .infinity, alignment:
+                               textAlignmentToAlignment(textAlignment: enabledRatingAlignment) ?? .center
+                        )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
                         .background(enabledRatingBackgroundColor)
@@ -105,6 +114,9 @@ struct OfferView: View {
                         .foregroundColor(enabledRatingTextColor)
                         .font(.system(size: enabledRatingFontSize))
                         .multilineTextAlignment(enabledRatingAlignment)
+                        .frame(maxWidth: .infinity, alignment:
+                               textAlignmentToAlignment(textAlignment: enabledRatingAlignment) ?? .center
+                        )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
                         .background(enabledRatingBackgroundColor)

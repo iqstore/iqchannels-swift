@@ -64,7 +64,7 @@ struct FCRView: View {
                             .italic(disabledRatingIsItalic)
                             .multilineTextAlignment(disabledRatingAlignment)
                             .frame(height: 40)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center)
                             .background(disabledRatingBackgroundColor)
                             .cornerRadius(disabledRatingRadius)
                             .overlay(
@@ -79,7 +79,7 @@ struct FCRView: View {
                             .font(.system(size: disabledRatingFontSize))
                             .multilineTextAlignment(disabledRatingAlignment)
                             .frame(height: 40)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center)
                             .background(disabledRatingBackgroundColor)
                             .cornerRadius(disabledRatingRadius)
                             .overlay(

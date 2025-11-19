@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct IQStyleModel: Decodable {
+    let appBar: AppBarStyle?
     let chat: ChatStyle?
     let messages: MessagesStyle?
     let answer: AnswerStyle?
@@ -20,6 +21,7 @@ struct IQStyleModel: Decodable {
     var theme: Apperance?
 
     enum CodingKeys: String, CodingKey {
+        case appBar = "app_bar"
         case chat
         case messages
         case answer
@@ -34,6 +36,25 @@ struct IQStyleModel: Decodable {
     enum Apperance: String, Decodable {
         case light, dark, system
     }
+    
+    struct AppBarStyle: Decodable {
+        let background: Theme?
+        let backButton: Theme?
+        let statusLabel: Text?
+        let titleLabel: Text?
+        let languageButton: Theme?
+        let languageButtonText: Text?
+        
+
+        enum CodingKeys: String, CodingKey {
+            case background
+            case backButton = "back_button"
+            case statusLabel = "status_label"
+            case titleLabel = "title_label"
+            case languageButton = "language_button"
+            case languageButtonText = "language_button_text"
+        }
+    }
 
     struct ChatStyle: Decodable {
         let background: Theme?
@@ -42,8 +63,8 @@ struct IQStyleModel: Decodable {
         let chatLoader: Theme?
         let iconOperator: URL?
         let systemText: Text?
-        let statusLabel: Text?
-        let titleLabel: Text?
+        let scrollDownButtonBackground: ContainerStyle?
+        let scrollDownButtonIconColor: Theme?
         
 
         enum CodingKeys: String, CodingKey {
@@ -53,8 +74,8 @@ struct IQStyleModel: Decodable {
             case chatLoader = "chat_loader"
             case iconOperator = "icon_operator"
             case systemText = "system_text"
-            case statusLabel = "status_label"
-            case titleLabel = "title_label"
+            case scrollDownButtonBackground = "scroll_down_button_background"
+            case scrollDownButtonIconColor = "scroll_down_button_icon_color"
         }
     }
 
@@ -78,6 +99,13 @@ struct IQStyleModel: Decodable {
         let textFileStateOnCheckingOperator: Text?
         let textFileStateSentForCheckingOperator: Text?
         let textFileStateCheckErrorOperator: Text?
+        let checkmarkRead: Theme?
+        let checkmarkReceived: Theme?
+        let sending: Theme?
+        let errorIcon: Text?
+        let errorBackground: Theme?
+        let errorPopupMenuBackground: ContainerStyle?
+        let errorPopupMenuText: Text?
 
         enum CodingKeys: String, CodingKey {
             case backgroundOperator = "background_operator"
@@ -99,6 +127,13 @@ struct IQStyleModel: Decodable {
             case textFileStateOnCheckingOperator = "text_file_state_on_checking_operator"
             case textFileStateSentForCheckingOperator = "text_file_state_sent_for_checking_operator"
             case textFileStateCheckErrorOperator = "text_file_state_check_error_operator"
+            case checkmarkRead = "checkmark_read"
+            case checkmarkReceived = "checkmark_received"
+            case sending = "sending"
+            case errorIcon = "error_icon"
+            case errorBackground = "error_background"
+            case errorPopupMenuBackground = "error_popup_menu_background"
+            case errorPopupMenuText = "error_popup_menu_text"
         }
     }
 
@@ -168,19 +203,21 @@ struct IQStyleModel: Decodable {
     }
 
     struct ToolsToMessageStyle: Decodable {
-        let iconSent: URL?
-        let iconClip: URL?
         let background: Theme?
-        let backgroundIcon: Theme?
+        let iconSent: URL?
+        let backgroundIconSent: ContainerStyle?
+        let iconClip: URL?
+        let backgroundIconClip: ContainerStyle?
         let backgroundInput: ContainerStyle?
         let textInput: Text?
         let cursorColor: Theme?
 
         enum CodingKeys: String, CodingKey {
-            case iconSent = "icon_sent"
-            case iconClip = "icon_clip"
             case background
-            case backgroundIcon = "background_icon"
+            case iconSent = "icon_sent"
+            case backgroundIconSent = "background_icon_sent"
+            case iconClip = "icon_clip"
+            case backgroundIconClip = "background_icon_clip"
             case backgroundInput = "background_input"
             case textInput = "text_input"
             case cursorColor = "cursor_color"
@@ -191,11 +228,15 @@ struct IQStyleModel: Decodable {
         let titleError: Text?
         let textError: Text?
         let iconError: URL?
+        let backgroundButtonError: ContainerStyle?
+        let textButtonError: Text?
 
         enum CodingKeys: String, CodingKey {
             case titleError = "title_error"
             case textError = "text_error"
             case iconError = "icon_error"
+            case backgroundButtonError = "background_button_error"
+            case textButtonError = "text_button_error"
         }
     }
 
@@ -290,5 +331,32 @@ public func stringToAlignment(stringAlignment: String?) -> TextAlignment? {
         return .trailing
     default:
         return nil
+    }
+}
+
+public func textAlignmentToAlignment(textAlignment: TextAlignment?) -> Alignment? {
+    switch textAlignment {
+    case .leading:
+        return .leading
+    case .center:
+        return .center
+    case .trailing:
+        return .trailing
+    default:
+        return nil
+    }
+}
+
+
+public func textAlignmentToHorizontalAlignment(textAlignment: TextAlignment?) -> HorizontalAlignment {
+    switch textAlignment {
+    case .leading:
+        return .leading
+    case .center:
+        return .center
+    case .trailing:
+        return .trailing
+    default:
+        return .leading
     }
 }

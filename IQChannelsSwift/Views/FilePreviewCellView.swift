@@ -89,9 +89,9 @@ struct FilePreviewCellView: View {
         return self.isSender ? clientIsItalic : operatorIsItalic
     }
     var fileNameAligment: TextAlignment {
-        let clientIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameClient?.textAlign) ?? .leading
-        let operatorIsItalic = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
-        return self.isSender ? clientIsItalic : operatorIsItalic
+        let clientAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameClient?.textAlign) ?? .leading
+        let operatorAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFilenameOperator?.textAlign) ?? .leading
+        return self.isSender ? clientAlignment : operatorAlignment
     }
     
     
@@ -123,6 +123,11 @@ struct FilePreviewCellView: View {
         let clientIsItalic = IQStyle.model?.messagesFile?.textFileSizeClient?.textStyle?.italic ?? false
         let operatorIsItalic = IQStyle.model?.messagesFile?.textFileSizeOperator?.textStyle?.italic ?? false
         return self.isSender ? clientIsItalic : operatorIsItalic
+    }
+    var fileSizeAlignment: TextAlignment {
+        let clientAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFileSizeClient?.textAlign) ?? .leading
+        let operatorAlignment = stringToAlignment(stringAlignment: IQStyle.model?.messagesFile?.textFileSizeOperator?.textAlign) ?? .leading
+        return self.isSender ? clientAlignment : operatorAlignment
     }
     
     
@@ -241,7 +246,7 @@ struct FilePreviewCellView: View {
                 }
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: textAlignmentToHorizontalAlignment(textAlignment: fileSizeAlignment), spacing: 4) {
                 if #available(iOS 16.0, *) {
                     Text(file.name ?? "")
                         .foregroundColor(fileNameTextColor)
@@ -262,10 +267,13 @@ struct FilePreviewCellView: View {
                         .font(.system(size: fileSizeFontSize))
                         .bold(fileSizeIsBold)
                         .italic(fileSizeIsItalic)
+                        .multilineTextAlignment(fileSizeAlignment)
+                        
                 } else {
                     Text(file.convertedSize)
                         .foregroundColor(fileSizeTextColor)
                         .font(.system(size: fileSizeFontSize))
+                        .multilineTextAlignment(fileSizeAlignment)
                 }
             }
         }

@@ -90,13 +90,17 @@ struct MessageStatusView: View {
             }
             
             if isSender {
+                let checkmarkReadColor = IQStyle.getColor(theme: IQStyle.model?.messages?.checkmarkRead) ?? textColor
+                let checkmarkReceivedColor = IQStyle.getColor(theme: IQStyle.model?.messages?.checkmarkReceived) ?? textColor
+                let sendingColor = IQStyle.getColor(theme: IQStyle.model?.messages?.sending) ?? textColor
+                
                 if message.isLoading {
                     if !message.error {
                         Image(name: "loading")
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .foregroundColor(textColor)
+                            .foregroundColor(sendingColor)
                             .frame(width: 12, height: 12)
                             .rotationEffect(Angle(degrees: showMessageLoading ? 360 : 0.0))
                             .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: showMessageLoading)
@@ -108,7 +112,7 @@ struct MessageStatusView: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(textColor)
+                        .foregroundColor((message.isRead ?? false) ? checkmarkReadColor : checkmarkReceivedColor)
                         .frame(width: 12, height: 16)
                 }
             }

@@ -367,6 +367,19 @@ class IQChatDetailViewController: IQViewController {
             present(controller, animated: true)
         }
     }
+    
+    private func setupNavigationBarAppearance() {
+        let backgroundColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.background) ?? UIColor(hex: "ffffff")
+        
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = backgroundColor
+
+        navigationItem.standardAppearance = appearance
+        navigationItem.scrollEdgeAppearance = appearance
+        navigationItem.compactAppearance = appearance
+    }
 }
 
 // MARK: - CHAT DETAIL VIEW DELEGATE

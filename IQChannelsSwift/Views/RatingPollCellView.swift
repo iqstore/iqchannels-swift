@@ -65,7 +65,7 @@ struct RatingPollCellView: View {
     var titleIsItalic: Bool {
         return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
-    var titleAligment: TextAlignment {
+    var titleAlignment: TextAlignment {
         return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
@@ -83,7 +83,7 @@ struct RatingPollCellView: View {
     var thanksIsItalic: Bool {
         return IQStyle.model?.rating?.feedbackThanksText?.textStyle?.italic ?? false
     }
-    var thanksAligment: TextAlignment {
+    var thanksAlignment: TextAlignment {
         return stringToAlignment(stringAlignment: IQStyle.model?.rating?.feedbackThanksText?.textAlign) ?? .leading
     }
     
@@ -144,16 +144,16 @@ struct RatingPollCellView: View {
                             .font(.system(size: titleFontSize))
                             .bold(titleIsBold)
                             .italic(titleIsItalic)
-                            .multilineTextAlignment(titleAligment)
+                            .multilineTextAlignment(titleAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
                     } else {
                         Text(IQLanguageTexts.model.ratingOfferTitle ?? "Желаете пройти опрос?")
                             .foregroundColor(titleColor)
                             .font(.system(size: titleFontSize))
-                            .multilineTextAlignment(titleAligment)
+                            .multilineTextAlignment(titleAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
                     }
                     OfferView() { value in
                         needShowOffer = false
@@ -171,9 +171,8 @@ struct RatingPollCellView: View {
                             .font(.system(size: thanksFontSize))
                             .bold(thanksIsBold)
                             .italic(thanksIsItalic)
-                            .multilineTextAlignment(thanksAligment)
+                            .multilineTextAlignment(thanksAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                     let ticketRatingValue = pollResult
@@ -187,9 +186,8 @@ struct RatingPollCellView: View {
                         Text(thanksText)
                             .foregroundColor(thanksColor)
                             .font(.system(size: thanksFontSize))
-                            .multilineTextAlignment(thanksAligment)
+                            .multilineTextAlignment(thanksAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                     let ticketRatingValue = pollResult
@@ -209,16 +207,16 @@ struct RatingPollCellView: View {
                             .font(.system(size: titleFontSize))
                             .bold(titleIsBold)
                             .italic(titleIsItalic)
-                            .multilineTextAlignment(titleAligment)
+                            .multilineTextAlignment(titleAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
                     } else {
                         Text(textPoll)
                             .foregroundColor(titleColor)
                             .font(.system(size: titleFontSize))
-                            .multilineTextAlignment(titleAligment)
+                            .multilineTextAlignment(titleAlignment)
                             .minimumScaleFactor(0.8)
-                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
                     }
                     
                     switch questionType {
