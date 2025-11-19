@@ -7,6 +7,8 @@ import SafariServices
 class IQChatDetailViewController: IQViewController {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let viewModel: IQChatDetailViewModel
     
     private let output: IQChannelsManagerDetailOutput

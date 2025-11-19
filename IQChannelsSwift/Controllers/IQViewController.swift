@@ -19,6 +19,14 @@ public class IQViewController: UIViewController {
         setupNavBar()
     }
     
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle {
+            setupNavBar()
+        }
+    }
+    
     func setupNavBar() {}
     func setupView() {}
     func bindViewModel() {}

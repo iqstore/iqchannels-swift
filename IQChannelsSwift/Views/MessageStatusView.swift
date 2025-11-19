@@ -3,6 +3,8 @@ import SwiftUI
 struct MessageStatusView: View {
     
     // MARK: - PROPERTIES
+    @Environment(\.colorScheme) var colorScheme
+    
     private let message: IQMessage
     private let isSender: Bool
     private let withBackground: Bool
