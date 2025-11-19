@@ -28,9 +28,9 @@ class IQChatDetailViewController: IQViewController {
         label.text = viewModel.chatLabel
         
         
-        let fontSize = CGFloat(IQStyle.model?.chat?.titleLabel?.textSize ?? 15)
-        let isBold = IQStyle.model?.chat?.titleLabel?.textStyle?.bold ?? false
-        let isItalic = IQStyle.model?.chat?.titleLabel?.textStyle?.italic ?? false
+        let fontSize = CGFloat(IQStyle.model?.appBar?.titleLabel?.textSize ?? 15)
+        let isBold = IQStyle.model?.appBar?.titleLabel?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.appBar?.titleLabel?.textStyle?.italic ?? false
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
 
@@ -50,16 +50,16 @@ class IQChatDetailViewController: IQViewController {
         }
         
         
-        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.chat?.titleLabel?.color) ?? UIColor(hex: "242729")
+        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.titleLabel?.color) ?? UIColor(hex: "242729")
         return label
     }()
     
     private lazy var statusLabel: UILabel = {
         let label: UILabel = .init()
         
-        let fontSize = CGFloat(IQStyle.model?.chat?.statusLabel?.textSize ?? 15)
-        let isBold = IQStyle.model?.chat?.statusLabel?.textStyle?.bold ?? false
-        let isItalic = IQStyle.model?.chat?.statusLabel?.textStyle?.italic ?? false
+        let fontSize = CGFloat(IQStyle.model?.appBar?.statusLabel?.textSize ?? 15)
+        let isBold = IQStyle.model?.appBar?.statusLabel?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.appBar?.statusLabel?.textStyle?.italic ?? false
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
 
@@ -78,7 +78,7 @@ class IQChatDetailViewController: IQViewController {
             label.font = systemFont
         }
         
-        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.chat?.statusLabel?.color) ?? UIColor(hex: "919399")
+        label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.statusLabel?.color) ?? UIColor(hex: "919399")
         return label
     }()
     
@@ -204,6 +204,7 @@ class IQChatDetailViewController: IQViewController {
                 self.languageButton.setTitle(name, for: .normal)
             }
         }
+        setupNavigationBarAppearance()
         navigationItem.titleView = titleStackView
         navigationItem.leftBarButtonItem = .init(customView: backButton)
     }
