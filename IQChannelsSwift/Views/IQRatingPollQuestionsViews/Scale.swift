@@ -34,7 +34,7 @@ struct ScaleView: View {
     var minTextIsItalic: Bool {
         return IQStyle.model?.rating?.scaleMinText?.textStyle?.italic ?? false
     }
-    var minTextAligment: TextAlignment {
+    var minTextAlignment: TextAlignment {
         return stringToAlignment(stringAlignment: IQStyle.model?.rating?.scaleMinText?.textAlign) ?? .leading
     }
     
@@ -52,7 +52,7 @@ struct ScaleView: View {
     var maxTextIsItalic: Bool {
         return IQStyle.model?.rating?.scaleMaxText?.textStyle?.italic ?? false
     }
-    var maxTextAligment: TextAlignment {
+    var maxTextAlignment: TextAlignment {
         return stringToAlignment(stringAlignment: IQStyle.model?.rating?.scaleMaxText?.textAlign) ?? .trailing
     }
     
@@ -201,14 +201,14 @@ struct ScaleView: View {
                     .bold(minTextIsBold)
                     .italic(minTextIsItalic)
                     .foregroundColor(minTextColor)
-                    .frame(maxWidth: .infinity, alignment: textAlignments[minTextAligment] ?? .leading)
-                    .multilineTextAlignment(minTextAligment)
+                    .frame(maxWidth: .infinity, alignment: textAlignments[minTextAlignment] ?? .leading)
+                    .multilineTextAlignment(minTextAlignment)
             } else {
                 Text(minValueText)
                     .font(.system(size: minTextFontSize))
                     .foregroundColor(minTextColor)
-                    .frame(maxWidth: .infinity, alignment: textAlignments[minTextAligment] ?? .leading)
-                    .multilineTextAlignment(minTextAligment)
+                    .frame(maxWidth: .infinity, alignment: textAlignments[minTextAlignment] ?? .leading)
+                    .multilineTextAlignment(minTextAlignment)
             }
             
             Spacer()
@@ -219,14 +219,14 @@ struct ScaleView: View {
                     .bold(maxTextIsBold)
                     .italic(maxTextIsItalic)
                     .foregroundColor(maxTextColor)
-                    .frame(maxWidth: .infinity, alignment: textAlignments[maxTextAligment] ?? .trailing)
-                    .multilineTextAlignment(maxTextAligment)
+                    .frame(maxWidth: .infinity, alignment: textAlignments[maxTextAlignment] ?? .trailing)
+                    .multilineTextAlignment(maxTextAlignment)
             } else {
                 Text(maxValueText)
                     .font(.system(size: maxTextFontSize))
                     .foregroundColor(maxTextColor)
-                    .frame(maxWidth: .infinity, alignment: textAlignments[maxTextAligment] ?? .trailing)
-                    .multilineTextAlignment(maxTextAligment)
+                    .frame(maxWidth: .infinity, alignment: textAlignments[maxTextAlignment] ?? .trailing)
+                    .multilineTextAlignment(maxTextAlignment)
             }
         }
         

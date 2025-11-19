@@ -86,6 +86,7 @@ struct ChatInputView: View {
             Button {
                 onAttachmentCompletion?()
             } label: {
+                let backgroundColorClip = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconClip?.color) ?? Color.clear
                 if let iconClipUrl = IQStyle.model?.toolsToMessage?.iconClip {
                     AnimatedImage(url: iconClipUrl)
                         .resizable()
@@ -94,7 +95,7 @@ struct ChatInputView: View {
                         .scaledToFit()
                         .frame(width: 24, height: 24)
                         .padding(8)
-                        .background(Color(hex: "F4F4F8"))
+                        .background(backgroundColorClip)
                         .clipShape(Circle())
                 } else {
                     Image(name: "attachment")
@@ -102,7 +103,7 @@ struct ChatInputView: View {
                         .scaledToFit()
                         .frame(width: 24, height: 24)
                         .padding(8)
-                        .background(Color(hex: "F4F4F8"))
+                        .background(backgroundColorClip)
                         .clipShape(Circle())
                 }
             }
@@ -151,7 +152,7 @@ struct ChatInputView: View {
             
             Group {
                 if showSendButton {
-                    let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIcon) ?? Color(hex: "242729")
+                    let backgroundColorSend = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconSent?.color) ?? Color(hex: "242729")
                     Button {
                         onSendCompletion?()
                     } label: {
@@ -163,7 +164,7 @@ struct ChatInputView: View {
                                 .scaledToFit()
                                 .frame(width: 24, height: 24)
                                 .padding(8)
-                                .background(backgroundColor)
+                                .background(backgroundColorSend)
                                 .clipShape(Circle())
                         } else {
                             Image(name: "up_arrow")
@@ -171,7 +172,7 @@ struct ChatInputView: View {
                                 .scaledToFit()
                                 .frame(width: 24, height: 24)
                                 .padding(8)
-                                .background(backgroundColor)
+                                .background(backgroundColorSend)
                                 .clipShape(Circle())
                         }
                     }
@@ -221,12 +222,14 @@ struct ChatInputView: View {
                         .bold(senderIsBold)
                         .italic(senderIsItalic)
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAlignment) ?? .leading)
                 } else {
                     Text(message.senderName)
                         .font(.system(size: senderFontSize))
                         .foregroundColor(senderTextColor)
                         .multilineTextAlignment(senderAlignment)
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAlignment) ?? .leading)
                 }
                 
                 let messageTextColor = IQStyle.getColor(theme: IQStyle.model?.answer?.textMessage?.color) ?? Color(hex: "242729")
@@ -243,12 +246,14 @@ struct ChatInputView: View {
                         .bold(senderIsBold)
                         .italic(senderIsItalic)
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAlignment) ?? .leading)
                 } else {
                     Text(message.messageText)
                         .font(.system(size: messageFontSize))
                         .foregroundColor(messageTextColor)
                         .multilineTextAlignment(senderAlignment)
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAlignment) ?? .leading)
                 }
             }
             

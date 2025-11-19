@@ -44,7 +44,7 @@ struct RatingCellView: View {
     var titleIsItalic: Bool {
         return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
-    var titleAligment: TextAlignment {
+    var titleAlignment: TextAlignment {
         return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
@@ -58,13 +58,15 @@ struct RatingCellView: View {
                     .minimumScaleFactor(0.8)
                     .bold(titleIsBold)
                     .italic(titleIsItalic)
-                    .multilineTextAlignment(titleAligment)
+                    .multilineTextAlignment(titleAlignment)
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
             } else {
                 Text("Пожалуйста, оцените качество консультации")
                     .foregroundColor(titleColor)
                     .font(.system(size: titleFontSize))
                     .minimumScaleFactor(0.8)
-                    .multilineTextAlignment(titleAligment)
+                    .multilineTextAlignment(titleAlignment)
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
             }
             
             HStack(spacing: 8) {

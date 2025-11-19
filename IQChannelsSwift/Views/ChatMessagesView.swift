@@ -173,6 +173,12 @@ struct ChatMessagesView: View {
     
     @ViewBuilder
     private func getScrollDownButton(proxy: ScrollViewProxy) -> some View {
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.chat?.scrollDownButtonBackground?.color) ?? Color(hex: "ffffff")
+        let borderColor = IQStyle.getColor(theme: IQStyle.model?.chat?.scrollDownButtonBackground?.border?.color) ?? Color(hex: "E4E8ED")
+        let borderSize = CGFloat(IQStyle.model?.chat?.scrollDownButtonBackground?.border?.size ?? 1)
+        
+        let foregroundColor = IQStyle.getColor(theme: IQStyle.model?.chat?.scrollDownButtonIconColor) ?? Color(hex: "000000")
+        
         if isScrollDownVisible {
             Button {
                 DispatchQueue.main.async {
@@ -183,13 +189,15 @@ struct ChatMessagesView: View {
             } label: {
                 ZStack(alignment: .topTrailing) {
                     Image(name: "chevron_down")
+                        .renderingMode(.template)
                         .resizable()
                         .scaledToFill()
+                        .foregroundColor(foregroundColor)
                         .frame(width: 24, height: 24)
                         .padding(8)
-                        .background(Color.white)
+                        .background(backgroundColor)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color(hex: "E4E8ED"), lineWidth: 1))
+                        .overlay(Circle().stroke(borderColor, lineWidth: borderSize))
                     
                     if !viewModel.scrollDotHidden {
                         Circle()
@@ -231,7 +239,7 @@ struct ChatMessagesView: View {
                 .italic(isItalic)
                 .frame(height: 24)
                 .frame(maxWidth: .infinity)
-                .background(Color(hex: "F4F4F8"))
+//                .background(Color(hex: "F4F4F8"))
                 .padding(.top, 12)
                 .padding(.horizontal, -16)
         } else {
@@ -241,7 +249,7 @@ struct ChatMessagesView: View {
                 .multilineTextAlignment(alignment)
                 .frame(height: 24)
                 .frame(maxWidth: .infinity)
-                .background(Color(hex: "F4F4F8"))
+//                .background(Color(hex: "F4F4F8"))
                 .padding(.top, 12)
                 .padding(.horizontal, -16)
         }
@@ -277,37 +285,81 @@ struct ChatMessagesView: View {
     
     @ViewBuilder
     private func getMenuView() -> some View {
+        let textColor = IQStyle.getColor(theme: IQStyle.model?.messages?.errorPopupMenuText?.color) ?? Color(hex: "000000")
+        let fontSize = CGFloat(IQStyle.model?.messages?.errorPopupMenuText?.textSize ?? 16)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.messages?.errorPopupMenuText?.textAlign) ?? .leading
+        let isBold = IQStyle.model?.messages?.errorPopupMenuText?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.messages?.errorPopupMenuText?.textStyle?.italic ?? false
+        
+        
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.messages?.errorPopupMenuBackground?.color) ?? Color(hex: "f1f1f1")
+        let radius = IQStyle.model?.messages?.errorPopupMenuBackground?.border?.borderRadius ?? 12
+        let borderSize = IQStyle.model?.messages?.errorPopupMenuBackground?.border?.size ?? 1
+        let borderColor = IQStyle.getColor(theme: IQStyle.model?.messages?.errorPopupMenuBackground?.border?.color) ?? Color(hex: "cccccc")
+        
+        
+        
+        
+        
         VStack(spacing: 8) {
             Button(action: {
                 delegate?.onResendMessage(isMenuVisibleMessage!.withError(false))
                 isMenuVisibleMessage = nil
             }) {
-                Text(IQLanguageTexts.model.resend ?? "Повторить отправку")
-                    .frame(width: 200, alignment: .leading)
-                    .font(.system(size: 16))
-                    .padding(3)
-                    .foregroundColor(.black)
-                    .cornerRadius(8)
+                if #available(iOS 16.0, *) {
+                    Text(IQLanguageTexts.model.resend ?? "Повторить отправку")
+                        .frame(width: 200)
+                        .font(.system(size: fontSize))
+                        .padding(3)
+                        .foregroundColor(textColor)
+                        .bold(isBold)
+                        .italic(isItalic)
+                        .multilineTextAlignment(alignment)
+                } else {
+                    Text(IQLanguageTexts.model.resend ?? "Повторить отправку")
+                        .frame(width: 200)
+                        .font(.system(size: fontSize))
+                        .padding(3)
+                        .foregroundColor(textColor)
+                        .multilineTextAlignment(alignment)
+                }
             }
-            Divider()
+//            Divider()
 
             Button(action: {
                 delegate?.onCancelSend(isMenuVisibleMessage!)
                 isMenuVisibleMessage = nil
             }) {
-                Text(IQLanguageTexts.model.delete ?? "Удалить")
-                    .frame(width: 200, alignment: .leading)
-                    .font(.system(size: 16))
-                    .padding(3)
-                    .foregroundColor(.black)
-                    .cornerRadius(8)
+                if #available(iOS 16.0, *) {
+                    Text(IQLanguageTexts.model.delete ?? "Удалить")
+                        .frame(width: 200)
+                        .font(.system(size: fontSize))
+                        .padding(3)
+                        .foregroundColor(textColor)
+                        .bold(isBold)
+                        .italic(isItalic)
+                        .multilineTextAlignment(alignment)
+                } else {
+                    Text(IQLanguageTexts.model.delete ?? "Удалить")
+                        .frame(width: 200)
+                        .font(.system(size: fontSize))
+                        .padding(3)
+                        .foregroundColor(textColor)
+                        .multilineTextAlignment(alignment)
+                }
             }
         }
         .animation(.easeInOut(duration: 0.1), value: true)
         .frame(width: 200)
         .padding(6)
-        .background(Color(hex: "f1f1f1"))
-        .cornerRadius(12)
+        .background(backgroundColor)
+        
+        .cornerRadius(radius)
         .shadow(radius: 4)
+        
+        .overlay(
+            RoundedRectangle(cornerRadius: radius)
+                .stroke(borderColor, lineWidth: borderSize)
+        )
     }
 }

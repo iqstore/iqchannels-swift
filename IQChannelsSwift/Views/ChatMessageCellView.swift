@@ -43,6 +43,25 @@ struct ChatMessageCellView: View {
     }
     
     
+    
+    var errorIconBackgroundColor: Color {
+        return IQStyle.getColor(theme: IQStyle.model?.messages?.errorBackground) ?? Color(hex: "ff0000")
+    }
+    var errorTextColor: Color {
+        return IQStyle.getColor(theme: IQStyle.model?.messages?.errorIcon?.color) ?? Color(hex: "ffffff")
+    }
+    var errorFontSize: CGFloat {
+        return CGFloat(IQStyle.model?.messages?.errorIcon?.textSize ?? 13)
+    }
+    var errorIsBold: Bool {
+        return IQStyle.model?.messages?.errorIcon?.textStyle?.bold ?? false
+    }
+    var errorIsItalic: Bool {
+        return IQStyle.model?.messages?.errorIcon?.textStyle?.italic ?? false
+    }
+    
+    
+    
     var avatarURL: URL? {
         return IQStyle.model?.chat?.iconOperator ?? message.user?.avatarURL
     }
@@ -76,12 +95,14 @@ struct ChatMessageCellView: View {
                                     .bold(senderIsBold)
                                     .italic(senderIsItalic)
                                     .padding(.leading, 12)
+                                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAligment) ?? .leading)
                             } else {
                                 Text(message.senderName)
                                     .font(.system(size: senderFontSize))
                                     .foregroundColor(senderTextColor)
                                     .multilineTextAlignment(senderAligment)
                                     .padding(.leading, 12)
+                                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: senderAligment) ?? .leading)
                             }
                         }
                         
@@ -170,12 +191,20 @@ struct ChatMessageCellView: View {
         }) {
             ZStack {
                 Circle()
-                    .fill(Color.red)
-                    .frame(width: 30, height: 30)
+                    .fill(errorIconBackgroundColor)
+                    .frame(width: 40, height: 40)
 
-                Text("!")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                if #available(iOS 16.0, *) {
+                    Text("!")
+                        .foregroundColor(errorTextColor)
+                        .font(.system(size: errorFontSize, weight: .bold))
+                        .bold(errorIsBold)
+                        .italic(errorIsItalic)
+                } else {
+                    Text("!")
+                        .foregroundColor(errorTextColor)
+                        .font(.system(size: errorFontSize, weight: .bold))
+                }
             }
         }
     }

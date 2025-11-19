@@ -52,10 +52,16 @@ struct SentRatingButton: View {
                     .foregroundColor(disabled ? disabledRatingTextColor : enabledRatingTextColor)
                     .font(.system(size: disabled ? disabledRatingFontSize : enabledRatingFontSize))
                     .frame(height: 40)
-                    .frame(maxWidth: .infinity)
                     .bold(disabled ? disabledRatingIsBold : enabledRatingIsBold)
                     .italic(disabled ? disabledRatingIsItalic : enabledRatingIsItalic)
                     .multilineTextAlignment(disabled ? disabledRatingAlignment : enabledRatingAlignment)
+
+                    .frame(maxWidth: .infinity, alignment:
+                            disabled ?
+                           textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                            :
+                            textAlignmentToAlignment(textAlignment: enabledRatingAlignment) ?? .center
+                    )
                     .background(disabled ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
                     .cornerRadius(disabled ? disabledRatingRadius : enabledRatingRadius)
                     .overlay(
@@ -69,8 +75,13 @@ struct SentRatingButton: View {
                     .foregroundColor(disabled ? disabledRatingTextColor : enabledRatingTextColor)
                     .font(.system(size: disabled ? disabledRatingFontSize : enabledRatingFontSize))
                     .frame(height: 40)
-                    .frame(maxWidth: .infinity)
                     .multilineTextAlignment(disabled ? disabledRatingAlignment : enabledRatingAlignment)
+                    .frame(maxWidth: .infinity, alignment:
+                            disabled ?
+                           textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                            :
+                            textAlignmentToAlignment(textAlignment: enabledRatingAlignment) ?? .center
+                    )
                     .background(disabled ? disabledRatingBackgroundColor : enabledRatingBackgroundColor)
                     .cornerRadius(disabled ? disabledRatingRadius : enabledRatingRadius)
                     .overlay(

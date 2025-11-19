@@ -63,8 +63,8 @@ struct OneOfListView: View {
                             .bold(disabledRatingIsBold)
                             .italic(disabledRatingIsItalic)
                             .multilineTextAlignment(disabledRatingAlignment)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center)
                             .frame(height: 40)
-                            .frame(maxWidth: .infinity)
                             .background(disabledRatingBackgroundColor)
                             .cornerRadius(disabledRatingRadius)
                             .overlay(
@@ -78,8 +78,8 @@ struct OneOfListView: View {
                             .foregroundColor(disabledRatingTextColor)
                             .font(.system(size: disabledRatingFontSize))
                             .multilineTextAlignment(disabledRatingAlignment)
+                            .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center)
                             .frame(height: 40)
-                            .frame(maxWidth: .infinity)
                             .background(disabledRatingBackgroundColor)
                             .cornerRadius(disabledRatingRadius)
                             .overlay(

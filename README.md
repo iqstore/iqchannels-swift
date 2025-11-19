@@ -363,11 +363,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "left",
       "text_style": {
         "bold": false,
         "italic": false
       }
+    },
+    "check_box_disabled": {       //Цвет неактивного чекбокса
+      "light": "#сссссс",
+      "dark": "#сссссс"
+    },
+    "check_box_enabled": {       //Цвет активного чекбокса
+      "light": "#0d35ff",
+      "dark": "#0d35ff"
     },
     "check_box_text": {       //Текст возле чекбокса
       "color": {
@@ -448,6 +455,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       }
     }
   },
+  "app_bar": {                 //Верхняя панель (Только iOS)
+    "background": {           //Фон панели
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "status_label": {         //Текст статуса 
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "title_label": {          //Заголовок в шапке чата
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
+  },
   "chat": {                   //Общий чат:
     "background": {           //Фон чата
       "light": "#FFFFFF",
@@ -486,29 +523,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "status_label": {         //Текст статуса в шапке чата
+    "scroll_down_button_background": { //Фон кнопки скролла вниз
       "color": {
-        "light": "#888888",
-        "dark": "#888888"
+        "light": "#FFFFE0",
+        "dark": "#808080"
       },
-      "text_size": 10,
-      "text_align": "center",
-      "text_style": {
-        "bold": false,
-        "italic": false
+      "border": {
+        "size": 1,
+        "color": {
+          "light": "#E4E8ED",
+          "dark": "#E4E8ED"
+        }
       }
     },
-    "title_label": {          //Заголовок в шапке чата
-      "color": {
-        "light": "#888888",
-        "dark": "#888888"
-      },
-      "text_size": 10,
-      "text_align": "center",
-      "text_style": {
-        "bold": false,
-        "italic": false
-      }
+    "scroll_down_button_icon_color": { //Цвет иконки у кнопки скролла вниз
+      "light": "#cccccc",
+      "dark": "#cccccc"
     }
   },
   "messages": {               //Сообщение отправка текста (стили применяются ко всем производным сообщениям):
@@ -527,7 +557,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       }
     },
     "background_client": {    //Фон контейнера (клиент)
-       "color": {
+      "color": {
         "light": "#242729",
         "dark": "#808080"
       },
@@ -570,7 +600,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -582,7 +611,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -594,7 +622,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -606,7 +633,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -618,7 +644,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -630,7 +655,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -648,7 +672,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_rejected_operator": { // Текст файла от оператора при статусе rejected
+    "text_file_state_rejected_operator": { //Текст файла от оператора при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -660,7 +684,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_on_checking_operator": { // Текст файла от оператора при статусе on_checking
+    "text_file_state_on_checking_operator": { //Текст файла от оператора при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -672,7 +696,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_sent_for_checking_operator": { // Текст файла от оператора при статусе sent_for_checking
+    "text_file_state_sent_for_checking_operator": { //Текст файла от оператора при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -684,7 +708,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_check_error_operator": { // Текст файла от оператора при статусе check_error
+    "text_file_state_check_error_operator": { //Текст файла от оператора при статусе check_error
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -696,7 +720,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_rejected_client": { // Текст файла от клиента при статусе rejected
+    "text_file_state_rejected_client": { //Текст файла от клиента при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -708,7 +732,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_on_checking_client": { // Текст файла от клиента при статусе on_checking
+    "text_file_state_on_checking_client": { //Текст файла от клиента при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -720,7 +744,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_sent_for_checking_client": { // Текст файла от клиента при статусе sent_for_checking
+    "text_file_state_sent_for_checking_client": { //Текст файла от клиента при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -732,7 +756,61 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "text_file_state_check_error_client": { // Текст файла от клиента при статусе check_error
+    "text_file_state_check_error_client": { //Текст файла от клиента при статусе check_error
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "checkmark_read": {                   //Цвет прочитаннной галочки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "checkmark_received": {                //Цвет доставленной галочки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "sending": {                          //Цвет кружочка загрузки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "error_icon": {                       //Восклицательный знак у ошибки сообщения
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "error_background": {                 //Фон иконки у ошибки сообщения
+      "light": "#FF0000",
+      "dark": "#FF0000"
+    },
+    "error_popup_menu_background": {       //Фон попап меню у ошибки сообщения
+      "color": {
+        "light": "#ffffff",
+        "dark": "#ffffff"
+      },
+      "border": {
+        "size": 1,
+        "color": {
+          "light": "#cccccc",
+          "dark": "#cccccc"
+        },
+        "border-radius": 10
+      }
+    },
+    "error_popup_menu_text": {             //Текст кнопок в попап меню у ошибки сообщения
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -778,6 +856,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     "left_line": {                        //Прямая вертикальная линия рядом с сообщением, на которое отвечаем - цвет
       "light": "#FF0000",
       "dark": "#FF0000"
+    },
+    "text_operator_typing": {             //Текст "Оператор печатает..." (Только Android)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "background_operator_typing": {       //Фон плашки "Оператор печатает..." (Только Android)
+      "light": "#FFFACD",
+      "dark": "#808080"
     }
   },
   "messages_file": {                      //Сообщение отправка файла:
@@ -1004,6 +1098,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           "dark": "#FFFFFF"
         },
         "text_size": 10,
+        "text_align": "center",
         "text_style": {
           "bold": false,
           "italic": false
@@ -1015,13 +1110,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
           "dark": "#FFFFFF"
         },
         "text_size": 10,
+        "text_align": "center",
         "text_style": {
           "bold": false,
           "italic": false
         }
       }
     },
-    "scale_min_text": {                   //Текст низкой оценки
+    "scale_min_text": {                   //Текст низкой оценки (Scale)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -1033,7 +1129,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "scale_max_text": {                   //Текст высокой оценки
+    "scale_max_text": {                   //Текст высокой оценки (Scale)
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -1076,7 +1172,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "dark": "#000000"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -1089,11 +1184,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       "dark": "#696969"
     },
     "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png", //Иконка-кнопка для отправки – вид кнопки(изменяется с помощью файла с иконкой)
-    "background_icon": {                  //Фон иконки для отправки
-      "light": "#DEB887",
-      "dark": "#696969"
-    },
-    "background_input": {                 //Фон области ввода текста
+    "background_icon_sent": {                  //Фон иконки для отправки
       "color": {
         "light": "#DEB887",
         "dark": "#696969"
@@ -1107,7 +1198,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "border-radius": 0
       }
     },
-    "text_input": {                       //Текст в поле ввода
+    "background_input": {                  //Фон области ввода текста
+      "color": {
+        "light": "#DEB887",
+        "dark": "#696969"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "text_input": {                        //Текст в поле ввода
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -1119,7 +1224,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       }
     },
     "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png",  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
-    "cursor_color": {                     //Цвет курсора
+    "background_icon_clip": {                  //Фон иконки для выбора вложений
+      "color": {
+        "light": "#DEB887",
+        "dark": "#696969"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "cursor_color": {                     //Цвет курсора (Только iOS)
       "light": "#525252",
       "dark": "#525252"
     }
@@ -1149,14 +1268,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png",          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
+    "background_button_error": {                  //Фон кнопки
+      "color": {
+        "light": "#cccccc",
+        "dark": "#cccccc"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "text_button_error": {                       //Текст кнопки
+      "color": {
+        "light": "#000000",
+        "dark": "#000000"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
   },
   "single-choice": {                    //Single-choice сообщение:
     "background_button": {              //Фон кнопки Single-choice
       "light": "#FFFF00",
       "dark": "#00FFFF"
     },
-    "border_button": {                  //Граница кнопки Single-choice
+    "border_button": {                  //Граница IVR кнопки Single-choice (isDropDown)
       "size": 3,
       "color": {
         "light": "#000000",
