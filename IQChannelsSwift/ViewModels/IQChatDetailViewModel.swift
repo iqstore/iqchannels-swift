@@ -31,6 +31,8 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var chatLabel: String = ""
     @Published var availableLanguages: [IQLanguage]?
     @Published var selectedLanguage: IQLanguage?
+    @Published var showBottomTypingBar: Bool = false
+    
     
     // MARK: - METHODS
     func showMessageControl(_ controlInfo: MessageControlInfo) {

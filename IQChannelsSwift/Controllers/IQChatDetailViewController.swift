@@ -257,13 +257,13 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$typingUser
             .receive(on: DispatchQueue.main)
             .sink { [weak self] user in
-                guard let self else { return }
+                guard let self, !viewModel.showBottomTypingBar else { return }
                 UIView.transition(with: titleStackView,
                                   duration: 0,
                                   options: .transitionCrossDissolve,
                                   animations: {
                     if (user != nil){
-                        self.statusLabel.text = "\(user?.displayName ?? "Оператор") \(IQLanguageTexts.model.operatorTyping ?? "печатает")..."
+                        self.statusLabel.text = "\(user?.displayName ?? "Оператор") \(IQLanguageTexts.model.operatorTyping ?? "печатает...")"
                     } else {
                         self.statusLabel.text = IQChannelsState.authenticated.description
                     }

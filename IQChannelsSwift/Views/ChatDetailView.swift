@@ -31,7 +31,19 @@ struct ChatDetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                ChatMessagesView(delegate: delegate)
+                
+                if(viewModel.showBottomTypingBar){
+                    ZStack(alignment: .bottom){
+                        ChatMessagesView(delegate: delegate)
+                        
+                        if let typingUser = viewModel.typingUser {
+                            getTypingView(user: typingUser)
+                                .zIndex(2)
+                        }
+                    }
+                } else {
+                    ChatMessagesView(delegate: delegate)
+                }
                 
                 ChatInputView(text: $viewModel.inputText,
                               messageToReply: $viewModel.messageToReply,
@@ -114,6 +126,43 @@ struct ChatDetailView: View {
         .shadow(radius: 10)
         .padding(16)
         .transition(.move(edge: .top))
+    }
+    
+    @ViewBuilder
+    private func getTypingView(user: IQUser) -> some View {
+        let textColor = IQStyle.getColor(theme: IQStyle.model?.answer?.textOperatorTyping?.color) ?? Color(hex: "242729")
+        let fontSize = CGFloat(IQStyle.model?.answer?.textOperatorTyping?.textSize ?? 17)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.answer?.textOperatorTyping?.textAlign) ?? .leading
+        let isBold = IQStyle.model?.answer?.textOperatorTyping?.textStyle?.bold ?? false
+        let isItalic = IQStyle.model?.answer?.textOperatorTyping?.textStyle?.italic ?? false
+        
+        let backgroundColor = IQStyle.getColor(theme: IQStyle.model?.answer?.backgroundOperatorTyping) ?? Color.white
+        
+        ZStack {
+            if #available(iOS 16.0, *) {
+                Text("\(user.displayName ?? "Оператор") \(IQLanguageTexts.model.operatorTyping ?? "печатает...")")
+                    .font(.system(size: fontSize))
+                    .foregroundColor(textColor)
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 12)
+                    .multilineTextAlignment(alignment)
+                    .bold(isBold)
+                    .italic(isItalic)
+                    .lineLimit(1)
+                    .padding(.horizontal, 48)
+            } else {
+                Text("\(user.displayName ?? "Оператор") \(IQLanguageTexts.model.operatorTyping ?? "печатает...")")
+                    .font(.system(size: fontSize))
+                    .foregroundColor(textColor)
+                    .padding(.vertical, 3)
+                    .padding(.horizontal, 12)
+                    .multilineTextAlignment(alignment)
+                    .lineLimit(1)
+                    .padding(.horizontal, 48)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: alignment) ?? .leading)
+        .background(backgroundColor)
     }
     
     struct RoundedCorner: Shape {
