@@ -86,8 +86,10 @@ struct IQStyleModel: Decodable {
         let textClient: Text?
         let replyTextClient: Text?
         let replySenderTextClient: Text?
+        let replyLeftLineClient: Theme?
         let replyTextOperator: Text?
         let replySenderTextOperator: Text?
+        let replyLeftLineOperator: Theme?
         let textTimeOperator: Text?
         let textTimeClient: Text?
         let textUp: Text?
@@ -114,8 +116,10 @@ struct IQStyleModel: Decodable {
             case textClient = "text_client"
             case replyTextClient = "reply_text_client"
             case replySenderTextClient = "reply_sender_text_client"
+            case replyLeftLineClient = "reply_left_line_client"
             case replyTextOperator = "reply_text_operator"
             case replySenderTextOperator = "reply_sender_text_operator"
+            case replyLeftLineOperator = "reply_left_line_operator"
             case textTimeOperator = "text_time_operator"
             case textTimeClient = "text_time_client"
             case textUp = "text_up"
@@ -143,13 +147,17 @@ struct IQStyleModel: Decodable {
         let backgroundTextUpMessage: Theme?
         let iconCancel: URL?
         let leftLine: Theme?
-
+        let textOperatorTyping: Text?
+        let backgroundOperatorTyping: Theme?
+        
         enum CodingKeys: String, CodingKey {
             case textSender = "text_sender"
             case textMessage = "text_message"
             case backgroundTextUpMessage = "background_text_up_message"
             case iconCancel = "icon_cancel"
             case leftLine = "left_line"
+            case textOperatorTyping = "text_operator_typing"
+            case backgroundOperatorTyping = "background_operator_typing"
         }
     }
 
@@ -358,5 +366,19 @@ public func textAlignmentToHorizontalAlignment(textAlignment: TextAlignment?) ->
         return .trailing
     default:
         return .leading
+    }
+}
+
+
+public func textAlignmentToNSTextAlignment(textAlignment: TextAlignment?) -> NSTextAlignment {
+    switch textAlignment {
+    case .leading:
+        return .left
+    case .center:
+        return .center
+    case .trailing:
+        return .right
+    default:
+        return .center
     }
 }

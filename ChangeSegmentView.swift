@@ -66,7 +66,7 @@ struct RatingPollCellView: View {
         return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
     var titleAlignment: TextAlignment {
-        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .center
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
     }
     
     
@@ -84,7 +84,7 @@ struct RatingPollCellView: View {
         return IQStyle.model?.rating?.feedbackThanksText?.textStyle?.italic ?? false
     }
     var thanksAlignment: TextAlignment {
-        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.feedbackThanksText?.textAlign) ?? .center
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.feedbackThanksText?.textAlign) ?? .leading
     }
     
     

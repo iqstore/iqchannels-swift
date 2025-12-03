@@ -105,6 +105,7 @@ extension IQChannelsManager {
         viewModel.client = chat.auth.auth.client
         viewModel.session = chat.auth.auth.session
         viewModel.messages = messages.reversed()
+        viewModel.showBottomTypingBar = config.showBottomTypingBar
         return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
     }
     

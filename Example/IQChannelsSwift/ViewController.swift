@@ -181,7 +181,8 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         let config = IQChannelsConfig(address: serverString,
                                       channels: channelsArray,
                                       styleJson: selectedStyle,
-                                      preFillMessages: preFillMessages)
+                                      preFillMessages: preFillMessages,
+                                      showBottomTypingBar: true)
         preFillMessages = nil
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)

@@ -18,7 +18,7 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.5'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.2.6'
 ```
 
 Затем выполните команду:
@@ -594,7 +594,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_text_client": {    //Основной текст ответа со стороны клиента
+    "reply_text_client": {    //Текст сообщения, на которое ответил клиент
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -605,7 +605,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_sender_text_client": {   //Текст сообщения, на которое ответил клиент
+    "reply_sender_text_client": {   //Имя отправителя сообщения, на которое ответил клиент
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -615,6 +615,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "bold": false,
         "italic": false
       }
+    },
+    "reply_left_line_client": {     //Линия слева от ответного сообщения (Клиент)
+      "light": "#FF0000",
+      "dark": "#FF0000"
     },
     "reply_text_operator": {        //Основной текст ответа со стороны оператора
       "color": {
@@ -627,7 +631,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_sender_text_operator": { //Текст сообщения, на которое ответил оператор
+    "reply_sender_text_operator": { //Имя отправителя сообщения, на которое ответил оператор
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -637,6 +641,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "bold": false,
         "italic": false
       }
+    },
+    "reply_left_line_operator": {   //Линия слева от ответного сообщения (Оператор)
+      "light": "#FF0000",
+      "dark": "#FF0000"
     },
     "text_time_operator": {         //Текст времени доставки (Оператор)
       "color": {
