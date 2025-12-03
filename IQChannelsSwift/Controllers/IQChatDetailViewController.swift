@@ -21,7 +21,6 @@ class IQChatDetailViewController: IQViewController {
         let stackView: UIStackView = .init(arrangedSubviews: [titleLabel, statusView])
         stackView.spacing = 0
         stackView.axis = .vertical
-        stackView.alignment = .center
         return stackView
     }()
     
@@ -31,6 +30,7 @@ class IQChatDetailViewController: IQViewController {
         
         
         let fontSize = CGFloat(IQStyle.model?.appBar?.titleLabel?.textSize ?? 15)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.appBar?.titleLabel?.textAlign) ?? .center
         let isBold = IQStyle.model?.appBar?.titleLabel?.textStyle?.bold ?? false
         let isItalic = IQStyle.model?.appBar?.titleLabel?.textStyle?.italic ?? false
         
@@ -51,6 +51,7 @@ class IQChatDetailViewController: IQViewController {
             label.font = systemFont
         }
         
+        label.textAlignment = textAlignmentToNSTextAlignment(textAlignment: alignment)
         
         label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.titleLabel?.color) ?? UIColor(hex: "242729")
         return label
@@ -60,6 +61,7 @@ class IQChatDetailViewController: IQViewController {
         let label: UILabel = .init()
         
         let fontSize = CGFloat(IQStyle.model?.appBar?.statusLabel?.textSize ?? 15)
+        let alignment = stringToAlignment(stringAlignment: IQStyle.model?.appBar?.statusLabel?.textAlign) ?? .center
         let isBold = IQStyle.model?.appBar?.statusLabel?.textStyle?.bold ?? false
         let isItalic = IQStyle.model?.appBar?.statusLabel?.textStyle?.italic ?? false
         
@@ -79,6 +81,8 @@ class IQChatDetailViewController: IQViewController {
         } else {
             label.font = systemFont
         }
+        
+        label.textAlignment = textAlignmentToNSTextAlignment(textAlignment: alignment)
         
         label.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.statusLabel?.color) ?? UIColor(hex: "919399")
         return label
@@ -204,7 +208,11 @@ class IQChatDetailViewController: IQViewController {
                 self.loadLanguageDataFromAppSupport(code)
                 self.viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
                 self.languageButton.setTitle(name, for: .normal)
+            } else {
+                self.loadLanguageDataFromAppSupport("ru")
             }
+        } else {
+            self.loadLanguageDataFromAppSupport("ru")
         }
         setupNavigationBarAppearance()
         navigationItem.titleView = titleStackView
@@ -382,6 +390,11 @@ class IQChatDetailViewController: IQViewController {
         navigationItem.standardAppearance = appearance
         navigationItem.scrollEdgeAppearance = appearance
         navigationItem.compactAppearance = appearance
+        
+        titleLabel.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.titleLabel?.color)
+            ?? UIColor(hex: "242729")
+        statusLabel.textColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.statusLabel?.color)
+            ?? UIColor(hex: "919399")
     }
 }
 

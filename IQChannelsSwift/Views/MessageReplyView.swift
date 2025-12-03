@@ -69,6 +69,12 @@ struct MessageReplyView: View {
     }
     
     
+    var leftLineColor: Color {
+        let clientColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replyLeftLineClient) ?? Color(hex: "ffffff")
+        let operatorColor = IQStyle.getColor(theme: IQStyle.model?.messages?.replyLeftLineOperator) ?? Color(hex: "DD0A34")
+        return isMy ? clientColor : operatorColor
+    }
+    
     
     // MARK: - BODY
     var body: some View {
@@ -76,9 +82,8 @@ struct MessageReplyView: View {
             onReplyMessageTapCompletion?(message.messageID)
         } label: {
             HStack(spacing: 8) {
-                let tintColor = isMy ? Color.white : Color(hex: "DD0A34")
                 Capsule()
-                    .fill(tintColor)
+                    .fill(leftLineColor)
                     .frame(width: 2, height: 32)
                 
                 if message.payload == .file,

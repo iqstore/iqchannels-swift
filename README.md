@@ -594,7 +594,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_text_client": {    //Основной текст ответа со стороны клиента
+    "reply_text_client": {    //Текст сообщения, на которое ответил клиент
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -605,7 +605,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_sender_text_client": {   //Текст сообщения, на которое ответил клиент
+    "reply_sender_text_client": {   //Имя отправителя сообщения, на которое ответил клиент
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -615,6 +615,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "bold": false,
         "italic": false
       }
+    },
+    "reply_left_line_client": {     //Линия слева от ответного сообщения (Клиент)
+      "light": "#FF0000",
+      "dark": "#FF0000"
     },
     "reply_text_operator": {        //Основной текст ответа со стороны оператора
       "color": {

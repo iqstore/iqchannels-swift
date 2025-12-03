@@ -61,6 +61,8 @@ struct ComposerInputView: UIViewRepresentable {
                 if uiView.contentSize.height != height {
                     uiView.contentSize.height = height
                 }
+                uiView.textColor = textColor
+                uiView.setUpAppearance()
             }
         }
     }

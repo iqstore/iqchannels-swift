@@ -87,6 +87,9 @@ struct ChatInputView: View {
                 onAttachmentCompletion?()
             } label: {
                 let backgroundColorClip = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconClip?.color) ?? Color.clear
+                let borderColorClip = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconClip?.border?.color) ?? Color.clear
+                let borderSizeClip = IQStyle.model?.toolsToMessage?.backgroundIconClip?.border?.size ?? 0
+                
                 if let iconClipUrl = IQStyle.model?.toolsToMessage?.iconClip {
                     AnimatedImage(url: iconClipUrl)
                         .resizable()
@@ -97,6 +100,10 @@ struct ChatInputView: View {
                         .padding(8)
                         .background(backgroundColorClip)
                         .clipShape(Circle())
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 999)
+                                .stroke(borderColorClip, lineWidth: borderSizeClip)
+                        )
                 } else {
                     Image(name: "attachment")
                         .resizable()
@@ -105,6 +112,10 @@ struct ChatInputView: View {
                         .padding(8)
                         .background(backgroundColorClip)
                         .clipShape(Circle())
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 999)
+                                .stroke(borderColorClip, lineWidth: borderSizeClip)
+                        )
                 }
             }
             
@@ -153,6 +164,9 @@ struct ChatInputView: View {
             Group {
                 if showSendButton {
                     let backgroundColorSend = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconSent?.color) ?? Color(hex: "242729")
+                    let borderColorSend = IQStyle.getColor(theme: IQStyle.model?.toolsToMessage?.backgroundIconSent?.border?.color) ?? Color.clear
+                    let borderSizeSend = IQStyle.model?.toolsToMessage?.backgroundIconSent?.border?.size ?? 0
+                    
                     Button {
                         onSendCompletion?()
                     } label: {
@@ -166,6 +180,10 @@ struct ChatInputView: View {
                                 .padding(8)
                                 .background(backgroundColorSend)
                                 .clipShape(Circle())
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 999)
+                                        .stroke(borderColorSend, lineWidth: borderSizeSend)
+                                )
                         } else {
                             Image(name: "up_arrow")
                                 .resizable()
@@ -174,6 +192,10 @@ struct ChatInputView: View {
                                 .padding(8)
                                 .background(backgroundColorSend)
                                 .clipShape(Circle())
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 999)
+                                        .stroke(borderColorSend, lineWidth: borderSizeSend)
+                                )
                         }
                     }
                     .transition(.move(edge: .trailing))
