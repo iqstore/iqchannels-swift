@@ -631,7 +631,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
-    "reply_sender_text_operator": { //Текст сообщения, на которое ответил оператор
+    "reply_sender_text_operator": { //Имя отправителя сообщения, на которое ответил оператор
       "color": {
         "light": "#ffffff",
         "dark": "#FFFFFF"
@@ -641,6 +641,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "bold": false,
         "italic": false
       }
+    },
+    "reply_left_line_operator": {   //Линия слева от ответного сообщения (Оператор)
+      "light": "#FF0000",
+      "dark": "#FF0000"
     },
     "text_time_operator": {         //Текст времени доставки (Оператор)
       "color": {
