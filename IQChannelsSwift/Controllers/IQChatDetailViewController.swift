@@ -448,6 +448,10 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
     func onPollIgnored(ratingId: Int, pollId: Int) {
         output.detailController(didPollIgnored: ratingId, pollId: pollId)
     }
+    
+    func onChangeSegment(_ message: IQMessage) {
+        output.detailController(didChangeSegment: message)
+    }
 }
 
 // MARK: - PH PICKER DELEGATE

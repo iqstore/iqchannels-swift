@@ -404,4 +404,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         return response.error
     }
+    
+    func changeSegment(messageID: Int) async -> Error? {
+        let path = "/chats/messages/\(messageID)/delete_transfer_to_channel_id"
+        let response = await post(path, body: [], responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "changeSegment: \n response: \(response)")
+        
+        return response.error
+    }
 }

@@ -997,6 +997,26 @@ extension IQChannelsManager {
             self.config.preFillMessages = nil
         }
     }
+    
+    func changeSegment (_ message: IQMessage) {
+        Task {
+            let error = await currentNetworkManager?.changeSegment(messageID: message.messageID)
+            
+            if (error != nil){
+                IQLog.debug(message: "changeSegment: \n error: \(String(describing: error))")
+            } else {
+                if let index = indexOfMessage(messageID: message.messageID) {
+                    var newMessage = message
+                    newMessage.transferToChannel = nil
+                    self.messages[index] = newMessage
+                }
+            }
+            
+            if let authResult = authResults.first(where: { $0.channel == message.transferToChannel?.name && $0.auth.client?.canAccessPersonalManager == false }) {
+                self.selectedChat = (authResult, IQChatType.chat)
+            }
+        }
+    }
 }
 
 //MARK: - Auth

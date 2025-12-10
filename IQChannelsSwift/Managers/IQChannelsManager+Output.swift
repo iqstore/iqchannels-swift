@@ -99,4 +99,8 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     func detailControllerSelectLanguage(didSelect language: IQLanguage) {
         setLanguage(language)
     }
+    
+    func detailController(didChangeSegment message: IQMessage) {
+        changeSegment(message)
+    }
 }

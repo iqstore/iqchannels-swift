@@ -37,6 +37,7 @@ struct IQDatabaseMessage {
     let rating: String?
     let upload: String?
     let error: Bool
+    let transferToChannel: String?
 }
 
 
@@ -76,7 +77,8 @@ extension IQMessage {
             file: self.file?.toJSONString(),
             rating: self.rating?.toJSONString(),
             upload: self.upload,
-            error: self.error
+            error: self.error,
+            transferToChannel: self.transferToChannel?.toJSONString(),
         )
     }
 }

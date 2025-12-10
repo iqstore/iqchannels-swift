@@ -13,6 +13,7 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onRate(value: Int, ratingId: Int)
     func onSendPoll(value: Int?, answers: [IQRatingPollClientAnswerInput], ratingId: Int, pollId: Int)
     func onPollIgnored(ratingId: Int, pollId: Int)
+    func onChangeSegment(_ message: IQMessage)
 }
 
 struct ChatDetailView: View {

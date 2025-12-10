@@ -71,6 +71,10 @@ struct ChatMessagesView: View {
                                                 delegate?.onMessageAppear(with: message.messageID)
                                             }
                                     }
+                                } else if(message.transferToChannel != nil){
+                                    ChangeSegmentView(message: message) {
+                                        delegate?.onChangeSegment(message)
+                                    }
                                 } else{
                                     let isLastMessage = message == viewModel.messages.first
                                     ChatMessageCellView(message: message,
