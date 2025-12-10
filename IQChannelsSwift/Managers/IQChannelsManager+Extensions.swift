@@ -19,11 +19,14 @@ extension IQChannelsManager {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     
-                    var items = self.getChatItems(from: results)
+                    var items = self.getChatItems(from: results, config: config)
                     
-                    if let chatToOpen = config.chatToOpen,
-                       let item = items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }) {
-                        items = [item]
+                    if let chatToOpen = config.chatToOpen{
+                        if let item = items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }) {
+                            items = [item]
+                        } else{
+                            return
+                        }
                     }
 
                     if items.count == 1, let item = items.first,
@@ -100,7 +103,7 @@ extension IQChannelsManager {
     func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType), showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
-        viewModel.backDismisses = getChatItems(from: authResults).count == 1
+        viewModel.backDismisses = getChatItems(from: authResults, config: config).count == 1
         viewModel.state = state
         viewModel.client = chat.auth.auth.client
         viewModel.session = chat.auth.auth.session
@@ -109,11 +112,27 @@ extension IQChannelsManager {
         return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
     }
     
-    func getChatItems(from results: [AuthResult]) -> [IQChatItemModel] {
-        results.map { (channel, auth) -> [IQChatItemModel] in
+    func getChatItems(from results: [AuthResult], config: IQChannelsConfig) -> [IQChatItemModel] {
+        var sortedResults = results
+        
+        if(config.chatToOpen != nil){
+            sortedResults = results.filter {
+                $0.channel == config.chatToOpen?.channel
+            }
+        }
+        
+        return sortedResults.map { (channel, auth) -> [IQChatItemModel] in
             guard let client = auth.client else { return [] }
+            let chatType = config.chatToOpen?.chatType ?? .chat
             
-            return client.chatTypes.map { .init(channel: channel, info: client.multiChatsInfo, chatType: $0) }
+            if(!client.canAccessPersonalManager && config.chatToOpen?.chatType == .manager){
+                state = .noPm
+                return []
+            } else {
+                state = .authenticated
+            }
+            
+            return [IQChatItemModel(channel: channel, info: client.multiChatsInfo, chatType: chatType)]
         }.flatMap {$0}
     }
     

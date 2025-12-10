@@ -1414,6 +1414,8 @@ extension ViewController: UIDocumentPickerDelegate {
  "signup_error": "Ошибка: длина имени должна быть не менее 3-х символов.",
  "title_error": "Чат временно недоступен",
  "text_error": "Мы уже все исправляем. Обновите страницу или попробуйте позже",
+ "title_error_pm": "Нет закреплённого персонального менеджера",
+ "text_error_pm": "Обратитесь в чат с тех. поддержкой",
  "button_error": "Вернуться",
  "status_label": "На связи",
  "status_label_awaiting_network": "Ожидание сети...",

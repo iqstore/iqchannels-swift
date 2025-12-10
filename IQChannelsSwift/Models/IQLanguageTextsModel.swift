@@ -18,6 +18,8 @@ struct IQLanguageTextsModel: Decodable {
     var signupError: String?
     var titleError: String?
     var textError: String?
+    var titleErrorPm: String?
+    var textErrorPm: String?
     var buttonError: String?
     var statusLabel: String?
     var statusLabelAwaitingNetwork: String?
@@ -75,6 +77,8 @@ struct IQLanguageTextsModel: Decodable {
         case signupError = "signup_error"
         case titleError = "title_error"
         case textError = "text_error"
+        case titleErrorPm = "title_error_pm"
+        case textErrorPm = "text_error_pm"
         case buttonError = "button_error"
         case statusLabel = "status_label"
         case statusLabelAwaitingNetwork = "status_label_awaiting_network"

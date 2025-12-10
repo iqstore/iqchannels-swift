@@ -11,11 +11,25 @@ struct ChatListView: View {
     var body: some View {
         ZStack {
             if viewModel.state == .authenticated {
-                ScrollView {
-                }
-                .onAppear(){
-                    if let chatInfo = viewModel.chatsInfo.first {
-                        output.listController(didSelectChat: chatInfo)
+                if(viewModel.chatsInfo.count <= 1){
+                    ScrollView {
+                    }
+                    .onAppear(){
+                        if let chatInfo = viewModel.chatsInfo.first {
+                            output.listController(didSelectChat: chatInfo)
+                        }
+                    }
+                }else{
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(viewModel.chatsInfo) { chatInfo in
+                                Button {
+                                    output.listController(didSelectChat: chatInfo)
+                                } label: {
+                                    ChatListCellView(chatInfoModel: chatInfo)
+                                }
+                            }
+                        }
                     }
                 }
             } else {

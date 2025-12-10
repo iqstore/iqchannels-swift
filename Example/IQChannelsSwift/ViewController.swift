@@ -9,6 +9,8 @@
 import UIKit
 import IQChannelsSwift
 
+var navigationControl: UINavigationController?
+
 class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
     var isPickingStyle = false
     
@@ -47,6 +49,17 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         return field
     }()
     
+    private lazy var chatToOpenField: UITextField = {
+        let field = UITextField()
+        field.borderStyle = .roundedRect
+        field.attributedPlaceholder = NSAttributedString(
+            string: "Чат для открытия",
+        )
+        field.autocapitalizationType = .none
+        field.addToolbar()
+        return field
+    }()
+    
     private lazy var unreadLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
@@ -67,11 +80,19 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         return button
     }()
     
+    private lazy var changeStyle: UILabel = {
+        let label = UILabel()
+        label.textColor = .black
+        label.text = "Выбор темы для стилей:"
+        label.textAlignment = .center
+        return label
+    }()
+    
     private lazy var styleDark: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 12
-        button.setTitle("Выбрать темный стиль", for: .normal)
+        button.setTitle("Тёмный", for: .normal)
         button.addTarget(self, action: #selector(styleDarkTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -81,7 +102,7 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         let button = UIButton()
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 12
-        button.setTitle("Выбрать светлый стиль", for: .normal)
+        button.setTitle("Светлый", for: .normal)
         button.addTarget(self, action: #selector(styleLightTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -91,7 +112,7 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         let button = UIButton()
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 12
-        button.setTitle("Выбрать системный стиль", for: .normal)
+        button.setTitle("Системный", for: .normal)
         button.addTarget(self, action: #selector(styleSystemTap), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -116,6 +137,15 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         return button
     }()
     
+    private lazy var pmButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 12
+        button.setTitle("Чат с ПМ", for: .normal)
+        button.addTarget(self, action: #selector(pmDidTap), for: .touchUpInside)
+        return button
+    }()
+    
     private lazy var preFilledMsgButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemBlue
@@ -136,8 +166,16 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     }()
     
     private lazy var stackView: UIStackView = {
+        let buttons = UIStackView(arrangedSubviews: [
+            styleDark, styleLight, styleSystem
+        ])
+        
+        buttons.axis = .horizontal
+        buttons.distribution = .fillEqually
+        buttons.spacing = 5
+        
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, unreadLabel, loginButton, anonButton, preFilledMsgButton, styleButton, languageButton, styleDark, styleLight, styleSystem
+            serverField, emailField, channelsField, chatToOpenField, unreadLabel, loginButton, anonButton, pmButton, preFilledMsgButton, styleButton, languageButton, changeStyle, buttons
         ])
         view.spacing = 16
         view.distribution = .fillEqually
@@ -173,13 +211,16 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         
         configuration.login(.anonymous)
         configuration.addUnread(listener: self)
+        
+        navigationControl = configuration.getViewController()
     }
 
-    func setServer(server: String?) {
+    func setServer(server: String?, chatToOpen: IQChannelsConfig.ChatToOpen? = nil) {
         serverString = (server?.isEmpty ?? true) ? "" : (server ?? "")
         channelsArray = channelsField.text?.components(separatedBy: .whitespaces) ?? []
         let config = IQChannelsConfig(address: serverString,
                                       channels: channelsArray,
+                                      chatToOpen: chatToOpen,
                                       styleJson: selectedStyle,
                                       preFillMessages: preFillMessages,
                                       showBottomTypingBar: true)
@@ -248,13 +289,36 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     }
     
     @objc func loginDidTap() {
-        setServer(server: serverField.text)
+        if let channel = chatToOpenField.text, !channel.isEmpty {
+            setServer(server: serverField.text, chatToOpen: (channel: channel, chatType: IQChatType.chat))
+        } else {
+            setServer(server: serverField.text)
+        }
+        
         configuration.login(.credentials(emailField.text ?? ""))
         configuration.addUnread(listener: self)
         showMessages()
     }
     
     @objc func anonymousDidTap() {
+        if let channel = chatToOpenField.text, !channel.isEmpty {
+            setServer(server: serverField.text, chatToOpen: (channel: channel, chatType: IQChatType.chat))
+        } else {
+            setServer(server: serverField.text)
+        }
+        
+        configuration.login(.anonymous)
+        showMessages()
+    }
+    
+    @objc func pmDidTap() {
+        if let channel = chatToOpenField.text, !channel.isEmpty {
+            setServer(server: serverField.text, chatToOpen: (channel: channel, chatType: IQChatType.manager))
+        } else {
+            var channel = channelsField.text?.components(separatedBy: .whitespaces).first ?? "support"
+            setServer(server: serverField.text, chatToOpen: (channel: channel, chatType: IQChatType.manager))
+        }
+        configuration.login(.credentials(emailField.text ?? ""))
         showMessages()
     }
     

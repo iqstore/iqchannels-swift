@@ -104,7 +104,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     
     func setListViewModel(_ viewModel: IQChatListViewModel?) {
         self.listViewModel = viewModel
-        listViewModel?.chatsInfo = getChatItems(from: authResults)
+        listViewModel?.chatsInfo = getChatItems(from: authResults, config: config)
     }
     
     func addEvent(listener: any IQChannelsEventListenerProtocol) {

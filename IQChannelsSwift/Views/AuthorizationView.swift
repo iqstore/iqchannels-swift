@@ -20,7 +20,9 @@ struct AuthorizationView: View {
             
             switch state {
             case .loggedOut:
-                getLogoutView()
+                getErrorView(isPm: false)
+            case .noPm:
+                getErrorView(isPm: true)
             case .awaitingNetwork:
                 getLoadingView()
             case .authenticating:
@@ -40,7 +42,7 @@ struct AuthorizationView: View {
     }
     
     @ViewBuilder
-    private func getLogoutView() -> some View {
+    private func getErrorView(isPm: Bool) -> some View {
         let titleColor = IQStyle.getColor(theme: IQStyle.model?.error?.titleError?.color) ?? Color(hex: "242729")
         let titleFontSize = CGFloat(IQStyle.model?.error?.titleError?.textSize ?? 17)
         let titleIsBold = IQStyle.model?.error?.titleError?.textStyle?.bold ?? false
@@ -65,6 +67,19 @@ struct AuthorizationView: View {
         let errorButtonBorderColor = IQStyle.getColor(theme: IQStyle.model?.error?.backgroundButtonError?.border?.color) ?? Color(hex: "cccccc")
         
         
+        var titleError: String {
+            let pmError = IQLanguageTexts.model.titleErrorPm ?? "Нет закреплённого персонального менеджера"
+            let chatError = IQLanguageTexts.model.titleError ?? "Чат временно недоступен"
+            return isPm ? pmError : chatError
+        }
+        
+        var textError: String {
+            let pmError = IQLanguageTexts.model.textErrorPm ?? "Обратитесь в чат с тех. поддержкой"
+            let chatError = IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже"
+            return isPm ? pmError : chatError
+        }
+        
+        
         
         VStack(spacing: 20) {
             AnimatedImage(url: IQStyle.model?.error?.iconError, 
@@ -77,7 +92,7 @@ struct AuthorizationView: View {
             
             VStack(spacing: 8) {
                 if #available(iOS 16.0, *) {
-                    Text(IQLanguageTexts.model.titleError ?? "Чат временно недоступен")
+                    Text(titleError)
                         .foregroundColor(titleColor)
                         .font(.system(size: titleFontSize, weight: .semibold))
                         .bold(titleIsBold)
@@ -85,7 +100,7 @@ struct AuthorizationView: View {
                         .multilineTextAlignment(titleAlignment)
                         .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
                 } else {
-                    Text(IQLanguageTexts.model.titleError ?? "Чат временно недоступен")
+                    Text(titleError)
                         .foregroundColor(titleColor)
                         .font(.system(size: titleFontSize, weight: .semibold))
                         .multilineTextAlignment(titleAlignment)
@@ -93,7 +108,7 @@ struct AuthorizationView: View {
                 }
                 
                 if #available(iOS 16.0, *) {
-                    Text(IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
+                    Text(textError)
                         .foregroundColor(descriptionColor)
                         .font(.system(size: descriptionFontSize))
                         .bold(descriptionIsBold)
@@ -101,7 +116,7 @@ struct AuthorizationView: View {
                         .multilineTextAlignment(descriptionAlignment)
                         .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: descriptionAlignment) ?? .center)
                 } else {
-                    Text(IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
+                    Text(textError)
                         .foregroundColor(descriptionColor)
                         .font(.system(size: descriptionFontSize))
                         .multilineTextAlignment(descriptionAlignment)
