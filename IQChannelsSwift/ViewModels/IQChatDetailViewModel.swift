@@ -32,6 +32,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var availableLanguages: [IQLanguage]?
     @Published var selectedLanguage: IQLanguage?
     @Published var showBottomTypingBar: Bool = false
+    @Published var enableAnimMessages: Bool = true
     
     
     // MARK: - METHODS
