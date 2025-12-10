@@ -16,15 +16,17 @@ struct IQClient: Equatable, Codable {
     var multiChatsInfo: IQMultiChatsInfo?
     
     var canAccessPersonalManager: Bool {
-        (personalManagerID != nil || personalManagerGroupID != nil) && (multiChatsInfo?.enableForPersonalManagers ?? false)
+//        (personalManagerID != nil || personalManagerGroupID != nil) && (multiChatsInfo?.enableForPersonalManagers ?? false)
+        
+        personalManagerID != nil || personalManagerGroupID != nil
     }
     
     var chatTypes: [IQChatType] {
         guard let multiChatsInfo else { return [.chat] }
         
-        if (multiChatsInfo.enableChat ?? false) && canAccessPersonalManager {
-            return [.chat, .manager]
-        }
+//        if (multiChatsInfo.enableChat ?? false) && canAccessPersonalManager {
+//            return [.chat, .manager]
+//        }
         return (canAccessPersonalManager) ? [.manager] : [.chat]
     }
 }

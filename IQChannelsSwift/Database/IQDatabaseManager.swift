@@ -43,6 +43,7 @@ class IQDatabaseManager {
     private let rating = Expression<String?>("rating")
     private let upload = Expression<String?>("upload")
     private let error = Expression<Bool>("error")
+    private let transferToChannel = Expression<String?>("transferToChannel")
 
     private init() {
         setupDatabase()
@@ -82,6 +83,7 @@ class IQDatabaseManager {
                 t.column(rating)
                 t.column(upload)
                 t.column(error)
+                t.column(transferToChannel)
             })
             IQLog.debug(message: "Initializing database")
             
@@ -102,6 +104,24 @@ class IQDatabaseManager {
             if checkColumnExists == 0 {
                 do {
                     try db.run(messages.addColumn(error, defaultValue: false))
+                } catch {
+                    IQLog.error(message: "Error add columns: \(error)")
+                }
+            }
+        } catch {
+            IQLog.error(message: "Error check columns: \(error)")
+        }
+        
+        do {
+            let checkColumnExists = try db.scalar("""
+               SELECT COUNT(*)
+               FROM pragma_table_info('messages')
+               WHERE name = 'transferToChannel'
+            """) as! Int64
+
+            if checkColumnExists == 0 {
+                do {
+                    try db.run(messages.addColumn(transferToChannel, defaultValue: nil))
                 } catch {
                     IQLog.error(message: "Error add columns: \(error)")
                 }
@@ -141,7 +161,8 @@ class IQDatabaseManager {
                    file <- message.file,
                    rating <- message.rating,
                    upload <- message.upload,
-                   error <- message.error
+                   error <- message.error,
+                   transferToChannel <- message.transferToChannel
                   ))
                 IQLog.debug(message: "Inserted message to database  \(message)")
             } catch {
@@ -182,7 +203,8 @@ class IQDatabaseManager {
                     file: message[file],
                     rating: message[rating],
                     upload: message[upload],
-                    error: message[error]
+                    error: message[error],
+                    transferToChannel: message[transferToChannel]
                 ))
             }
         } catch {

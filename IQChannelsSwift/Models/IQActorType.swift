@@ -12,4 +12,11 @@ enum IQAuthorType: String, Codable, Equatable{
     case client
     case user
     case system
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            let value = (try? container.decode(String.self)) ?? ""
+
+            self = IQAuthorType(rawValue: value) ?? .system
+        }
 }

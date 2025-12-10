@@ -9,6 +9,7 @@ import Foundation
 
 enum IQChannelsState {
     case loggedOut
+    case noPm
     case awaitingNetwork
     case authenticating
     case authenticated
@@ -22,6 +23,8 @@ enum IQChannelsState {
         case .authenticating:
             return ""
         case .loggedOut:
+            return ""
+        case .noPm:
             return ""
         }
     }

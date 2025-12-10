@@ -32,4 +32,5 @@ protocol IQNetworkManagerProtocol {
     func clientsSignup() async -> ResponseCallback<IQClientAuth>
     func clientsIntegrationAuth(credentials: String) async -> ResponseCallback<IQClientAuth>
     func setLanguage(languageCode: String) async -> Error?
+    func changeSegment(messageID: Int) async -> Error?
 }
