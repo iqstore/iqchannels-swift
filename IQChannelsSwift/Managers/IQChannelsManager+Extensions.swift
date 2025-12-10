@@ -395,6 +395,9 @@ extension IQChannelsManager {
         switch action.action {
         case "Postback", "Say something":
             let message = IQMessage(action: action, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.append(message)
             Task {
                 await sendMessage(message)
@@ -412,6 +415,9 @@ extension IQChannelsManager {
         guard let selectedChat else { return }
         
         let message = IQMessage(choice: choice, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
+        DispatchQueue.main.async {
+            self.detailViewModel?.enableAnimMessages = true
+        }
         messages.append(message)
         Task {
             await sendMessage(message)
@@ -437,7 +443,9 @@ extension IQChannelsManager {
                 }
                 return
             }
-            
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.append(contentsOf: newMessages)
     
             Task {
@@ -448,6 +456,9 @@ extension IQChannelsManager {
     
         } else {
             let message = IQMessage(text: text, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId(), replyMessageID: replyToMessage)
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.append(message)
             Task {
                 await sendMessage(message)
@@ -541,6 +552,9 @@ extension IQChannelsManager {
     
     func cancelSendMessage(_ message: IQMessage) {
         if let messageIndex = indexOfMyMessage(localID: message.localID) {
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.remove(at: messageIndex)
             IQDatabaseManager.shared.deleteMessageByLocalId(message.localID ?? 0)
         }
@@ -637,7 +651,9 @@ extension IQChannelsManager {
             if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
                 messages[index] = message
             }
-            
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.removeAll { $0.newMsgHeader == true }
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
             
@@ -698,6 +714,9 @@ extension IQChannelsManager {
         print("Missed messages: ", newMessages.map { $0.text })
         if !newMessages.isEmpty {
             var messages = self.messages
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.append(contentsOf: newMessages)
             messages.sort(by: { $0.createdDate < $1.createdDate })
             self.messages = messages
@@ -741,6 +760,9 @@ extension IQChannelsManager {
             if let lifeTime {
                 DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime)) {
                     if let index = self.messages.firstIndex(where: { $0.localID == -1 }) {
+                        DispatchQueue.main.async {
+                            self.detailViewModel?.enableAnimMessages = true
+                        }
                         self.messages.remove(at: index)
                     }
                 }
@@ -778,6 +800,13 @@ extension IQChannelsManager {
                 baseViewModels.sendError(error)
                 return
             }
+            
+            let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
+            
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = false
+                self.messages = results
+            }
         }
     }
     
@@ -805,6 +834,9 @@ extension IQChannelsManager {
             }
             
             let newMessages = result.result?.0.filter { indexOfMessage(messageID: $0.messageID) == nil && $0.hasValidPayload } ?? []
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.insert(contentsOf: newMessages, at: 0)
             markAsReceived(newMessages.map { $0.messageID })
         }
@@ -838,6 +870,9 @@ extension IQChannelsManager {
         if let index = indexOfMyMessage(localID: message.localID){
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
             messages.append(message)
             markAsReceived([message.messageID])
             DispatchQueue.main.async {
@@ -869,7 +904,9 @@ extension IQChannelsManager {
                 IQDatabaseManager.shared.deleteMessageByLocalId(localId)
             }
         }
-        
+        DispatchQueue.main.async {
+            self.detailViewModel?.enableAnimMessages = true
+        }
         messages.remove(elementsAtIndices: ids)
         
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
@@ -910,6 +947,9 @@ extension IQChannelsManager {
         
         for unsentMessage in unsentMessagesFromLocalDatabase {
             if(selectedChat?.auth.auth.client?.id == unsentMessage.clientID){
+                DispatchQueue.main.async {
+                    self.detailViewModel?.enableAnimMessages = true
+                }
                 messages.append(IQMessage(from: unsentMessage))
                 if(unsentMessage.file != nil){
                     await uploadFileMessage(IQMessage(from: unsentMessage))

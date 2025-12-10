@@ -250,7 +250,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                     if(settings.totalOpenedTickets == 0){
                         value.append(IQMessage(
                             text: settings.message,
-                            operatorName: settings.pseudonym,
+                            operatorName: settings.pseudonym ?? "Оператор",
                             avatarURL: avatarURL
                         ))
                         lifeTime = settings.lifetime
