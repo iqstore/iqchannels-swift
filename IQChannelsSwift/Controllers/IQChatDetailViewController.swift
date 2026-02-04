@@ -330,7 +330,6 @@ class IQChatDetailViewController: IQViewController {
             let picker = UIImagePickerController()
             picker.sourceType = .camera
             picker.delegate = self
-            picker.allowsEditing = true
             present(picker, animated: true)
         @unknown default: break
         }
@@ -470,7 +469,7 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
         
         if let url = info[.imageURL] as? URL {
             output.detailController(didPick: [(url, nil)])
-        } else if let image = info[.editedImage] as? UIImage {
+        } else if let image = info[.originalImage] as? UIImage {
             output.detailController(didPick: [(nil, image)])
         }
         viewModel.scrollDown.toggle()

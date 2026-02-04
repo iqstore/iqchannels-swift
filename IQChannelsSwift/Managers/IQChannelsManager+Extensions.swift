@@ -473,7 +473,12 @@ extension IQChannelsManager {
                 return .init(data: data, filename: url.lastPathComponent)
             } else if let image {
                 guard let data = image.dataRepresentation(withMaxSizeMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return nil }
-                return .init(data: data, filename: "image.jpeg")
+                
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyyMMdd_HHmmss"
+                let filename = "IMG_\(formatter.string(from: Date())).jpg"
+                
+                return .init(data: data, filename: filename)
             }
             return nil
         }
