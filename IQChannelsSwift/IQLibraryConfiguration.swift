@@ -34,7 +34,7 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         navigationController.navigationBar.scrollEdgeAppearance = navigationBarAppearance
         navigationController.navigationBar.compactAppearance = navigationBarAppearance
         navigationController.navigationBar.standardAppearance = navigationBarAppearance
-        
+        IQLog.debug(message: "1")
         return navigationController
     }
     
@@ -56,11 +56,15 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         } else {
             channelManager?.configure(configuration: config)
         }
-        #if DEBUG
-            IQLog.configure(state: true)
-        #else
-            IQLog.configure(state: false)
-        #endif
+        
+        IQLog.configure(state: config.logging)
+//        #if DEBUG
+//            IQLog.configure(state: true)
+////            IQLog.configure(state: false)
+//        #else
+////            IQLog.configure(state: true)
+//            IQLog.configure(state: false)
+//        #endif
     }
     
     public func setNewJSON(_ json: Data?) {

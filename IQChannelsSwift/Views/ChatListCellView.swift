@@ -27,17 +27,7 @@ struct ChatListCellView: View {
                         .lineLimit(1)
                     
                     Spacer(minLength: 0)
-                    
-//                    Text("вчера, 10:38")
-//                        .font(.system(size: 14))
-//                        .foregroundColor(Color(hex: "969696"))
-//                        .lineLimit(1)
                 }
-                
-//                Text("Здравствуйте")
-//                    .font(.system(size: 16))
-//                    .foregroundColor(Color(hex: "969696"))
-//                    .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity)

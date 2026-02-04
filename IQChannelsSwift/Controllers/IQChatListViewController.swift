@@ -37,10 +37,12 @@ class IQChatListViewController: IQViewController {
         let hostView: ChatListView = .init(viewModel: viewModel, output: output)
         let controller: UIHostingController = .init(rootView: hostView)
         setupConstructedSwiftUI(interactor: controller)
+        IQLog.debug(message: "2")
     }
     
     override func setupNavBar() {
         navigationItem.rightBarButtonItem = .init(customView: closeButton)
+        IQLog.debug(message: "3")
     }
     
     override func bindViewModel() {
@@ -48,7 +50,19 @@ class IQChatListViewController: IQViewController {
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] controller in
-                self?.navigationController?.pushViewController(controller, animated: true)
+                IQLog.debug(message: "4")
+                guard let navigationController = self?.navigationController else { return }
+
+                if navigationController.topViewController is IQChatDetailViewController {
+                    var stack = navigationController.viewControllers
+                    stack.removeLast()
+                    stack.append(controller)
+                    navigationController.setViewControllers(stack, animated: true)
+                } else {
+                    navigationController.pushViewController(controller, animated: true)
+                }
+                
+                IQLog.debug(message: "5")
             }
             .store(in: &subscriptions)
         

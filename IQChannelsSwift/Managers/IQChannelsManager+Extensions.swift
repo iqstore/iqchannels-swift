@@ -9,7 +9,6 @@ import PhotosUI
 import SDWebImage
 import Combine
 
-private var selectedChatSubscription: AnyCancellable?
 //MARK: - Private Methods
 extension IQChannelsManager {
     
@@ -379,32 +378,6 @@ extension IQChannelsManager {
 }
 
 
-//MARK: - Unread
-extension IQChannelsManager {
-    
-//    private func listenToUnread(){
-//        guard networkStatusManager.isReachable else { return }
-//        
-//        currentNetworkManager?.listenToUnread { [weak self] value, error in
-//            guard let self else { return }
-//            
-//            if error != nil {
-//                currentNetworkManager?.stopListenToUnread()
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-//                    self?.listenToUnread()
-//                }
-//            } else {
-//                Task {
-//                    await MainActor.run {
-//                        self.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
-}
-
 //MARK: - Messages
 extension IQChannelsManager {
     
@@ -445,6 +418,20 @@ extension IQChannelsManager {
     
     public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
+        
+        if(text == "/version_sdk"){
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
+            
+            let message = IQMessage(text: "2.3.0", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            
+            messages.append(message)
+            DispatchQueue.main.async {
+                self.detailViewModel?.scrollDotHidden = false
+            }
+            return
+        }
         
         if let files {
             var hasNonValidatedFilesText: String? = nil
@@ -500,7 +487,12 @@ extension IQChannelsManager {
                 return .init(data: data, filename: url.lastPathComponent)
             } else if let image {
                 guard let data = image.dataRepresentation(withMaxSizeMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return nil }
-                return .init(data: data, filename: "image.jpeg")
+                
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyyMMdd_HHmmss"
+                let filename = "IMG_\(formatter.string(from: Date())).jpg"
+                
+                return .init(data: data, filename: filename)
             }
             return nil
         }
@@ -511,10 +503,33 @@ extension IQChannelsManager {
     func sendImages(result: [PHPickerResult]) {
         Task {
             var files = [DataFile]()
-            await result.asyncForEach {
-                guard let data = await $0.data(maxSizeInMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return }
-                let isGif = $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier)
-                files.append(.init(data: data, filename: isGif ? "image.gif" : "image.jpeg"))
+
+            await result.asyncForEach { pickerResult in
+                guard let data = await pickerResult.data(
+                    maxSizeInMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)
+                ) else { return }
+
+                let isGif = pickerResult.itemProvider
+                    .hasItemConformingToTypeIdentifier(UTType.gif.identifier)
+
+                var filename: String
+
+                if let assetId = pickerResult.assetIdentifier {
+                    let assets = PHAsset.fetchAssets(
+                        withLocalIdentifiers: [assetId],
+                        options: nil
+                    )
+                    if let asset = assets.firstObject,
+                       let originalName = asset.value(forKey: "filename") as? String {
+                        filename = originalName
+                    } else {
+                        filename = isGif ? "image.gif" : "image.jpeg"
+                    }
+                } else {
+                    filename = isGif ? "image.gif" : "image.jpeg"
+                }
+
+                files.append(.init(data: data, filename: filename))
             }
             
             selectFiles(files)
@@ -594,9 +609,14 @@ extension IQChannelsManager {
         
         if response.error != nil {
             if let error = response.error {
-                if indexOfMyMessage(localID: message.localID) != nil {
-                    baseViewModels.sendError(error)
+                let errorMessage = message.withError(true)
+                
+                if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
+                    messages[index] = errorMessage
                 }
+                
+                IQDatabaseManager.shared.insertMessage(errorMessage.toDatabaseMessage())
+                unsentMessages.append(errorMessage)
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                     Task {
@@ -677,7 +697,7 @@ extension IQChannelsManager {
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
             
             DispatchQueue.main.async { [self] in
-                detailViewModel?.idOfNewMessage = nil
+                self.detailViewModel?.idOfNewMessage = nil
             }
             
             guard let networkManager = currentNetworkManager else { return }

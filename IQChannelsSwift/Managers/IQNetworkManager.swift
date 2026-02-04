@@ -245,12 +245,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                         systemChat = false
                     }
                 } else{
-                    let avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(settings.avatarID)?size=avatar")
+                    let avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(settings.avatarID ?? "")?size=avatar")
                     
                     if(settings.totalOpenedTickets == 0){
                         value.append(IQMessage(
                             text: settings.message,
                             operatorName: settings.pseudonym ?? "Оператор",
+                            avatarID: settings.avatarID,
                             avatarURL: avatarURL
                         ))
                         lifeTime = settings.lifetime

@@ -17,6 +17,7 @@ public struct IQChannelsConfig {
     var styleJson: Data?
     var languageJson: Data?
     var disableUnreadBadge: Bool = false
+    var logging: Bool = false
     var attachment: IQAttachment? = nil
     var preFillMessages: IQPreFillMessages? = nil
     var showBottomTypingBar: Bool = false
@@ -28,6 +29,7 @@ public struct IQChannelsConfig {
                 languageJson: Data? = nil,
                 attachment: IQAttachment? = nil,
                 disableUnreadBadge: Bool = false,
+                logging: Bool = false,
                 preFillMessages: IQPreFillMessages? = nil,
                 showBottomTypingBar: Bool = false) {
         self.address = address
@@ -37,6 +39,7 @@ public struct IQChannelsConfig {
         self.languageJson = languageJson
         self.attachment = attachment
         self.disableUnreadBadge = disableUnreadBadge
+        self.logging = logging
         self.preFillMessages = preFillMessages
         self.showBottomTypingBar = showBottomTypingBar
     }

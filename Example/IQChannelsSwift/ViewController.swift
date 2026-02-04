@@ -63,7 +63,6 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     private lazy var unreadLabel: UILabel = {
         let label = UILabel()
         label.textColor = .black
-        label.layer.cornerRadius = 12
         label.text = "Непрочитанных сообщений: nil"
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -177,7 +176,7 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         let view = UIStackView(arrangedSubviews: [
             serverField, emailField, channelsField, chatToOpenField, unreadLabel, loginButton, anonButton, pmButton, preFilledMsgButton, styleButton, languageButton, changeStyle, buttons
         ])
-        view.spacing = 16
+        view.spacing = 5
         view.distribution = .fillEqually
         view.axis = .vertical
         view.translatesAutoresizingMaskIntoConstraints = false
