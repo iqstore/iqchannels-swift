@@ -198,6 +198,28 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
 }
 ```
 
+Отображение логов сдк
+-----------------------------------
+Для отображения логов из сдк нужно добавить флаг в конфиг.
+
+Пример реализации:
+```swift
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com",
+                                      channels: ["channel1", "channel2"],
+                                      logging: true) // Включение логирования
+        configurationManager.configure(config)
+        
+        return true
+    }
+}
+```
+
 Отправка пуш-токенов
 --------------------
 Для поддержки пуш-уведомлений требуется при старте приложения запросить у пользователя возможность
