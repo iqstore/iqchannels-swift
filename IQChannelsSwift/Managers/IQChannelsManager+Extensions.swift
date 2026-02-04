@@ -484,10 +484,33 @@ extension IQChannelsManager {
     func sendImages(result: [PHPickerResult]) {
         Task {
             var files = [DataFile]()
-            await result.asyncForEach {
-                guard let data = await $0.data(maxSizeInMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return }
-                let isGif = $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier)
-                files.append(.init(data: data, filename: isGif ? "image.gif" : "image.jpeg"))
+
+            await result.asyncForEach { pickerResult in
+                guard let data = await pickerResult.data(
+                    maxSizeInMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)
+                ) else { return }
+
+                let isGif = pickerResult.itemProvider
+                    .hasItemConformingToTypeIdentifier(UTType.gif.identifier)
+
+                var filename: String
+
+                if let assetId = pickerResult.assetIdentifier {
+                    let assets = PHAsset.fetchAssets(
+                        withLocalIdentifiers: [assetId],
+                        options: nil
+                    )
+                    if let asset = assets.firstObject,
+                       let originalName = asset.value(forKey: "filename") as? String {
+                        filename = originalName
+                    } else {
+                        filename = isGif ? "image.gif" : "image.jpeg"
+                    }
+                } else {
+                    filename = isGif ? "image.gif" : "image.jpeg"
+                }
+
+                files.append(.init(data: data, filename: filename))
             }
             
             selectFiles(files)

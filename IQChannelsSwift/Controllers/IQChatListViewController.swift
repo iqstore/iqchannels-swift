@@ -48,7 +48,19 @@ class IQChatListViewController: IQViewController {
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] controller in
-                self?.navigationController?.pushViewController(controller, animated: true)
+                IQLog.debug(message: "4")
+                guard let navigationController = self?.navigationController else { return }
+
+                if navigationController.topViewController is IQChatDetailViewController {
+                    var stack = navigationController.viewControllers
+                    stack.removeLast()
+                    stack.append(controller)
+                    navigationController.setViewControllers(stack, animated: true)
+                } else {
+                    navigationController.pushViewController(controller, animated: true)
+                }
+                
+                IQLog.debug(message: "5")
             }
             .store(in: &subscriptions)
         
