@@ -419,6 +419,20 @@ extension IQChannelsManager {
     public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
         
+        if(text == "/version_sdk"){
+            DispatchQueue.main.async {
+                self.detailViewModel?.enableAnimMessages = true
+            }
+            
+            let message = IQMessage(text: "2.3.1", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            
+            messages.append(message)
+            DispatchQueue.main.async {
+                self.detailViewModel?.scrollDotHidden = false
+            }
+            return
+        }
+        
         if let files {
             var hasNonValidatedFilesText: String? = nil
             let newMessages = files.enumerated().compactMap { index, file -> IQMessage? in
