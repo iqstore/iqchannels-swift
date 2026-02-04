@@ -590,9 +590,14 @@ extension IQChannelsManager {
         
         if response.error != nil {
             if let error = response.error {
-                if indexOfMyMessage(localID: message.localID) != nil {
-                    baseViewModels.sendError(error)
+                let errorMessage = message.withError(true)
+                
+                if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
+                    messages[index] = errorMessage
                 }
+                
+                IQDatabaseManager.shared.insertMessage(errorMessage.toDatabaseMessage())
+                unsentMessages.append(errorMessage)
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                     Task {
