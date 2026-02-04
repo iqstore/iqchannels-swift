@@ -9,7 +9,6 @@ import PhotosUI
 import SDWebImage
 import Combine
 
-private var selectedChatSubscription: AnyCancellable?
 //MARK: - Private Methods
 extension IQChannelsManager {
     
@@ -379,32 +378,6 @@ extension IQChannelsManager {
 }
 
 
-//MARK: - Unread
-extension IQChannelsManager {
-    
-//    private func listenToUnread(){
-//        guard networkStatusManager.isReachable else { return }
-//        
-//        currentNetworkManager?.listenToUnread { [weak self] value, error in
-//            guard let self else { return }
-//            
-//            if error != nil {
-//                currentNetworkManager?.stopListenToUnread()
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-//                    self?.listenToUnread()
-//                }
-//            } else {
-//                Task {
-//                    await MainActor.run {
-//                        self.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(value ?? 0) }
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
-}
-
 //MARK: - Messages
 extension IQChannelsManager {
     
@@ -677,7 +650,7 @@ extension IQChannelsManager {
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
             
             DispatchQueue.main.async { [self] in
-                detailViewModel?.idOfNewMessage = nil
+                self.detailViewModel?.idOfNewMessage = nil
             }
             
             guard let networkManager = currentNetworkManager else { return }
