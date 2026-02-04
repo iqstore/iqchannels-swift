@@ -155,6 +155,16 @@ struct IQMessage: Codable, Identifiable, Equatable {
     }
     
     //MARK: - INIT
+    init(text: String, localID: Int, clientID: Int?) {
+        self.text = text
+        self.isRead = true
+        self.localID = localID
+        self.clientID = clientID
+        self.payload = .text
+        self.author = .client
+        self.isReply = false
+        self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
+    }
     init(text: String, chatType: IQChatType, clientID: Int?, localID: Int, replyMessageID: Int?) {
         self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: replyMessageID)
         self.text = text

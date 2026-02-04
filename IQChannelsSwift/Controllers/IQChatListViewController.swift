@@ -37,10 +37,12 @@ class IQChatListViewController: IQViewController {
         let hostView: ChatListView = .init(viewModel: viewModel, output: output)
         let controller: UIHostingController = .init(rootView: hostView)
         setupConstructedSwiftUI(interactor: controller)
+        IQLog.debug(message: "2")
     }
     
     override func setupNavBar() {
         navigationItem.rightBarButtonItem = .init(customView: closeButton)
+        IQLog.debug(message: "3")
     }
     
     override func bindViewModel() {

@@ -151,9 +151,13 @@ class IQChatDetailViewController: IQViewController {
     
     // MARK: - LIFECYCLE
     override func setupSwiftUI() {
+        IQLog.debug(message: "6")
+        
         let hostView: ChatDetailView = .init(delegate: self)
         let controller: UIHostingController = .init(rootView: hostView.environmentObject(viewModel))
         setupConstructedSwiftUI(interactor: controller)
+        
+        IQLog.debug(message: "7")
     }
     
     // MARK: - LANGUAGE
@@ -190,6 +194,7 @@ class IQChatDetailViewController: IQViewController {
         let supportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let fileURL = supportURL.appendingPathComponent("\(code).json")
 
+        IQLog.debug(message: "9")
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             IQLog.error(message: "Файл \(code).json не найден")
             return
@@ -200,6 +205,7 @@ class IQChatDetailViewController: IQViewController {
     }
     
     override func setupNavBar() {
+        IQLog.debug(message: "8")
         if let language = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String] {
             let code = language["code"]
             let name = language["name"]
@@ -217,6 +223,8 @@ class IQChatDetailViewController: IQViewController {
         setupNavigationBarAppearance()
         navigationItem.titleView = titleStackView
         navigationItem.leftBarButtonItem = .init(customView: backButton)
+        
+        IQLog.debug(message: "10")
     }
     
     override func bindViewModel() {
