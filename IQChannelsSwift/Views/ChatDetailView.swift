@@ -1,4 +1,5 @@
 import SwiftUI
+import SDWebImageSwiftUI
 
 protocol ChatDetailViewDelegate: AnyObject {
     func onAttachmentTap()
@@ -30,49 +31,63 @@ struct ChatDetailView: View {
     
     // MARK: - BODY
     var body: some View {
-        ZStack(alignment: .top) {
-            VStack(spacing: 0) {
-                
-                if(viewModel.showBottomTypingBar){
-                    ZStack(alignment: .bottom){
-                        ChatMessagesView(delegate: delegate)
-                        
-                        if let typingUser = viewModel.typingUser {
-                            getTypingView(user: typingUser)
-                                .zIndex(2)
+        if(viewModel.state == .authenticated){
+            ZStack(alignment: .top) {
+                VStack(spacing: 0) {
+                    
+                    if(viewModel.showBottomTypingBar){
+                        ZStack(alignment: .bottom){
+                            ChatMessagesView(delegate: delegate)
+                            
+                            if let typingUser = viewModel.typingUser {
+                                getTypingView(user: typingUser)
+                                    .zIndex(2)
+                            }
                         }
+                    } else {
+                        ChatMessagesView(delegate: delegate)
                     }
-                } else {
-                    ChatMessagesView(delegate: delegate)
+                    
+                    ChatInputView(text: $viewModel.inputText,
+                                  messageToReply: $viewModel.messageToReply,
+                                  selectedFiles: $viewModel.selectedFiles,
+                                  disableInput: viewModel.messages.first?.disableFreeText ?? false,
+                                  onAttachmentCompletion: {
+                        delegate?.onAttachmentTap()
+                    }, onSendCompletion: {
+                        delegate?.onSendMessage(viewModel.inputText)
+                        viewModel.inputText = ""
+                        viewModel.messageToReply = nil
+                        viewModel.selectedFiles = nil
+                    })
                 }
+                .zIndex(0)
                 
-                ChatInputView(text: $viewModel.inputText,
-                              messageToReply: $viewModel.messageToReply,
-                              selectedFiles: $viewModel.selectedFiles,
-                              disableInput: viewModel.messages.first?.disableFreeText ?? false,
-                              onAttachmentCompletion: {
-                    delegate?.onAttachmentTap()
-                }, onSendCompletion: {
-                    delegate?.onSendMessage(viewModel.inputText)
-                    viewModel.inputText = ""
-                    viewModel.messageToReply = nil
-                    viewModel.selectedFiles = nil
-                })
-            }
-            .zIndex(0)
-            
-            Group {
-                if viewModel.isMessageCopied {
-                    getMessageCopiedOverlay()
+                Group {
+                    if viewModel.isMessageCopied {
+                        getMessageCopiedOverlay()
+                    }
                 }
+                .zIndex(1)
+                .opacity(viewModel.isMessageCopied ? 1 : 0)
             }
-            .zIndex(1)
-            .opacity(viewModel.isMessageCopied ? 1 : 0)
+            .background(backgroundColor.ignoresSafeArea())
+            .animation(.easeInOut(duration: 0.25), value: viewModel.typingUser)
+            .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: viewModel.isMessageCopied)
+            .overlay(getMessageControlOverlay())
         }
-        .background(backgroundColor.ignoresSafeArea())
-        .animation(.easeInOut(duration: 0.25), value: viewModel.typingUser)
-        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: viewModel.isMessageCopied)
-        .overlay(getMessageControlOverlay())
+        else if (viewModel.state == .noPm){
+            ZStack {
+                backgroundColor.ignoresSafeArea()
+                getErrorView(isPm: true)
+            }
+        }
+        else {
+            ZStack {
+                backgroundColor.ignoresSafeArea()
+                getErrorView(isPm: false)
+            }
+        }
     }
     
     // MARK: - VIEWS
@@ -177,6 +192,82 @@ struct ChatDetailView: View {
                 cornerRadii: CGSize(width: radius, height: radius)
             )
             return Path(path.cgPath)
+        }
+    }
+    
+    
+    
+    @ViewBuilder
+    private func getErrorView(isPm: Bool) -> some View {
+        let titleColor = IQStyle.getColor(theme: IQStyle.model?.error?.titleError?.color) ?? Color(hex: "242729")
+        let titleFontSize = CGFloat(IQStyle.model?.error?.titleError?.textSize ?? 17)
+        let titleIsBold = IQStyle.model?.error?.titleError?.textStyle?.bold ?? false
+        let titleIsItalic = IQStyle.model?.error?.titleError?.textStyle?.italic ?? false
+        let titleAlignment = stringToAlignment(stringAlignment: IQStyle.model?.error?.titleError?.textAlign) ?? .center
+        
+        let descriptionColor = IQStyle.getColor(theme: IQStyle.model?.error?.textError?.color) ?? Color(hex: "242729")
+        let descriptionFontSize = CGFloat(IQStyle.model?.error?.textError?.textSize ?? 15)
+        let descriptionIsBold = IQStyle.model?.error?.textError?.textStyle?.bold ?? false
+        let descriptionIsItalic = IQStyle.model?.error?.textError?.textStyle?.italic ?? false
+        let descriptionAlignment = stringToAlignment(stringAlignment: IQStyle.model?.error?.textError?.textAlign) ?? .center
+        
+        
+        var titleError: String {
+            let pmError = IQLanguageTexts.model.titleErrorPm ?? "Нет закреплённого персонального менеджера"
+            let chatError = IQLanguageTexts.model.titleError ?? "Чат временно недоступен"
+            return isPm ? pmError : chatError
+        }
+        
+        var textError: String {
+            let pmError = IQLanguageTexts.model.textErrorPm ?? "Обратитесь в чат с тех. поддержкой"
+            let chatError = IQLanguageTexts.model.textError ?? "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже"
+            return isPm ? pmError : chatError
+        }
+        
+        
+        
+        VStack(spacing: 20) {
+            AnimatedImage(url: IQStyle.model?.error?.iconError,
+                          placeholderImage: UIImage(name: "circle_error"))
+                .resizable()
+                .indicator(SDWebImageActivityIndicator.gray)
+                .transition(SDWebImageTransition.fade)
+                .scaledToFit()
+                .frame(width: 48, height: 48)
+            
+            VStack(spacing: 8) {
+                if #available(iOS 16.0, *) {
+                    Text(titleError)
+                        .foregroundColor(titleColor)
+                        .font(.system(size: titleFontSize, weight: .semibold))
+                        .bold(titleIsBold)
+                        .italic(titleIsItalic)
+                        .multilineTextAlignment(titleAlignment)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
+                } else {
+                    Text(titleError)
+                        .foregroundColor(titleColor)
+                        .font(.system(size: titleFontSize, weight: .semibold))
+                        .multilineTextAlignment(titleAlignment)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
+                }
+                
+                if #available(iOS 16.0, *) {
+                    Text(textError)
+                        .foregroundColor(descriptionColor)
+                        .font(.system(size: descriptionFontSize))
+                        .bold(descriptionIsBold)
+                        .italic(descriptionIsItalic)
+                        .multilineTextAlignment(descriptionAlignment)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: descriptionAlignment) ?? .center)
+                } else {
+                    Text(textError)
+                        .foregroundColor(descriptionColor)
+                        .font(.system(size: descriptionFontSize))
+                        .multilineTextAlignment(descriptionAlignment)
+                        .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: descriptionAlignment) ?? .center)
+                }
+            }
         }
     }
 }
