@@ -38,6 +38,7 @@ extension IQChannelsManager {
                         self.selectedChat = (authResult, attachment.chatType)
                     } else {
                         self.listViewModel?.chatsInfo = items
+                        self.selectedChat = nil
                     }
                 }
             }
@@ -99,13 +100,13 @@ extension IQChannelsManager {
         })
     }
     
-    func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType), showNavBar: Bool) -> IQChatDetailViewController {
+    func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)?, showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
         viewModel.backDismisses = getChatItems(from: authResults, config: config).count == 1
         viewModel.state = state
-        viewModel.client = chat.auth.auth.client
-        viewModel.session = chat.auth.auth.session
+        viewModel.client = chat?.auth.auth.client
+        viewModel.session = chat?.auth.auth.session
         viewModel.messages = messages.reversed()
         viewModel.showBottomTypingBar = config.showBottomTypingBar
         return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
@@ -424,7 +425,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.3.0", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.3.1", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -1069,16 +1070,16 @@ extension IQChannelsManager {
             await networkManagers.asyncForEach { (channel, networkManager) in
                 let response: ResponseCallback<IQClientAuth>
                 switch loginType {
-                case .anonymous:
-                    IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
-                    if let token = storageManager.anonymousTokens?[channel] {
-                        response = await networkManager.clientsAuth(token: token)
-                    } else {
-                        response = await networkManager.clientsSignup()
-                    }
-                case let .credentials(credential):
-                    IQLog.debug(message: "Authentication credentials \n loginType: \(loginType)")
-                    response = await networkManager.clientsIntegrationAuth(credentials: credential)
+                    case .anonymous:
+                        IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
+                        if let token = storageManager.anonymousTokens?[channel] {
+                            response = await networkManager.clientsAuth(token: token)
+                        } else {
+                            response = await networkManager.clientsSignup()
+                        }
+                    case let .credentials(credential):
+                        IQLog.debug(message: "Authentication credentials \n loginType: \(loginType)")
+                        response = await networkManager.clientsIntegrationAuth(credentials: credential)
                 }
                 errors.append(response.error)
                 results.append((channel, response.result))
@@ -1090,6 +1091,9 @@ extension IQChannelsManager {
             } else {
                 IQLog.debug(message: "Success authentication \n results: \(results)")
                 self.auth(loginType, succeededWith: results, completion)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [] in
+                completion?()
             }
         }
     }
@@ -1117,10 +1121,6 @@ extension IQChannelsManager {
         authResults = results
         authAttempt = 0
         state = .authenticated
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            completion?()
-        }
     }
     
     private func auth(_ type: IQLoginType, failedWith error: Error?, _ completion: (() -> Void)?) {
