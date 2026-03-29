@@ -956,6 +956,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       }
     }
   },
+  "change_segment": {                       //Сообщение с кнопкой для перехода в другой сегмент
+    "background_container": {               //Фон сообщения
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "border": {
+        "size": 10,
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "border-radius": 50
+      }
+    },
+    "title": {                              //Заголовок сообщения
+      "color": {
+        "light": "#000000",
+        "dark": "#000000"
+      },
+      "text_size": 22,
+      "text_align": "center",
+      "text_style": {
+        "bold": true,
+        "italic": true
+      }
+    },
+    "background_button": {                  //Фон кнопки
+      "color": {
+        "light": "#008080",
+        "dark": "#008080"
+      },
+      "border": {
+        "size": 5,
+        "color": {
+          "light": "#008080",
+          "dark": "#008080"
+        },
+        "border-radius": 15
+      }
+    },
+    "text_button": {                       //Текст кнопки
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 20,
+      "text_align": "center",
+      "text_style": {
+        "bold": true,
+        "italic": true
+      }
+    }
+  },
   "rating": {                             //Сообщение оценки качества:
     "background_container": {             //Фон контейнера - по умолчанию как у сообщения
       "color": {

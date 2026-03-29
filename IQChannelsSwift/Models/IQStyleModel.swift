@@ -14,6 +14,7 @@ struct IQStyleModel: Decodable {
     let messages: MessagesStyle?
     let answer: AnswerStyle?
     let messagesFile: MessagesFileStyle?
+    let changeSegment: ChangeSegmentStyles?
     let rating: RatingStyle?
     let toolsToMessage: ToolsToMessageStyle?
     let error: ErrorStyle?
@@ -26,6 +27,7 @@ struct IQStyleModel: Decodable {
         case messages
         case answer
         case messagesFile = "messages_file"
+        case changeSegment = "change_segment"
         case rating
         case toolsToMessage = "tools_to_message"
         case error
@@ -176,6 +178,20 @@ struct IQStyleModel: Decodable {
             case iconFileOperator = "icon_file_operator"
             case textFileSizeClient = "text_file_size_client"
             case textFileSizeOperator = "text_file_size_operator"
+        }
+    }
+    
+    struct ChangeSegmentStyles: Decodable {
+        let backgroundContainer: ContainerStyle?
+        let title: Text?
+        let backgroundButton: ContainerStyle?
+        let textButton: Text?
+
+        enum CodingKeys: String, CodingKey {
+            case backgroundContainer = "background_container"
+            case title
+            case backgroundButton = "background_button"
+            case textButton = "text_button"
         }
     }
 
