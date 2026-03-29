@@ -664,14 +664,20 @@ extension IQChannelsManager {
         
         IQDatabaseManager.shared.readMessageByChatId(chatId)
         
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        
+        let unreadCount = unread.count
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
         
         readMessages.update(with: messageID)
+        
+        IQLog.debug(message: "Read message with messageID = \(messageID)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
         
         Task {
             let _ = await currentNetworkManager?.sendReadEvent([messageID])
@@ -899,15 +905,20 @@ extension IQChannelsManager {
         
         IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        let unreadCount = unread.count
         
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
+        
+        IQLog.debug(message: "New message created = \(message)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
 
-        if let index = indexOfMyMessage(localID: message.localID){
+        if let index = indexOfMyMessage(localID: message.localID) {
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
             DispatchQueue.main.async {
@@ -950,12 +961,17 @@ extension IQChannelsManager {
         messages.remove(elementsAtIndices: ids)
         
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        let unreadCount = unread.count
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
+        
+        IQLog.debug(message: "Messages removed with ids = \(ids)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
 
     }
     
