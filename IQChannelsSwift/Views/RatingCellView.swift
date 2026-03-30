@@ -45,14 +45,14 @@ struct RatingCellView: View {
         return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
     }
     var titleAlignment: TextAlignment {
-        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .leading
+        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .center
     }
     
     // MARK: - BODY
     var body: some View {
         VStack(spacing: 12) {
             if #available(iOS 16.0, *) {
-                Text(IQLanguageTexts.model.ratingStatePending ?? "Пожалуйста, оцените качество консультации")
+                Text(rating.questionText ?? "Пожалуйста, оцените качество консультации")
                     .foregroundColor(titleColor)
                     .font(.system(size: titleFontSize))
                     .minimumScaleFactor(0.8)
@@ -61,7 +61,7 @@ struct RatingCellView: View {
                     .multilineTextAlignment(titleAlignment)
                     .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: titleAlignment) ?? .center)
             } else {
-                Text(IQLanguageTexts.model.ratingStatePending ?? "Пожалуйста, оцените качество консультации")
+                Text(rating.questionText ?? "Пожалуйста, оцените качество консультации")
                     .foregroundColor(titleColor)
                     .font(.system(size: titleFontSize))
                     .minimumScaleFactor(0.8)
