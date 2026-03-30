@@ -1088,7 +1088,8 @@ extension IQChannelsManager {
                 switch loginType {
                     case .anonymous:
                         IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
-                        if let token = storageManager.anonymousTokens?[channel] {
+                    
+                        if let token = storageManager.anonymousTokens?["\(channel)\(config.address)"] {
                             response = await networkManager.clientsAuth(token: token)
                         } else {
                             response = await networkManager.clientsSignup()
@@ -1124,13 +1125,14 @@ extension IQChannelsManager {
         
         results.forEach { (channel, auth) in
             guard let token = auth.session?.token else { return }
+            let address = config.address
             
             networkManagers[channel]?.token = token
             if type == .anonymous {
                 if storageManager.anonymousTokens != nil {
-                    storageManager.anonymousTokens?.updateValue(token, forKey: channel)
+                    storageManager.anonymousTokens?.updateValue(token, forKey: "\(channel)\(address)")
                 } else {
-                    storageManager.anonymousTokens = [channel: token]
+                    storageManager.anonymousTokens = ["\(channel)\(address)": token]
                 }
             }
         }
