@@ -17,6 +17,7 @@ struct IQRating: Codable, Equatable {
     var value: Int?
     var state: IQRatingState?
     var ratingPoll: IQRatingPoll?
+    var questionText: String?
 }
 
 enum IQRatingState: String, Codable {

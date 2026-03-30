@@ -25,51 +25,51 @@ struct ChangeSegmentView: View {
     
     
     var backgroundColor: Color {
-        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
+        return IQStyle.getColor(theme: IQStyle.model?.changeSegment?.backgroundContainer?.color) ?? Color(hex: "F4F4F8")
     }
     var backgroundRadius: CGFloat {
-        return IQStyle.model?.rating?.backgroundContainer?.border?.borderRadius ?? 12
+        return IQStyle.model?.changeSegment?.backgroundContainer?.border?.borderRadius ?? 12
     }
     var backgroundBorderSize: CGFloat {
-        return IQStyle.model?.rating?.backgroundContainer?.border?.size ?? 0
+        return IQStyle.model?.changeSegment?.backgroundContainer?.border?.size ?? 0
     }
     var backgroundBorderColor: Color {
-        return IQStyle.getColor(theme: IQStyle.model?.rating?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
+        return IQStyle.getColor(theme: IQStyle.model?.changeSegment?.backgroundContainer?.border?.color) ?? Color(hex: "000000")
     }
     
     
     
     
     var titleColor: Color {
-        return IQStyle.getColor(theme: IQStyle.model?.rating?.ratingTitle?.color) ?? Color(hex: "242729")
+        return IQStyle.getColor(theme: IQStyle.model?.changeSegment?.title?.color) ?? Color(hex: "242729")
     }
     var titleFontSize: CGFloat {
-        return CGFloat(IQStyle.model?.rating?.ratingTitle?.textSize ?? 17)
+        return CGFloat(IQStyle.model?.changeSegment?.title?.textSize ?? 17)
     }
     var titleIsBold: Bool {
-        return IQStyle.model?.rating?.ratingTitle?.textStyle?.bold ?? false
+        return IQStyle.model?.changeSegment?.title?.textStyle?.bold ?? false
     }
     var titleIsItalic: Bool {
-        return IQStyle.model?.rating?.ratingTitle?.textStyle?.italic ?? false
+        return IQStyle.model?.changeSegment?.title?.textStyle?.italic ?? false
     }
     var titleAlignment: TextAlignment {
-        return stringToAlignment(stringAlignment: IQStyle.model?.rating?.ratingTitle?.textAlign) ?? .center
+        return stringToAlignment(stringAlignment: IQStyle.model?.changeSegment?.title?.textAlign) ?? .center
     }
     
     
     // MARK: - BODY
     var body: some View {
-        let disabledRatingTextColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.textDisabled?.color) ?? Color.white
-        let disabledRatingFontSize = CGFloat(IQStyle.model?.rating?.answerButton?.textDisabled?.textSize ?? 15)
-        let disabledRatingBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.color) ?? Color(hex: "B7B7CA")
+        let buttonTextColor = IQStyle.getColor(theme: IQStyle.model?.changeSegment?.textButton?.color) ?? Color.white
+        let buttonFontSize = CGFloat(IQStyle.model?.changeSegment?.textButton?.textSize ?? 15)
+        let buttonBackgroundColor = IQStyle.getColor(theme: IQStyle.model?.changeSegment?.backgroundButton?.color) ?? Color(hex: "DD0A34")
         
-        let disabledRatingIsBold = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.bold ?? false
-        let disabledRatingIsItalic = IQStyle.model?.rating?.answerButton?.textDisabled?.textStyle?.italic ?? false
-        let disabledRatingAlignment = stringToAlignment(stringAlignment: IQStyle.model?.rating?.answerButton?.textDisabled?.textAlign) ?? .center
+        let buttonIsBold = IQStyle.model?.changeSegment?.textButton?.textStyle?.bold ?? false
+        let buttonIsItalic = IQStyle.model?.changeSegment?.textButton?.textStyle?.italic ?? false
+        let buttonAlignment = stringToAlignment(stringAlignment: IQStyle.model?.changeSegment?.textButton?.textAlign) ?? .center
         
-        let disabledRatingRadius = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.borderRadius ?? 8
-        let disabledRatingBorderSize = IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.size ?? 0
-        let disabledRatingBorderColor = IQStyle.getColor(theme: IQStyle.model?.rating?.answerButton?.backgroundDisabled?.border?.color) ?? Color(hex: "000000")
+        let buttonRadius = IQStyle.model?.changeSegment?.backgroundButton?.border?.borderRadius ?? 8
+        let buttonBorderSize = IQStyle.model?.changeSegment?.backgroundButton?.border?.size ?? 0
+        let buttonBorderColor = IQStyle.getColor(theme: IQStyle.model?.changeSegment?.backgroundButton?.border?.color) ?? Color(hex: "000000")
         
         VStack(spacing: 12) {
             if #available(iOS 16.0, *) {
@@ -95,41 +95,41 @@ struct ChangeSegmentView: View {
             } label: {
                 if #available(iOS 16.0, *) {
                     Text("Перейти в канал \"\(message.transferToChannel?.title ?? "")\"")
-                        .foregroundColor(disabledRatingTextColor)
-                        .font(.system(size: disabledRatingFontSize))
-                        .bold(disabledRatingIsBold)
-                        .italic(disabledRatingIsItalic)
-                        .multilineTextAlignment(disabledRatingAlignment)
+                        .foregroundColor(buttonTextColor)
+                        .font(.system(size: buttonFontSize))
+                        .bold(buttonIsBold)
+                        .italic(buttonIsItalic)
+                        .multilineTextAlignment(buttonAlignment)
                         .frame(maxWidth: .infinity, alignment:
-                                textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                                textAlignmentToAlignment(textAlignment: buttonAlignment) ?? .center
                         )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
-                        .background(disabledRatingBackgroundColor)
-                        .cornerRadius(disabledRatingRadius)
+                        .background(buttonBackgroundColor)
+                        .cornerRadius(buttonRadius)
                         .overlay(
-                            RoundedRectangle(cornerRadius: disabledRatingRadius)
+                            RoundedRectangle(cornerRadius: buttonRadius)
                                 .stroke(
-                                    disabledRatingBorderColor,
-                                    lineWidth: disabledRatingBorderSize)
+                                    buttonBorderColor,
+                                    lineWidth: buttonBorderSize)
                         )
                 } else {
                     Text("Перейти в канал \"\(message.transferToChannel?.title ?? "")\"")
-                        .foregroundColor(disabledRatingTextColor)
-                        .font(.system(size: disabledRatingFontSize))
-                        .multilineTextAlignment(disabledRatingAlignment)
+                        .foregroundColor(buttonTextColor)
+                        .font(.system(size: buttonFontSize))
+                        .multilineTextAlignment(buttonAlignment)
                         .frame(maxWidth: .infinity, alignment:
-                                textAlignmentToAlignment(textAlignment: disabledRatingAlignment) ?? .center
+                                textAlignmentToAlignment(textAlignment: buttonAlignment) ?? .center
                         )
                         .frame(height: 40)
                         .frame(maxWidth: .infinity)
-                        .background(disabledRatingBackgroundColor)
-                        .cornerRadius(disabledRatingRadius)
+                        .background(buttonBackgroundColor)
+                        .cornerRadius(buttonRadius)
                         .overlay(
-                            RoundedRectangle(cornerRadius: disabledRatingRadius)
+                            RoundedRectangle(cornerRadius: buttonRadius)
                                 .stroke(
-                                    disabledRatingBorderColor,
-                                    lineWidth: disabledRatingBorderSize)
+                                    buttonBorderColor,
+                                    lineWidth: buttonBorderSize)
                         )
                 }
             }

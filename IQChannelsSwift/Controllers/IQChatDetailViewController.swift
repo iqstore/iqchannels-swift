@@ -327,6 +327,22 @@ class IQChatDetailViewController: IQViewController {
     private func photoSourceDidTap(source: UIImagePickerController.SourceType){
         switch source {
         case .photoLibrary, .savedPhotosAlbum:
+            PHPhotoLibrary.requestAuthorization { status in
+                switch status {
+                case .authorized:
+                    IQLog.debug(message: "Доступ к галерее разрешён")
+                case .limited:
+                    IQLog.debug(message: "Ограниченный доступ к галерее")
+                case .denied:
+                    IQLog.debug(message: "Доступ к галерее запрещён")
+                case .restricted:
+                    IQLog.debug(message: "Доступ к галерее ограничен системой")
+                case .notDetermined:
+                    IQLog.debug(message: "Пользователь ещё не ответил")
+                @unknown default:
+                    break
+                }
+            }
             var configuration = PHPickerConfiguration(photoLibrary: .shared())
             configuration.selectionLimit = 10
             configuration.preferredAssetRepresentationMode = .current

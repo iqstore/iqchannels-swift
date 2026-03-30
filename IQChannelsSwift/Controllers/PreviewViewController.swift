@@ -122,22 +122,22 @@ class PreviewViewController: UIViewController, UIScrollViewDelegate {
         let authorizationStatus = PHPhotoLibrary.authorizationStatus(for: .addOnly)
         
         switch authorizationStatus {
-        case .authorized, .limited:
-            savePhotoToLibrary(data: data)
-            
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-                DispatchQueue.main.async {
-                    if status == .authorized || status == .limited {
-                        self.savePhotoToLibrary(data: data)
-                    } else {
-                        self.showAccessDeniedAlert()
+            case .authorized, .limited:
+                savePhotoToLibrary(data: data)
+                
+            case .notDetermined:
+                PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+                    DispatchQueue.main.async {
+                        if status == .authorized || status == .limited {
+                            self.savePhotoToLibrary(data: data)
+                        } else {
+                            self.showAccessDeniedAlert()
+                        }
                     }
                 }
-            }
-            
-        case .denied, .restricted:
-            showAccessDeniedAlert()
+                
+            case .denied, .restricted:
+                showAccessDeniedAlert()
             
         @unknown default:
             break

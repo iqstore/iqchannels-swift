@@ -271,10 +271,18 @@ extension IQChannelsManager {
     
     private func sendApnsToken(_ apnsToken: String) {
         Task {
-            guard let currentNetworkManager else { return }
+//            guard let currentNetworkManager else { return }
+            guard let currentNetworkManager else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    self?.sendApnsToken(apnsToken)
+                }
+                return
+            }
             
             let error = await currentNetworkManager.pushToken(token: apnsToken)
             if error != nil {
+                IQLog.error(message: "sendApnsToken: \n error: \(String(describing: error))")
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                     self?.sendApnsToken(apnsToken)
                 }
@@ -425,7 +433,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.3.1", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.3.2", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -664,14 +672,20 @@ extension IQChannelsManager {
         
         IQDatabaseManager.shared.readMessageByChatId(chatId)
         
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        
+        let unreadCount = unread.count
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
         
         readMessages.update(with: messageID)
+        
+        IQLog.debug(message: "Read message with messageID = \(messageID)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
         
         Task {
             let _ = await currentNetworkManager?.sendReadEvent([messageID])
@@ -899,15 +913,20 @@ extension IQChannelsManager {
         
         IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        let unreadCount = unread.count
         
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
+        
+        IQLog.debug(message: "New message created = \(message)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
 
-        if let index = indexOfMyMessage(localID: message.localID){
+        if let index = indexOfMyMessage(localID: message.localID) {
             messages[index] = messages[index].merged(with: message)
         } else if message.hasValidPayload, indexOfMessage(messageID: message.messageID) == nil {
             DispatchQueue.main.async {
@@ -950,12 +969,17 @@ extension IQChannelsManager {
         messages.remove(elementsAtIndices: ids)
         
         let chatId = messages.filter {$0.clientID == selectedChat?.auth.auth.client?.id}.first?.chatID
-        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}.count
+        let unread = IQDatabaseManager.shared.getAllMessages().filter { ($0.isRead == nil || $0.isRead == false) && $0.author == "\"user\"" && $0.chatID == chatId}
+        let unreadCount = unread.count
         Task {
             await MainActor.run {
-                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unread) }
+                IQChannelsManager.unreadListeners.forEach { $0.iqChannelsUnreadDidChange(unreadCount) }
             }
         }
+        
+        IQLog.debug(message: "Messages removed with ids = \(ids)")
+        IQLog.debug(message: "Unread count = \(unreadCount)")
+        IQLog.debug(message: "Unread messages = \(unread)")
 
     }
     
@@ -1072,7 +1096,8 @@ extension IQChannelsManager {
                 switch loginType {
                     case .anonymous:
                         IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
-                        if let token = storageManager.anonymousTokens?[channel] {
+                    
+                        if let token = storageManager.anonymousTokens?["\(channel)\(config.address)"] {
                             response = await networkManager.clientsAuth(token: token)
                         } else {
                             response = await networkManager.clientsSignup()
@@ -1108,13 +1133,14 @@ extension IQChannelsManager {
         
         results.forEach { (channel, auth) in
             guard let token = auth.session?.token else { return }
+            let address = config.address
             
             networkManagers[channel]?.token = token
             if type == .anonymous {
                 if storageManager.anonymousTokens != nil {
-                    storageManager.anonymousTokens?.updateValue(token, forKey: channel)
+                    storageManager.anonymousTokens?.updateValue(token, forKey: "\(channel)\(address)")
                 } else {
-                    storageManager.anonymousTokens = [channel: token]
+                    storageManager.anonymousTokens = ["\(channel)\(address)": token]
                 }
             }
         }

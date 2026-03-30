@@ -11,6 +11,7 @@ import UIKit
 public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
     
     var channelManager: (IQChannelsManagerProtocol & IQChannelsManagerListOutput)?
+    var deviceToken: Data?
     
     public init () { }
     

@@ -125,7 +125,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let params = ["Token": token]
         let response = await post(path, body: params, responseType: IQEmptyResponse.self)
         
-        IQLog.debug(message: "pushToken: \n token: \(token) \n response: \(response)")
+        IQLog.debug(message: "sendPushToken: \n token: \(token) \n response: \(response)")
         
         return response.error
     }
@@ -245,7 +245,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                         systemChat = false
                     }
                 } else{
-                    let avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(settings.avatarID ?? "")?size=avatar")
+                    var avatarURL: URL? = nil
+                    
+                    if let avatarId = settings.avatarID, !avatarId.isEmpty {
+                        avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(avatarId)?size=avatar")
+                    }
+                    
+                    IQLog.debug(message: "Auto greet avatarURL:\(String(describing: avatarURL))")
                     
                     if(settings.totalOpenedTickets == 0){
                         value.append(IQMessage(
@@ -260,7 +266,10 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             }
         }
         
-        let unreadMessagesCount = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user}.count
+        let unreadMessages = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user}
+        let unreadMessagesCount = unreadMessages.count
+        
+        
         if(unreadMessagesCount > 0){
             if let lastMessage = value.last, !(lastMessage.isMy ?? false) {
                 value.insert(
@@ -282,6 +291,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
         
         IQLog.debug(message: "loadMessages: \n request: \(request) \n success")
+        IQLog.debug(message: "Unread count = \(unreadMessagesCount)")
+        IQLog.debug(message: "Unread messages = \(unreadMessages)")
         
         return .init(result: (value, systemChat, lifeTime, chatTitle, availableLanguages))
     }
