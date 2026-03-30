@@ -31,7 +31,7 @@ class IQChatDetailViewController: IQViewController {
         
         let fontSize = CGFloat(IQStyle.model?.appBar?.titleLabel?.textSize ?? 15)
         let alignment = stringToAlignment(stringAlignment: IQStyle.model?.appBar?.titleLabel?.textAlign) ?? .center
-        let isBold = IQStyle.model?.appBar?.titleLabel?.textStyle?.bold ?? false
+        let isBold = IQStyle.model?.appBar?.titleLabel?.textStyle?.bold ?? true
         let isItalic = IQStyle.model?.appBar?.titleLabel?.textStyle?.italic ?? false
         
         var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
