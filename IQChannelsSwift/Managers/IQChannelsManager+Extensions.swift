@@ -271,10 +271,18 @@ extension IQChannelsManager {
     
     private func sendApnsToken(_ apnsToken: String) {
         Task {
-            guard let currentNetworkManager else { return }
+//            guard let currentNetworkManager else { return }
+            guard let currentNetworkManager else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    self?.sendApnsToken(apnsToken)
+                }
+                return
+            }
             
             let error = await currentNetworkManager.pushToken(token: apnsToken)
             if error != nil {
+                IQLog.error(message: "sendApnsToken: \n error: \(String(describing: error))")
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                     self?.sendApnsToken(apnsToken)
                 }

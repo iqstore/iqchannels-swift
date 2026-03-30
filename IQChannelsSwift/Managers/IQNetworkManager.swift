@@ -125,7 +125,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let params = ["Token": token]
         let response = await post(path, body: params, responseType: IQEmptyResponse.self)
         
-        IQLog.debug(message: "pushToken: \n token: \(token) \n response: \(response)")
+        IQLog.debug(message: "sendPushToken: \n token: \(token) \n response: \(response)")
         
         return response.error
     }
@@ -245,7 +245,13 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                         systemChat = false
                     }
                 } else{
-                    let avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(settings.avatarID ?? "")?size=avatar")
+                    var avatarURL: URL? = nil
+                    
+                    if let avatarId = settings.avatarID, !avatarId.isEmpty {
+                        avatarURL = URL(string: "\(address)/public/api/v1/files/image/\(avatarId)?size=avatar")
+                    }
+                    
+                    IQLog.debug(message: "Auto greet avatarURL:\(String(describing: avatarURL))")
                     
                     if(settings.totalOpenedTickets == 0){
                         value.append(IQMessage(
