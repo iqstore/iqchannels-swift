@@ -65,6 +65,7 @@ struct IQStyleModel: Decodable {
         let chatLoader: Theme?
         let iconOperator: URL?
         let systemText: Text?
+        let newMessageBackground: Theme?
         let scrollDownButtonBackground: ContainerStyle?
         let scrollDownButtonIconColor: Theme?
         
@@ -76,6 +77,7 @@ struct IQStyleModel: Decodable {
             case chatLoader = "chat_loader"
             case iconOperator = "icon_operator"
             case systemText = "system_text"
+            case newMessageBackground = "new_message_background"
             case scrollDownButtonBackground = "scroll_down_button_background"
             case scrollDownButtonIconColor = "scroll_down_button_icon_color"
         }

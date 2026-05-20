@@ -19,6 +19,22 @@ struct TextMessageCellView: View {
     @State private var keyboardShown: Bool = false
     @State private var computeFrame = false
     @State private var frame: CGRect = .zero
+    @State private var cachedText: (NSAttributedString, [Link])?
+    
+    private func loadText() {
+        let result = AttributeTextManager.shared.getString(
+            from: message.messageText,
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
+
+        DispatchQueue.main.async {
+            self.cachedText = result
+        }
+    }
     
     var backgroundColor: Color {
         let backgroundOperator = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundOperator?.color) ?? Color(hex: "F4F4F8")
@@ -100,21 +116,27 @@ struct TextMessageCellView: View {
                                      onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                 }
                 
-                let data = AttributeTextManager.shared.getString(from: text,
-                                                                 textColor: textColor,
-                                                                 fontSize: fontSize,
-                                                                 alingment: aligment,
-                                                                 isBold: isBold,
-                                                                 isItalic: isItalic)
-                TextLabel(text: data.0,
-                          linkRanges: data.1)
-                    .layoutPriority(1)
+
+                Group {
+                    if let cachedText {
+                        TextLabel(text: cachedText.0,
+                                  linkRanges: cachedText.1)
+                        .layoutPriority(1)
+                        .padding(.horizontal, 12)
+                    } else {
+                        Text("")
+                    }
+                }
+                .onAppear {
+                    loadText()
+                }
             }
 
             MessageStatusView(message: message)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.top, message.isAutoGreet ? 16 : 8)
+        .padding(.bottom, 8)
         .background(backgroundColor)
         .cornerRadius(backgroundRadius)
         .overlay(

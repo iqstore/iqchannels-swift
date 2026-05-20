@@ -3,6 +3,7 @@ import Combine
 import SwiftUI
 import PhotosUI
 import SafariServices
+import Photos
 
 class IQChatDetailViewController: IQViewController {
     
@@ -324,38 +325,25 @@ class IQChatDetailViewController: IQViewController {
     }
     
     // MARK: - PRIVATE METHODS
-    private func photoSourceDidTap(source: UIImagePickerController.SourceType){
+    private func photoSourceDidTap(source: UIImagePickerController.SourceType) {
         switch source {
+
         case .photoLibrary, .savedPhotosAlbum:
-            PHPhotoLibrary.requestAuthorization { status in
-                switch status {
-                case .authorized:
-                    IQLog.debug(message: "Доступ к галерее разрешён")
-                case .limited:
-                    IQLog.debug(message: "Ограниченный доступ к галерее")
-                case .denied:
-                    IQLog.debug(message: "Доступ к галерее запрещён")
-                case .restricted:
-                    IQLog.debug(message: "Доступ к галерее ограничен системой")
-                case .notDetermined:
-                    IQLog.debug(message: "Пользователь ещё не ответил")
-                @unknown default:
-                    break
-                }
-            }
-            var configuration = PHPickerConfiguration(photoLibrary: .shared())
-            configuration.selectionLimit = 10
-            configuration.preferredAssetRepresentationMode = .current
-            configuration.filter = PHPickerFilter.images
-            let picker = PHPickerViewController(configuration: configuration)
-            picker.delegate = self
-            present(picker, animated: true)
+
+            let gallery = LimitedPhotosViewController()
+            gallery.delegate = self
+
+            let nav = UINavigationController(rootViewController: gallery)
+            self.present(nav, animated: true)
         case .camera:
+
             let picker = UIImagePickerController()
             picker.sourceType = .camera
             picker.delegate = self
             present(picker, animated: true)
-        @unknown default: break
+
+        @unknown default:
+            break
         }
     }
     
@@ -435,6 +423,10 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
         output.detailController(didSelect: singleChoice)
     }
     
+    func onProductTap(_ productTap: IQProductTap) {
+        output.detailController(didSelect: productTap)
+    }
+    
     func onActionTap(_ action: IQAction) {
         output.detailController(didSelect: action)
     }
@@ -496,6 +488,17 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
         } else if let image = info[.originalImage] as? UIImage {
             output.detailController(didPick: [(nil, image)])
         }
+        viewModel.scrollDown.toggle()
+    }
+}
+
+extension IQChatDetailViewController: LimitedPhotosViewControllerDelegate {
+    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?) {
+
+        if let image {
+            output.detailController(didPick: [(url, image)])
+        }
+
         viewModel.scrollDown.toggle()
     }
 }
@@ -627,5 +630,246 @@ final class LanguageCell: UITableViewCell {
         if (selected){
             nameLabel.font = .boldSystemFont(ofSize: nameLabel.font.pointSize)
         }
+    }
+}
+
+
+
+protocol LimitedPhotosViewControllerDelegate: AnyObject {
+    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?)
+}
+
+final class LimitedPhotosViewController: UIViewController {
+
+    private var assets: [PHAsset] = []
+    weak var delegate: LimitedPhotosViewControllerDelegate?
+
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+
+        let spacing: CGFloat = 2
+        let itemsPerRow: CGFloat = 3
+
+        let width = (UIScreen.main.bounds.width - (itemsPerRow - 1) * spacing) / itemsPerRow
+
+        layout.itemSize = CGSize(width: width, height: width)
+        layout.minimumLineSpacing = spacing
+        layout.minimumInteritemSpacing = spacing
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+
+        collectionView.backgroundColor = .systemBackground
+        collectionView.delegate = self
+        collectionView.dataSource = self
+
+        collectionView.register(
+            PhotoCell.self,
+            forCellWithReuseIdentifier: PhotoCell.reuseIdentifier
+        )
+
+        return collectionView
+    }()
+
+    private let imageManager = PHCachingImageManager()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        title = IQLanguageTexts.model.gallery ?? "Галерея"
+
+        view.backgroundColor = .systemBackground
+
+        setupUI()
+        requestAccess()
+    }
+
+    private func setupUI() {
+        view.addSubview(collectionView)
+
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func requestAccess() {
+
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+
+        switch status {
+
+        case .authorized, .limited:
+            loadAssets()
+
+        case .notDetermined:
+
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+                DispatchQueue.main.async {
+
+                    switch status {
+
+                    case .authorized, .limited:
+                        self?.loadAssets()
+
+                    case .denied, .restricted:
+                        self?.showAccessDenied()
+                        IQLog.debug(message: "Доступ к галерее запрещён")
+
+                    default:
+                        break
+                    }
+                }
+            }
+
+        case .denied, .restricted:
+            showAccessDenied()
+            IQLog.debug(message: "Доступ к галерее запрещён")
+
+        @unknown default:
+            break
+        }
+    }
+
+    private func loadAssets() {
+
+        assets.removeAll()
+
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: nil)
+
+        var temp: [PHAsset] = []
+
+        fetchResult.enumerateObjects { asset, _, _ in
+            temp.insert(asset, at: 0)
+        }
+
+        self.assets = temp
+        
+        collectionView.reloadData()
+    }
+
+    private func showAccessDenied() {
+
+        let alert = UIAlertController(
+            title: "Нет доступа",
+            message: "Разрешите доступ к фотографиям в настройках",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+
+        present(alert, animated: true)
+    }
+}
+
+extension LimitedPhotosViewController: UICollectionViewDataSource {
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
+
+        assets.count
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: PhotoCell.reuseIdentifier,
+            for: indexPath
+        ) as? PhotoCell else {
+
+            return UICollectionViewCell()
+        }
+
+        let asset = assets[indexPath.item]
+
+        let size = CGSize(width: 300, height: 300)
+
+        imageManager.requestImage(
+            for: asset,
+            targetSize: size,
+            contentMode: .aspectFill,
+            options: nil
+        ) { image, _ in
+            cell.imageView.image = image
+        }
+
+        return cell
+    }
+}
+
+extension LimitedPhotosViewController: UICollectionViewDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let asset = assets[indexPath.item]
+        
+        let options = PHContentEditingInputRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
+        asset.requestContentEditingInput(with: options) { [weak self] input, _ in
+            
+            guard let self else { return }
+            
+            let url = input?.fullSizeImageURL
+            
+            self.imageManager.requestImage(
+                for: asset,
+                targetSize: CGSize(width: 1000, height: 1000),
+                contentMode: .aspectFill,
+                options: nil
+            ) { image, _ in
+                
+                DispatchQueue.main.async {
+                    
+                    self.delegate?.limitedPhotosViewControllerDidPick(
+                        image: image,
+                        url: url
+                    )
+                    
+                    self.dismiss(animated: true)
+                }
+            }
+        }
+    }
+}
+
+final class PhotoCell: UICollectionViewCell {
+
+    static let reuseIdentifier = "PhotoCell"
+
+    let imageView: UIImageView = {
+
+        let imageView = UIImageView()
+
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+
+        return imageView
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        contentView.addSubview(imageView)
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError()
     }
 }

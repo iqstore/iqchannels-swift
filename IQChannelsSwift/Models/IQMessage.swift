@@ -29,14 +29,16 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var disableFreeText: Bool?
     var isSystem: Bool = false
     var isReply: Bool = true
+    var isAutoGreet: Bool = false
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
+    var product: IQProduct?
     var transferToChannel: IQTransferToChannel?
     
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, chatID, createdAt, localID, isDropDown, singleChoices, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author, transferToChannel
+        case payload, text, userID, clientID, fileID, chatID, createdAt, localID, isDropDown, singleChoices, product, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author, transferToChannel
     }
 
     //MARK: - Custom
@@ -196,7 +198,15 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.botpressPayload = choice.value
     }
     
-    init(text: String, operatorName: String, avatarID: String?, avatarURL: URL?) {
+    init(product: IQProduct, chatType: IQChatType, clientID: Int?, localID: Int) {
+        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
+        self.payload = .text
+        self.isRead = false
+        self.text = "product.title"
+        self.botpressPayload = "product.value"
+    }
+    
+    init(text: String, operatorName: String, avatarID: String?, avatarURL: URL?, isAutoGreet: Bool = false) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)
         self.localID = -1
@@ -204,6 +214,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.isRead = true
         self.isReply = false
         self.payload = .text
+        self.isAutoGreet = isAutoGreet
         self.user = IQUser(id: 0, displayName: operatorName, avatarID: avatarID, avatarURL: avatarURL)
     }
     

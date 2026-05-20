@@ -53,6 +53,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         return networkManagers[channel]
     }
     var lifecycleObserver: AppLifecycleObserver?
+    var sendDelay: TimeInterval = 0
     
     init(configuration: IQChannelsConfig) {
         self.config = configuration

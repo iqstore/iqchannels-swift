@@ -234,6 +234,8 @@ struct ChatMessagesView: View {
         let isBold = IQStyle.model?.chat?.systemText?.textStyle?.bold ?? false
         let isItalic = IQStyle.model?.chat?.systemText?.textStyle?.italic ?? false
         
+        let background = IQStyle.getColor(theme: IQStyle.model?.chat?.newMessageBackground) ?? Color(hex: "F4F4F8")
+        
         if #available(iOS 16.0, *) {
             Text(IQLanguageTexts.model.newMessages ?? "Новые сообщения")
                 .foregroundColor(textColor)
@@ -243,7 +245,7 @@ struct ChatMessagesView: View {
                 .italic(isItalic)
                 .frame(height: 24)
                 .frame(maxWidth: .infinity)
-//                .background(Color(hex: "F4F4F8"))
+                .background(background)
                 .padding(.top, 12)
                 .padding(.horizontal, -16)
         } else {
@@ -253,7 +255,7 @@ struct ChatMessagesView: View {
                 .multilineTextAlignment(alignment)
                 .frame(height: 24)
                 .frame(maxWidth: .infinity)
-//                .background(Color(hex: "F4F4F8"))
+                .background(background)
                 .padding(.top, 12)
                 .padding(.horizontal, -16)
         }

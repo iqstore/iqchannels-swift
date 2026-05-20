@@ -5,6 +5,7 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onAttachmentTap()
     func onFileTap(_ file: IQFile, sessionToken: String)
     func onSingleChoiceTap(_ singleChoice: IQSingleChoice)
+    func onProductTap(_ product: IQProductTap)
     func onActionTap(_ action: IQAction)
     func onMessageAppear(with messageId: Int)
     func onSendMessage(_ text: String)
@@ -31,7 +32,7 @@ struct ChatDetailView: View {
     
     // MARK: - BODY
     var body: some View {
-        if(viewModel.state == .authenticated){
+        if(viewModel.state == .authenticated || viewModel.state == .awaitingNetwork){
             ZStack(alignment: .top) {
                 VStack(spacing: 0) {
                     
@@ -82,12 +83,12 @@ struct ChatDetailView: View {
                 getErrorView(isPm: true)
             }
         }
-        else {
-            ZStack {
-                backgroundColor.ignoresSafeArea()
-                getErrorView(isPm: false)
-            }
-        }
+//        else {
+//            ZStack {
+//                backgroundColor.ignoresSafeArea()
+//                getErrorView(isPm: false)
+//            }
+//        }
     }
     
     // MARK: - VIEWS

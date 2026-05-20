@@ -49,7 +49,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let path = "/files/config"
         let result = await networkManager.get(path, responseType: IQFileConfig.self)
         if let value = result.result?.value {
-            IQLog.debug(message: "getFileConfig: success")
+            IQLog.debug(message: "getFileConfig: \(value)")
             return value
         }
         let error = result.error ?? NSError.clientError()
@@ -258,7 +258,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                             text: settings.message,
                             operatorName: settings.pseudonym ?? "Оператор",
                             avatarID: settings.avatarID,
-                            avatarURL: avatarURL
+                            avatarURL: avatarURL,
+                            isAutoGreet: true
                         ))
                         lifeTime = settings.lifetime
                     }
@@ -355,6 +356,24 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let response = await post(path, body: form, responseType: IQEmptyResponse.self)
         
         IQLog.debug(message: "sendMessage: \n form: \(form) \n result: \(response)")
+        
+        return response.error
+    }
+    
+    func acceptProduct(form: IQProductForm) async -> Error? {
+        let path = "/chats/messages/accept_product"
+        let response = await post(path, body: form, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "acceptProduct: \n form: \(form) \n result: \(response)")
+        
+        return response.error
+    }
+    
+    func declineProduct(form: IQProductForm) async -> Error? {
+        let path = "/chats/messages/decline_product"
+        let response = await post(path, body: form, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "declineProduct: \n form: \(form) \n result: \(response)")
         
         return response.error
     }

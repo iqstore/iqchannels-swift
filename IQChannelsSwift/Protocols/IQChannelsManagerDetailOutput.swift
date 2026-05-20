@@ -17,6 +17,7 @@ protocol IQChannelsManagerDetailOutput {
     func detailController(didDisplayMessageWith id: Int)
     func detailController(didCopyMessage message: IQMessage)
     func detailController(didSelect choice: IQSingleChoice)
+    func detailController(didSelect productTap: IQProductTap)
     func detailController(didSelect action: IQAction)
     func detailController(didRate value: Int, ratingID: Int)
     func detailController(didSendPoll value: Int?, answers: [IQRatingPollClientAnswerInput], ratingID: Int, pollId: Int)

@@ -13,6 +13,7 @@ enum IQMessagePayloadType: String, Codable, Equatable {
     case text
     case file
     case singleChoice = "single-choice"
+    case product
     case card
     case carousel
     

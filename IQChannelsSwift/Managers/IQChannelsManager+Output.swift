@@ -88,6 +88,10 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
         send(choice)
     }
     
+    func detailController(didSelect productTap: IQProductTap) {
+        acceptOrDeclineProduct(productTap)
+    }
+    
     func detailController(didSelect action: IQAction) {
         send(action)
     }

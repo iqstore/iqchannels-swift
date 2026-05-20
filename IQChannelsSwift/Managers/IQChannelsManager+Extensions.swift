@@ -415,6 +415,10 @@ extension IQChannelsManager {
     func send(_ choice: IQSingleChoice) {
         guard let selectedChat else { return }
         
+        if let index = messages.firstIndex(where: { $0.messageID == choice.chatMessageID }) {
+            messages[index].singleChoices = nil
+        }
+        
         let message = IQMessage(choice: choice, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
         DispatchQueue.main.async {
             self.detailViewModel?.enableAnimMessages = true
@@ -425,7 +429,38 @@ extension IQChannelsManager {
         }
     }
     
+    func acceptOrDeclineProduct(_ productTap: IQProductTap) {
+        guard let selectedChat else { return }
+
+        Task {
+            let productForm = IQProductForm(
+                messageID: productTap.messageID,
+                productID: productTap.id
+            )
+            
+            guard let networkManager = currentNetworkManager else { return }
+            
+            if(productTap.isAccept){
+                let error = await networkManager.acceptProduct(form: productForm)
+            } else{
+                let error = await networkManager.declineProduct(form: productForm)
+            }
+            
+        }
+    }
+
     public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
+        let currentDelay = sendDelay
+        sendDelay += 1
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            self._sendMessage(text, files: files, replyToMessage: replyToMessage)
+            
+            self.sendDelay = max(self.sendDelay - 1, 0)
+        }
+    }
+    
+    public func _sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
         
         if(text == "/version_sdk"){
@@ -433,7 +468,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.3.2", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.3.3", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -490,18 +525,34 @@ extension IQChannelsManager {
     
     func sendFiles(items: [(URL?, UIImage?)]) {
         let files: [DataFile] = items.prefix(10).compactMap { (url, image) -> DataFile? in
-            if let url {
-                defer { url.stopAccessingSecurityScopedResource() }
-                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
-                return .init(data: data, filename: url.lastPathComponent)
-            } else if let image {
+//            if let url {
+//                defer { url.stopAccessingSecurityScopedResource() }
+//                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
+//                
+//                return .init(data: data, filename: url.lastPathComponent)
+//            } else
+            if let image {
                 guard let data = image.dataRepresentation(withMaxSizeMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return nil }
                 
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyyMMdd_HHmmss"
-                let filename = "IMG_\(formatter.string(from: Date())).jpg"
+                var filename = ""
+                
+                if let url {
+                    defer { url.stopAccessingSecurityScopedResource() }
+                    filename = url.lastPathComponent
+                }
+                else {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyyMMdd_HHmmss"
+                    filename = "IMG_\(formatter.string(from: Date())).jpg"
+                }
                 
                 return .init(data: data, filename: filename)
+            }
+            else if let url {
+                defer { url.stopAccessingSecurityScopedResource() }
+                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
+
+                return .init(data: data, filename: url.lastPathComponent)
             }
             return nil
         }
@@ -573,7 +624,7 @@ extension IQChannelsManager {
         
         
         let parts = file.filename.components(separatedBy: ".")
-        let fileExtension = parts.count > 1 ? parts.last ?? "file" : "file"
+        let fileExtension = parts.count > 1 ? (parts.last ?? "file").lowercased() : "file"
 
         if let allowedExtensions = limits.allowedExtensions,
            !allowedExtensions.contains(fileExtension) {
@@ -587,10 +638,10 @@ extension IQChannelsManager {
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
-        cancelSendMessage(message)
         if let taskID = message.file?.taskIdentifier {
             currentNetworkManager?.cancelTask(with: taskID)
         }
+        cancelSendMessage(message)
     }
     
     func cancelSendMessage(_ message: IQMessage) {
@@ -618,6 +669,7 @@ extension IQChannelsManager {
         
         if response.error != nil {
             if let error = response.error {
+                if error.localizedDescription.contains("отменено") { return }
                 let errorMessage = message.withError(true)
                 
                 if let index = messages.firstIndex(where: { $0.localID == message.localID }) {

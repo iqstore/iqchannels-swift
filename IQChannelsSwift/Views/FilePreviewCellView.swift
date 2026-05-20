@@ -15,7 +15,22 @@ struct FilePreviewCellView: View {
     private let isSender: Bool
     
     @State private var showMessageLoading: Bool = false
+    @State private var cachedText: (NSAttributedString, [Link])?
     
+    private func loadText() {
+        let result = AttributeTextManager.shared.getString(
+            from: message.messageText,
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
+
+        DispatchQueue.main.async {
+            self.cachedText = result
+        }
+    }
     
     var textColor: UIColor {
         let textOperator = IQStyle.getUIColor(theme: IQStyle.model?.messages?.textOperator?.color) ?? UIColor(hex: "242729")
@@ -164,22 +179,26 @@ struct FilePreviewCellView: View {
                 }
                 
                 if(text != ""){
-                    let data = AttributeTextManager.shared.getString(from: text,
-                                                                     textColor: textColor,
-                                                                     fontSize: fontSize,
-                                                                     alingment: aligment,
-                                                                     isBold: isBold,
-                                                                     isItalic: isItalic)
-                    if #available(iOS 16.0, *) {
-                        TextLabel(text: data.0,
-                                  linkRanges: data.1)
-                        .layoutPriority(1)
-                        .bold(isBold)
-                        .italic(isItalic)
-                    } else {
-                        TextLabel(text: data.0,
-                                  linkRanges: data.1)
-                        .layoutPriority(1)
+
+                    Group {
+                        if let cachedText {
+                            if #available(iOS 16.0, *) {
+                                TextLabel(text: cachedText.0,
+                                          linkRanges: cachedText.1)
+                                .layoutPriority(1)
+                                .bold(isBold)
+                                .italic(isItalic)
+                            } else {
+                                TextLabel(text: cachedText.0,
+                                          linkRanges: cachedText.1)
+                                .layoutPriority(1)
+                            }
+                        } else {
+                            Text("")
+                        }
+                    }
+                    .onAppear {
+                        loadText()
                     }
                 }
             }

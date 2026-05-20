@@ -19,6 +19,22 @@ struct MediaMessageCellView: View {
     @State private var showMessageLoading: Bool = false
     @State private var uiImage: UIImage? = nil
     @State private var isLoading: Bool = true
+    @State private var cachedText: (NSAttributedString, [Link])?
+    
+    private func loadText() {
+        let result = AttributeTextManager.shared.getString(
+            from: message.messageText,
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
+
+        DispatchQueue.main.async {
+            self.cachedText = result
+        }
+    }
     
     var backgroundColor: Color {
         let backgroundClient = IQStyle.getColor(theme: IQStyle.model?.messages?.backgroundClient?.color) ?? Color(hex: "242729")
@@ -172,16 +188,20 @@ struct MediaMessageCellView: View {
                 }
                 
                 if(text != ""){
-                    let data = AttributeTextManager.shared.getString(from: text,
-                                                                     textColor: textColor,
-                                                                     fontSize: fontSize,
-                                                                     alingment: aligment,
-                                                                     isBold: isBold,
-                                                                     isItalic: isItalic)
-                    TextLabel(text: data.0,
-                              linkRanges: data.1)
-                    .layoutPriority(1)
-                    .padding(.horizontal, 12)
+
+                    Group {
+                        if let cachedText {
+                            TextLabel(text: cachedText.0,
+                                      linkRanges: cachedText.1)
+                            .layoutPriority(1)
+                            .padding(.horizontal, 12)
+                        } else {
+                            Text("")
+                        }
+                    }
+                    .onAppear {
+                        loadText()
+                    }
                     
                     MessageStatusView(message: message)
                         .padding(.horizontal, 12)
