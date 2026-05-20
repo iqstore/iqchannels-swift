@@ -638,10 +638,10 @@ extension IQChannelsManager {
     }
     
     func cancelUploadFileMessage(_ message: IQMessage) {
-        cancelSendMessage(message)
         if let taskID = message.file?.taskIdentifier {
             currentNetworkManager?.cancelTask(with: taskID)
         }
+        cancelSendMessage(message)
     }
     
     func cancelSendMessage(_ message: IQMessage) {
@@ -669,6 +669,7 @@ extension IQChannelsManager {
         
         if response.error != nil {
             if let error = response.error {
+                if error.localizedDescription.contains("отменено") { return }
                 let errorMessage = message.withError(true)
                 
                 if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
