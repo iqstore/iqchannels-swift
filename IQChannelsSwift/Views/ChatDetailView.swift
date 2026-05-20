@@ -32,7 +32,7 @@ struct ChatDetailView: View {
     
     // MARK: - BODY
     var body: some View {
-        if(viewModel.state == .authenticated){
+        if(viewModel.state == .authenticated || viewModel.state == .awaitingNetwork){
             ZStack(alignment: .top) {
                 VStack(spacing: 0) {
                     
@@ -83,12 +83,12 @@ struct ChatDetailView: View {
                 getErrorView(isPm: true)
             }
         }
-        else {
-            ZStack {
-                backgroundColor.ignoresSafeArea()
-                getErrorView(isPm: false)
-            }
-        }
+//        else {
+//            ZStack {
+//                backgroundColor.ignoresSafeArea()
+//                getErrorView(isPm: false)
+//            }
+//        }
     }
     
     // MARK: - VIEWS
