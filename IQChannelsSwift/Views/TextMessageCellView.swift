@@ -135,7 +135,8 @@ struct TextMessageCellView: View {
             MessageStatusView(message: message)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.top, message.isAutoGreet ? 16 : 8)
+        .padding(.bottom, 8)
         .background(backgroundColor)
         .cornerRadius(backgroundRadius)
         .overlay(

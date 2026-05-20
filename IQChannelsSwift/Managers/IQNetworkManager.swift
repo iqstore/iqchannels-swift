@@ -258,7 +258,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                             text: settings.message,
                             operatorName: settings.pseudonym ?? "Оператор",
                             avatarID: settings.avatarID,
-                            avatarURL: avatarURL
+                            avatarURL: avatarURL,
+                            isAutoGreet: true
                         ))
                         lifeTime = settings.lifetime
                     }

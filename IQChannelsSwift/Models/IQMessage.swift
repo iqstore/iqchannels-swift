@@ -29,6 +29,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var disableFreeText: Bool?
     var isSystem: Bool = false
     var isReply: Bool = true
+    var isAutoGreet: Bool = false
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
     var product: IQProduct?
@@ -213,6 +214,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.isRead = true
         self.isReply = false
         self.payload = .text
+        self.isAutoGreet = isAutoGreet
         self.user = IQUser(id: 0, displayName: operatorName, avatarID: avatarID, avatarURL: avatarURL)
     }
     
