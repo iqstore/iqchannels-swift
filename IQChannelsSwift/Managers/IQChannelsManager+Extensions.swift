@@ -415,6 +415,10 @@ extension IQChannelsManager {
     func send(_ choice: IQSingleChoice) {
         guard let selectedChat else { return }
         
+        if let index = messages.firstIndex(where: { $0.messageID == choice.chatMessageID }) {
+            messages[index].singleChoices = nil
+        }
+        
         let message = IQMessage(choice: choice, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId())
         DispatchQueue.main.async {
             self.detailViewModel?.enableAnimMessages = true
