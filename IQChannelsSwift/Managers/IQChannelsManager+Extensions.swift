@@ -450,6 +450,17 @@ extension IQChannelsManager {
     }
 
     public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
+        let currentDelay = sendDelay
+        sendDelay += 1
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + currentDelay) {
+            self._sendMessage(text, files: files, replyToMessage: replyToMessage)
+            
+            self.sendDelay = max(self.sendDelay - 1, 0)
+        }
+    }
+    
+    public func _sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
         
         if(text == "/version_sdk"){
