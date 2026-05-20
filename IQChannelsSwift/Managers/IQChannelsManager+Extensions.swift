@@ -490,18 +490,34 @@ extension IQChannelsManager {
     
     func sendFiles(items: [(URL?, UIImage?)]) {
         let files: [DataFile] = items.prefix(10).compactMap { (url, image) -> DataFile? in
-            if let url {
-                defer { url.stopAccessingSecurityScopedResource() }
-                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
-                return .init(data: data, filename: url.lastPathComponent)
-            } else if let image {
+//            if let url {
+//                defer { url.stopAccessingSecurityScopedResource() }
+//                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
+//                
+//                return .init(data: data, filename: url.lastPathComponent)
+//            } else
+            if let image {
                 guard let data = image.dataRepresentation(withMaxSizeMB: CGFloat(fileLimit?.maxFileSizeMb ?? 10)) else { return nil }
                 
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyyMMdd_HHmmss"
-                let filename = "IMG_\(formatter.string(from: Date())).jpg"
+                var filename = ""
+                
+                if let url {
+                    defer { url.stopAccessingSecurityScopedResource() }
+                    filename = url.lastPathComponent
+                }
+                else {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyyMMdd_HHmmss"
+                    filename = "IMG_\(formatter.string(from: Date())).jpg"
+                }
                 
                 return .init(data: data, filename: filename)
+            }
+            else if let url {
+                defer { url.stopAccessingSecurityScopedResource() }
+                guard url.startAccessingSecurityScopedResource(), let data = try? Data(contentsOf: url) else { return nil }
+
+                return .init(data: data, filename: url.lastPathComponent)
             }
             return nil
         }
@@ -573,7 +589,7 @@ extension IQChannelsManager {
         
         
         let parts = file.filename.components(separatedBy: ".")
-        let fileExtension = parts.count > 1 ? parts.last ?? "file" : "file"
+        let fileExtension = parts.count > 1 ? (parts.last ?? "file").lowercased() : "file"
 
         if let allowedExtensions = limits.allowedExtensions,
            !allowedExtensions.contains(fileExtension) {

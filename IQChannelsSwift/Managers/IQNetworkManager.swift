@@ -49,7 +49,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let path = "/files/config"
         let result = await networkManager.get(path, responseType: IQFileConfig.self)
         if let value = result.result?.value {
-            IQLog.debug(message: "getFileConfig: success")
+            IQLog.debug(message: "getFileConfig: \(value)")
             return value
         }
         let error = result.error ?? NSError.clientError()
