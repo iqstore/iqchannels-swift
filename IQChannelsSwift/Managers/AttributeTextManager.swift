@@ -31,13 +31,48 @@ final class AttributeTextManager {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = textAlignments[alingment] ?? .left
         
-        let attributedString = NSMutableAttributedString(string: formattedMarkdown)
+//        let attributedString = NSMutableAttributedString(string: formattedMarkdown)
+        let attributedString: NSMutableAttributedString
+
+        if let data = formattedMarkdown.data(using: .utf8),
+           let htmlString = try? NSMutableAttributedString(
+                data: data,
+                options: [
+                    .documentType: NSAttributedString.DocumentType.html,
+                    .characterEncoding: String.Encoding.utf8.rawValue
+                ],
+                documentAttributes: nil
+           ) {
+            attributedString = htmlString
+        } else {
+            attributedString = NSMutableAttributedString(string: formattedMarkdown)
+        }
+        
+        
         var linkRanges: [Link] = []
-        attributedString.setAttributes([
-            .font: font,
+        attributedString.addAttributes([
+//            .font: font,
             .foregroundColor: textColor,
             .paragraphStyle: paragraphStyle
-        ], range: .init(location: 0, length: (formattedMarkdown as NSString).length))
+        ], range: NSRange(location: 0, length: attributedString.length))
+        
+        attributedString.enumerateAttribute(.font,
+                                            in: NSRange(location: 0, length: attributedString.length)) { value, range, _ in
+
+            let currentFont = value as? UIFont ?? UIFont.systemFont(ofSize: fontSize)
+
+            var traits = currentFont.fontDescriptor.symbolicTraits
+
+            let descriptor = UIFont.systemFont(ofSize: fontSize)
+                .fontDescriptor
+                .withSymbolicTraits(traits)
+
+            let newFont = descriptor.map {
+                UIFont(descriptor: $0, size: fontSize)
+            } ?? UIFont.systemFont(ofSize: fontSize)
+
+            attributedString.addAttribute(.font, value: newFont, range: range)
+        }
         
         // Define patterns for markdown
         let patterns: [(String, [NSAttributedString.Key: Any])] = [

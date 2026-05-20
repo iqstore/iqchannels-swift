@@ -13,7 +13,24 @@ struct SystemMessageCellView: View {
     @EnvironmentObject var viewModel: IQChatDetailViewModel
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var cachedText: (NSAttributedString, [Link])?
+    
     private let message: IQMessage
+    
+    private func loadText() {
+        let result = AttributeTextManager.shared.getString(
+            from: message.messageText,
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
+
+        DispatchQueue.main.async {
+            self.cachedText = result
+        }
+    }
     
     var textColor: UIColor {
         return IQStyle.getUIColor(theme: IQStyle.model?.chat?.systemText?.color) ?? UIColor(hex: "888888")
@@ -42,15 +59,18 @@ struct SystemMessageCellView: View {
     
     // MARK: - BODY
     var body: some View {
-        let data = AttributeTextManager.shared.getString(from: message.messageText,
-                                                         textColor: textColor,
-                                                         fontSize: fontSize,
-                                                         alingment: aligment,
-                                                         isBold: isBold,
-                                                         isItalic: isItalic)
-        TextLabel(text: data.0,
-                  linkRanges: data.1)
-        .layoutPriority(1)
-        .padding(.vertical, 8)
+        Group {
+            if let cachedText {
+                TextLabel(text: cachedText.0,
+                          linkRanges: cachedText.1)
+                .layoutPriority(1)
+                .padding(.vertical, 8)
+            } else {
+                Text("")
+            }
+        }
+        .onAppear {
+            loadText()
+        }
     }
 }
