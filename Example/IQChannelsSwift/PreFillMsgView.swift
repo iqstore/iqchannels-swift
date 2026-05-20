@@ -217,7 +217,7 @@ extension PreFillMsgView: UIImagePickerControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
         
-        if let url = info[.imageURL] as? URL { //123123
+        if let url = info[.imageURL] as? URL {
             sendFiles(items: [(url, nil)])
         } else if let image = info[.editedImage] as? UIImage {
             sendFiles(items: [(nil, image)])

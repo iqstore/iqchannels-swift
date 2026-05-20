@@ -545,6 +545,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         "italic": false
       }
     },
+    "new_message_background": {    //Фон панели "Новые сообщения"
+        "light": "#F4F4F8",
+        "dark": "#F4F4F8"
+    }
     "scroll_down_button_background": { //Фон кнопки скролла вниз
       "color": {
         "light": "#FFFFE0",
