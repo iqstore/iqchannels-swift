@@ -359,6 +359,24 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return response.error
     }
     
+    func acceptProduct(form: IQProductForm) async -> Error? {
+        let path = "/chats/messages/accept_product"
+        let response = await post(path, body: form, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "acceptProduct: \n form: \(form) \n result: \(response)")
+        
+        return response.error
+    }
+    
+    func declineProduct(form: IQProductForm) async -> Error? {
+        let path = "/chats/messages/decline_product"
+        let response = await post(path, body: form, responseType: IQEmptyResponse.self)
+        
+        IQLog.debug(message: "declineProduct: \n form: \(form) \n result: \(response)")
+        
+        return response.error
+    }
+    
     func clientsAuth(token: String) async -> ResponseCallback<IQClientAuth> {
         let path = "/clients/auth"
         let body = IQClientAuthRequest(token: token)

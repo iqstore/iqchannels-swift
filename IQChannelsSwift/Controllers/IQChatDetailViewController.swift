@@ -423,6 +423,10 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
         output.detailController(didSelect: singleChoice)
     }
     
+    func onProductTap(_ productTap: IQProductTap) {
+        output.detailController(didSelect: productTap)
+    }
+    
     func onActionTap(_ action: IQAction) {
         output.detailController(didSelect: action)
     }

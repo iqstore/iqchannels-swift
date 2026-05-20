@@ -5,6 +5,7 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onAttachmentTap()
     func onFileTap(_ file: IQFile, sessionToken: String)
     func onSingleChoiceTap(_ singleChoice: IQSingleChoice)
+    func onProductTap(_ product: IQProductTap)
     func onActionTap(_ action: IQAction)
     func onMessageAppear(with messageId: Int)
     func onSendMessage(_ text: String)

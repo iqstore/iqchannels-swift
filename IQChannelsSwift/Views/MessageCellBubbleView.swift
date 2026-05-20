@@ -74,6 +74,10 @@ struct MessageCellBubbleView: View {
                     delegate?.onSingleChoiceTap(singleChoice)
                 }
             }
+        case .product:
+            ProductView(message: message) { productTap in
+                delegate?.onProductTap(productTap)
+            }
         case .card, .carousel:
             CardCellView(message: message) { action in
                 delegate?.onActionTap(action)

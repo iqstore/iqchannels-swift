@@ -425,6 +425,26 @@ extension IQChannelsManager {
         }
     }
     
+    func acceptOrDeclineProduct(_ productTap: IQProductTap) {
+        guard let selectedChat else { return }
+
+        Task {
+            let productForm = IQProductForm(
+                messageID: productTap.messageID,
+                productID: productTap.id
+            )
+            
+            guard let networkManager = currentNetworkManager else { return }
+            
+            if(productTap.isAccept){
+                let error = await networkManager.acceptProduct(form: productForm)
+            } else{
+                let error = await networkManager.declineProduct(form: productForm)
+            }
+            
+        }
+    }
+
     public func sendMessage(_ text: String, files: [DataFile]?, replyToMessage: Int?) {
         guard let selectedChat else { return }
         

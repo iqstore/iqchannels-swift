@@ -28,6 +28,8 @@ protocol IQNetworkManagerProtocol {
     func finishPoll(ratingId: Int, pollId: Int, rated: Bool) async -> Error?
     func uploadFile(file: DataFile, taskIdentifierCallback: TaskIdentifierCallback?) async -> ResponseCallback<IQFile>
     func sendMessage(form: IQMessageForm) async -> Error?
+    func acceptProduct(form: IQProductForm) async -> Error?
+    func declineProduct(form: IQProductForm) async -> Error?
     func clientsAuth(token: String) async -> ResponseCallback<IQClientAuth>
     func clientsSignup() async -> ResponseCallback<IQClientAuth>
     func clientsIntegrationAuth(credentials: String) async -> ResponseCallback<IQClientAuth>
