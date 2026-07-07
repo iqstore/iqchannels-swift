@@ -18,7 +18,7 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.3.4-rc1'
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.3.4'
 ```
 
 Затем выполните команду:
@@ -194,6 +194,50 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         setServer(server: "https://example.ru")   // Конфигурация
         configuration.login(.anonymous)           // Логин
         configuration.addUnread(listener: self)   // Добавление слушателя
+    }
+}
+```
+
+Отображение расширенных непрочитанных сообщений
+-----------------------------------
+Для отображения расширенных непрочитанных сообщений нужно добавить слушателя, в который будет присылаться json с данными о непрочитанных сообщениях. Слушателя нужно добавлять после конфигурации и логина.
+
+Пример реализации:
+```swift
+class ViewController: UIViewController, UITextFieldDelegate, IQChannelsAdvancedUnreadListenerProtocol {
+    var id: String {
+        UUID().uuidString
+    }
+    
+    let configuration: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+    
+    func iqChannelsAdvancedUnreadDidChange(_ unread: IQChannelsSwift.IQAdvancedUnread) {
+        DispatchQueue.main.async {
+            self.advancedUnreadLabel.text = "\(unread)"
+        }
+    }
+    
+    func iqChannelsAdvancedUnreadException(_ e: any Error) {
+        DispatchQueue.main.async {
+            self.advancedUnreadLabel.text = "\(e)"
+        }
+    }
+    
+    private lazy var advancedUnreadLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
+        return label
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setServer(server: "https://example.ru")   // Конфигурация
+        configuration.login(.anonymous)           // Логин
+        configuration.addAdvancedUnread(listener: self)   // Добавление слушателя
     }
 }
 ```
