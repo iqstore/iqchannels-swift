@@ -556,7 +556,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.3.8-rc1", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.3.8", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -978,7 +978,6 @@ extension IQChannelsManager {
             
             listenToEvents()
             
-            await sendUnsendMessages()
             sendPreFillMessages()
             
             DispatchQueue.main.async { [weak self] in
@@ -1047,6 +1046,8 @@ extension IQChannelsManager {
             }
             
             let newMessages = result.result?.0.filter { indexOfMessage(messageID: $0.messageID) == nil && $0.hasValidPayload } ?? []
+            
+            await sendUnsendMessages()
             DispatchQueue.main.async {
                 self.detailViewModel?.enableAnimMessages = true
             }
@@ -1352,14 +1353,8 @@ extension IQChannelsManager: IQNetworkStatusManagerDelegate {
             if !authResults.isEmpty {
                 state = .authenticated
                 await loadMessagesAndMerge()
-//                loadMessages()
-//                listenToUnread()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                     self?.uploadUnsentMessages()
-//                    Task {
-//                        print("!!!!!!!!!!!!!!! sendUnsendMessages")
-//                        await self?.sendUnsendMessages()
-//                    }
                 }
             } else if let loginType, state != .authenticating {
                 authAttempt = 0
