@@ -237,7 +237,7 @@ extension IQChannelsManager {
                         
                         if var unread = unread,
                            let event = events,
-                           let index = unread.channels?.firstIndex(where: { $0.name == event.name }) {
+                           let index = unread.channels?.firstIndex(where: { $0.name == event.name && $0.chatType == event.chatType }) {
 
                             unread.channels?[index].lastMessage = event.lastMessage
                             unread.channels?[index].unreadCount = event.unreadCount
@@ -556,7 +556,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.3.9", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.4.0", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {

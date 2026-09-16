@@ -43,6 +43,7 @@ public struct IQAdvancedUnreadResult: Decodable, Equatable {
     public var id: Int? = nil
     public var type: String? = nil
     public var name: String? = nil
+    public var chatType: String? = nil
     public var lastMessage: LastMessage? = nil
     public var unreadCount: Int? = nil
 }
