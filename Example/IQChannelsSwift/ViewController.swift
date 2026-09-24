@@ -222,7 +222,8 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
                                       chatToOpen: chatToOpen,
                                       styleJson: selectedStyle,
                                       preFillMessages: preFillMessages,
-                                      showBottomTypingBar: true)
+                                      showBottomTypingBar: true,
+                                      useRussianTrustedRootCA: false)
         preFillMessages = nil
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)

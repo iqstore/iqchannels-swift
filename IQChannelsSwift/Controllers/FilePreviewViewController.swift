@@ -13,6 +13,7 @@ import UniformTypeIdentifiers
 class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionDelegate, UIDocumentPickerDelegate {
     
     private var sessionToken: String
+    private var useRussianTrustedRootCA: Bool
     private var webView: WKWebView!
     private var documentUrl: URL
     private var fileName: String?
@@ -21,10 +22,11 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     private let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
     // Initialize with a URL
-    init(url: URL, fileName: String?, sessionToken: String) {
+    init(url: URL, fileName: String?, sessionToken: String, useRussianTrustedRootCA: Bool = false) {
         self.sessionToken = sessionToken
         self.documentUrl = url
         self.fileName = fileName
+        self.useRussianTrustedRootCA = useRussianTrustedRootCA
         super.init(nibName: nil, bundle: nil)
         modalTransitionStyle = .coverVertical
         modalPresentationStyle = .overFullScreen
@@ -126,27 +128,41 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
                  completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            return completionHandler(.useCredential, nil)
-        }
+        if (useRussianTrustedRootCA){
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(.useCredential, nil)
+            }
 
-        if evaluateServerTrust(serverTrust) {
-            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            if evaluateServerTrust(serverTrust) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            } else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
         } else {
-            completionHandler(.cancelAuthenticationChallenge, nil)
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(URLSession.AuthChallengeDisposition.useCredential, nil)
+            }
+            return completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: serverTrust))
         }
     }
 
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
                     completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            return completionHandler(.useCredential, nil)
-        }
+        if (useRussianTrustedRootCA){
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(.useCredential, nil)
+            }
 
-        if evaluateServerTrust(serverTrust) {
-            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            if evaluateServerTrust(serverTrust) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            } else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
         } else {
-            completionHandler(.cancelAuthenticationChallenge, nil)
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(URLSession.AuthChallengeDisposition.useCredential, nil)
+            }
+            return completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: serverTrust))
         }
     }
     

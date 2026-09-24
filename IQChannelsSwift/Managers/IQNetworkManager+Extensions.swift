@@ -8,29 +8,60 @@
 import Foundation
 
 extension IQNetworkManager: URLSessionDelegate {
-    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
-                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            return completionHandler(.useCredential, nil)
-        }
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if (useRussianTrustedRootCA){
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(.useCredential, nil)
+            }
 
-        guard let certificatePath = Bundle.main.path(forResource: "RussianTrustedRootCA", ofType: "cer"),
-        let certificateData = try? Data(contentsOf: URL(fileURLWithPath: certificatePath)),
-        let customCertificate = SecCertificateCreateWithData(nil, certificateData as CFData) else {
-            completionHandler(.useCredential, URLCredential(trust: serverTrust))
-            return
-        }
+            guard let certificatePath = Bundle.main.path(forResource: "RussianTrustedRootCA", ofType: "cer"),
+            let certificateData = try? Data(contentsOf: URL(fileURLWithPath: certificatePath)),
+            let customCertificate = SecCertificateCreateWithData(nil, certificateData as CFData) else {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                return
+            }
 
-        SecTrustSetAnchorCertificates(serverTrust, [customCertificate] as CFArray)
-        SecTrustSetAnchorCertificatesOnly(serverTrust, false)
+            SecTrustSetAnchorCertificates(serverTrust, [customCertificate] as CFArray)
+            SecTrustSetAnchorCertificatesOnly(serverTrust, false)
 
-        var error: CFError?
-        if SecTrustEvaluateWithError(serverTrust, &error) {
-            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            var error: CFError?
+            if SecTrustEvaluateWithError(serverTrust, &error) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            } else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
         } else {
-            completionHandler(.cancelAuthenticationChallenge, nil)
+            guard let serverTrust = challenge.protectionSpace.serverTrust else {
+                return completionHandler(URLSession.AuthChallengeDisposition.useCredential, nil)
+            }
+            return completionHandler(URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: serverTrust))
         }
     }
+    
+    
+//    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge,
+//                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+//        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+//            return completionHandler(.useCredential, nil)
+//        }
+//
+//        guard let certificatePath = Bundle.main.path(forResource: "RussianTrustedRootCA", ofType: "cer"),
+//        let certificateData = try? Data(contentsOf: URL(fileURLWithPath: certificatePath)),
+//        let customCertificate = SecCertificateCreateWithData(nil, certificateData as CFData) else {
+//            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+//            return
+//        }
+//
+//        SecTrustSetAnchorCertificates(serverTrust, [customCertificate] as CFArray)
+//        SecTrustSetAnchorCertificatesOnly(serverTrust, false)
+//
+//        var error: CFError?
+//        if SecTrustEvaluateWithError(serverTrust, &error) {
+//            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+//        } else {
+//            completionHandler(.cancelAuthenticationChallenge, nil)
+//        }
+//    }
     
     func sse<T: Decodable>(path: String, responseType: T.Type, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<IQResult<T>>) -> IQEventSourceManager {
         let url = requestUrl(path)

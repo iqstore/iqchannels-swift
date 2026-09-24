@@ -15,6 +15,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     let address: String
     let channel: String
+    let useRussianTrustedRootCA: Bool
     var customHeaders: [String: String]?
     
     let relationManager: IQRelationManager
@@ -24,9 +25,10 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     
     lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
     
-    init(address: String, channel: String) {
+    init(address: String, channel: String, useRussianTrustedRootCA: Bool = false) {
         self.address = address
         self.channel = channel
+        self.useRussianTrustedRootCA = useRussianTrustedRootCA
         self.relationManager = .init(address: address)
     }
     
@@ -44,8 +46,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         (eventsListener?.eventSource?.isOpen() ?? false)
     }
     
-    static func getFileConfig(address: String) async throws -> IQFileConfig {
-        let networkManager = IQNetworkManager(address: address, channel: "")
+    static func getFileConfig(address: String, useRussianTrustedRootCA: Bool = false) async throws -> IQFileConfig {
+        let networkManager = IQNetworkManager(address: address, channel: "", useRussianTrustedRootCA: useRussianTrustedRootCA)
         let path = "/files/config"
         let result = await networkManager.get(path, responseType: IQFileConfig.self)
         if let value = result.result?.value {

@@ -21,6 +21,7 @@ public struct IQChannelsConfig {
     var attachment: IQAttachment? = nil
     var preFillMessages: IQPreFillMessages? = nil
     var showBottomTypingBar: Bool = false
+    var useRussianTrustedRootCA: Bool = false
     
     public init(address: String,
                 channels: [String],
@@ -31,7 +32,8 @@ public struct IQChannelsConfig {
                 disableUnreadBadge: Bool = false,
                 logging: Bool = false,
                 preFillMessages: IQPreFillMessages? = nil,
-                showBottomTypingBar: Bool = false) {
+                showBottomTypingBar: Bool = false,
+                useRussianTrustedRootCA: Bool = false) {
         self.address = address
         self.channels = channels
         self.chatToOpen = chatToOpen
@@ -42,6 +44,7 @@ public struct IQChannelsConfig {
         self.logging = logging
         self.preFillMessages = preFillMessages
         self.showBottomTypingBar = showBottomTypingBar
+        self.useRussianTrustedRootCA = useRussianTrustedRootCA
     }
 
 }
