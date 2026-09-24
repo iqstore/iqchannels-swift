@@ -32,6 +32,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var availableLanguages: [IQLanguage]?
     @Published var selectedLanguage: IQLanguage?
     @Published var showBottomTypingBar: Bool = false
+    var useRussianTrustedRootCA: Bool = false
     @Published var enableAnimMessages: Bool = true
     @Published var isAnonim: Bool = false
     @Published var greetingSettings: IQGreetingSettings?

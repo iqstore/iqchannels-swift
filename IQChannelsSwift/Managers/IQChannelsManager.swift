@@ -64,7 +64,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         self.config = configuration
         var networkManagers = [String: IQNetworkManagerProtocol]()
         configuration.channels.forEach {
-            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0), forKey: $0)
+            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0, useRussianTrustedRootCA: configuration.useRussianTrustedRootCA), forKey: $0)
         }
         self.networkManagers = networkManagers
         
@@ -86,7 +86,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         self.config = configuration
         var networkManagers = [String: IQNetworkManagerProtocol]()
         configuration.channels.forEach {
-            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0), forKey: $0)
+            networkManagers.updateValue(IQNetworkManager(address: configuration.address, channel: $0, useRussianTrustedRootCA: configuration.useRussianTrustedRootCA), forKey: $0)
         }
         self.networkManagers = networkManagers
         
