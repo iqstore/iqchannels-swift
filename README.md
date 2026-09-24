@@ -264,6 +264,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 ```
 
+Поддержка сертификата RussianTrustedRootCA в сдк
+-----------------------------------
+Для поддержки сертификата минцифры в сдк нужно добавить флаг в конфиг.
+
+Пример реализации:
+```swift
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let configurationManager: IQLibraryConfigurationProtocol = IQLibraryConfiguration()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        let config = IQChannelsConfig(address: "https://example.com",
+                                      channels: ["channel1", "channel2"],
+                                      useRussianTrustedRootCA: true) // Включение поддержки сертификата минцифры
+        configurationManager.configure(config)
+        
+        return true
+    }
+}
+```
+
 Отправка пуш-токенов
 --------------------
 Для поддержки пуш-уведомлений требуется при старте приложения запросить у пользователя возможность
