@@ -39,6 +39,22 @@ xcuserdata
 Pods/
 Podfile.lock
 
+# Swift Package Manager
+#
+# Package.resolved is not committed for libraries (it belongs to the consuming app)
+.build/
+Package.resolved
+
+# Editors / AI
+.vscode/
+AGENTS.md
+
+# Xcode workspace settings
+**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Example app: local-only entitlements
+Example/IQChannelsSwift_ExampleRelease.entitlements
+
 # Carthage
 #
 # Add this line if you want to avoid checking in source code from Carthage dependencies.
