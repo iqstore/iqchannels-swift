@@ -228,6 +228,11 @@ class IQChatDetailViewController: IQViewController {
         IQLog.debug(message: "10")
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = !viewModel.backDismisses
+    }
+    
     override func bindViewModel() {
         viewModel.errorListener
             .receive(on: DispatchQueue.main)

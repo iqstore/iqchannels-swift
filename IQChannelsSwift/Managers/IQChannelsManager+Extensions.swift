@@ -18,15 +18,7 @@ extension IQChannelsManager {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     
-                    var items = self.getChatItems(from: results, config: config)
-                    
-                    if let chatToOpen = config.chatToOpen{
-                        if let item = items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }) {
-                            items = [item]
-                        } else{
-                            return
-                        }
-                    }
+                    guard let items = self.displayChatItems(from: results, config: config) else { return }
 
                     if items.count == 1, let item = items.first,
                        let authResult = results.first(where: { $0.channel == item.channel } ){
@@ -115,7 +107,7 @@ extension IQChannelsManager {
     func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)?, showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
-        viewModel.backDismisses = getChatItems(from: authResults, config: config).count == 1
+        viewModel.backDismisses = displayChatItems(from: authResults, config: config)?.count == 1
         viewModel.state = state
         viewModel.client = chat?.auth.auth.client
         viewModel.session = chat?.auth.auth.session
@@ -168,6 +160,12 @@ extension IQChannelsManager {
                 ]
             }
         }.flatMap {$0}
+    }
+    
+    func displayChatItems(from results: [AuthResult], config: IQChannelsConfig) -> [IQChatItemModel]? {
+        let items = getChatItems(from: results, config: config)
+        guard let chatToOpen = config.chatToOpen else { return items }
+        return items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }).map { [$0] }
     }
     
     func closeCurrentChat() {
