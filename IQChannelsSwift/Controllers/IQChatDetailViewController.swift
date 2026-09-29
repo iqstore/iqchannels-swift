@@ -386,7 +386,8 @@ class IQChatDetailViewController: IQViewController {
             present(controller, animated: true)
         } else if file.type == .file {
             let controller: FilePreviewController = .init(url: url, fileName: file.name, sessionToken: sessionToken,
-                                                          useRussianTrustedRootCA: viewModel.useRussianTrustedRootCA)
+                                                          useRussianTrustedRootCA: viewModel.useRussianTrustedRootCA,
+                                                          urlSession: viewModel.urlSession)
             present(controller, animated: true)
         }
     }

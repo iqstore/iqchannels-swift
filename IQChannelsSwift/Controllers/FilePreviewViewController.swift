@@ -14,6 +14,7 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     
     private var sessionToken: String
     private var useRussianTrustedRootCA: Bool
+    private var injectedSession: URLSession?
     private var webView: WKWebView!
     private var documentUrl: URL
     private var fileName: String?
@@ -22,11 +23,12 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
     private let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
 
     // Initialize with a URL
-    init(url: URL, fileName: String?, sessionToken: String, useRussianTrustedRootCA: Bool = false) {
+    init(url: URL, fileName: String?, sessionToken: String, useRussianTrustedRootCA: Bool = false, urlSession: URLSession? = nil) {
         self.sessionToken = sessionToken
         self.documentUrl = url
         self.fileName = fileName
         self.useRussianTrustedRootCA = useRussianTrustedRootCA
+        self.injectedSession = urlSession
         super.init(nibName: nil, bundle: nil)
         modalTransitionStyle = .coverVertical
         modalPresentationStyle = .overFullScreen
@@ -175,7 +177,7 @@ class FilePreviewController: UIViewController, WKNavigationDelegate, URLSessionD
         var request = URLRequest(url: documentUrl)
         request.setValue("client-session=\(sessionToken)", forHTTPHeaderField: "Cookie")
 
-        let session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
+        let session = injectedSession ?? URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
         let downloadTask = session.downloadTask(with: request) { [weak self] url, response, error in
             guard let self, let url, let data = try? Data(contentsOf: url), error == nil else {
                 self?.showAlert(message: IQLanguageTexts.model.fileSavedError ?? "Не удалось загрузить файл")

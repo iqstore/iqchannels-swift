@@ -215,6 +215,9 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     }
 
     func setServer(server: String?, chatToOpen: IQChannelsConfig.ChatToOpen? = nil) {
+        // Сессия, сконфигурированная приложением: если передана — SDK использует её для запросов
+        // и не выполняет собственную проверку сертификатов (serverTrust проверяет делегат сессии)
+        let urlSession: URLSession? = nil
         serverString = (server?.isEmpty ?? true) ? "" : (server ?? "")
         channelsArray = channelsField.text?.components(separatedBy: .whitespaces) ?? []
         let config = IQChannelsConfig(address: serverString,
@@ -223,7 +226,8 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
                                       styleJson: selectedStyle,
                                       preFillMessages: preFillMessages,
                                       showBottomTypingBar: true,
-                                      useRussianTrustedRootCA: false)
+                                      useRussianTrustedRootCA: false,
+                                      urlSession: urlSession)
         preFillMessages = nil
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)
