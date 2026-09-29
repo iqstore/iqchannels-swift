@@ -15,4 +15,12 @@ struct IQChatSettings: Codable, Equatable {
     var avatarID: String? = ""
     var totalOpenedTickets: Int = 0
     var chatTitle: String = "Чат с оператором"
+    var translations: [IQTranslations]? = nil
+}
+
+struct IQTranslations: Codable, Equatable {
+    var id: Int = 0
+    var languageCode: String = "ru"
+    var projectID: Int = 0
+    var translation: String = "Здравствуйте!"
 }
