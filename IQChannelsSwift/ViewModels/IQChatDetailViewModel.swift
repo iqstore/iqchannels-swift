@@ -33,6 +33,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var selectedLanguage: IQLanguage?
     @Published var showBottomTypingBar: Bool = false
     var useRussianTrustedRootCA: Bool = false
+    var urlSession: URLSession?
     @Published var enableAnimMessages: Bool = true
     @Published var isAnonim: Bool = false
     @Published var greetingSettings: IQGreetingSettings?

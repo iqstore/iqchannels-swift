@@ -16,6 +16,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     let address: String
     let channel: String
     let useRussianTrustedRootCA: Bool
+    let injectedSession: URLSession?
     var customHeaders: [String: String]?
     
     let relationManager: IQRelationManager
@@ -23,12 +24,15 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     var advancedUnreadListener: IQEventSourceManager?
     var unreadCount: Int?
     
-    lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
+    lazy var session: URLSession = {
+        injectedSession ?? URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
+    }()
     
-    init(address: String, channel: String, useRussianTrustedRootCA: Bool = false) {
+    init(address: String, channel: String, useRussianTrustedRootCA: Bool = false, urlSession: URLSession? = nil) {
         self.address = address
         self.channel = channel
         self.useRussianTrustedRootCA = useRussianTrustedRootCA
+        self.injectedSession = urlSession
         self.relationManager = .init(address: address)
     }
     
@@ -46,8 +50,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         (eventsListener?.eventSource?.isOpen() ?? false)
     }
     
-    static func getFileConfig(address: String, useRussianTrustedRootCA: Bool = false) async throws -> IQFileConfig {
-        let networkManager = IQNetworkManager(address: address, channel: "", useRussianTrustedRootCA: useRussianTrustedRootCA)
+    static func getFileConfig(address: String, useRussianTrustedRootCA: Bool = false, urlSession: URLSession? = nil) async throws -> IQFileConfig {
+        let networkManager = IQNetworkManager(address: address, channel: "", useRussianTrustedRootCA: useRussianTrustedRootCA, urlSession: urlSession)
         let path = "/files/config"
         let result = await networkManager.get(path, responseType: IQFileConfig.self)
         if let value = result.result?.value {

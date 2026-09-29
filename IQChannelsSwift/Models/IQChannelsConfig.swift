@@ -22,6 +22,7 @@ public struct IQChannelsConfig {
     var preFillMessages: IQPreFillMessages? = nil
     var showBottomTypingBar: Bool = false
     var useRussianTrustedRootCA: Bool = false
+    var urlSession: URLSession?
     
     public init(address: String,
                 channels: [String],
@@ -33,7 +34,8 @@ public struct IQChannelsConfig {
                 logging: Bool = false,
                 preFillMessages: IQPreFillMessages? = nil,
                 showBottomTypingBar: Bool = false,
-                useRussianTrustedRootCA: Bool = false) {
+                useRussianTrustedRootCA: Bool = false,
+                urlSession: URLSession? = nil) {
         self.address = address
         self.channels = channels
         self.chatToOpen = chatToOpen
@@ -45,6 +47,7 @@ public struct IQChannelsConfig {
         self.preFillMessages = preFillMessages
         self.showBottomTypingBar = showBottomTypingBar
         self.useRussianTrustedRootCA = useRussianTrustedRootCA
+        self.urlSession = urlSession
     }
 
 }

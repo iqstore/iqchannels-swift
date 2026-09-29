@@ -102,7 +102,7 @@ extension IQChannelsManager {
     
     func setupFileLimits() {
         Task {
-            fileLimit = try? await IQNetworkManager.getFileConfig(address: config.address, useRussianTrustedRootCA: config.useRussianTrustedRootCA)
+            fileLimit = try? await IQNetworkManager.getFileConfig(address: config.address, useRussianTrustedRootCA: config.useRussianTrustedRootCA, urlSession: config.urlSession)
         }
     }
     
@@ -122,6 +122,7 @@ extension IQChannelsManager {
         viewModel.messages = messages.reversed()
         viewModel.showBottomTypingBar = config.showBottomTypingBar
         viewModel.useRussianTrustedRootCA = config.useRussianTrustedRootCA
+        viewModel.urlSession = config.urlSession
         return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
     }
     
@@ -557,7 +558,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.4.1", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.4.2", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
