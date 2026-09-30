@@ -18,15 +18,7 @@ extension IQChannelsManager {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     
-                    var items = self.getChatItems(from: results, config: config)
-                    
-                    if let chatToOpen = config.chatToOpen{
-                        if let item = items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }) {
-                            items = [item]
-                        } else{
-                            return
-                        }
-                    }
+                    guard let items = self.displayChatItems(from: results, config: config) else { return }
 
                     if items.count == 1, let item = items.first,
                        let authResult = results.first(where: { $0.channel == item.channel } ){
@@ -115,7 +107,11 @@ extension IQChannelsManager {
     func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)?, showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
         detailViewModel = viewModel
-        viewModel.backDismisses = getChatItems(from: authResults, config: config).count == 1
+        if let saved = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String],
+           let code = saved["code"], let name = saved["name"] {
+            viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
+        }
+        viewModel.backDismisses = displayChatItems(from: authResults, config: config)?.count == 1
         viewModel.state = state
         viewModel.client = chat?.auth.auth.client
         viewModel.session = chat?.auth.auth.session
@@ -168,6 +164,12 @@ extension IQChannelsManager {
                 ]
             }
         }.flatMap {$0}
+    }
+    
+    func displayChatItems(from results: [AuthResult], config: IQChannelsConfig) -> [IQChatItemModel]? {
+        let items = getChatItems(from: results, config: config)
+        guard let chatToOpen = config.chatToOpen else { return items }
+        return items.first(where: { $0.channel == chatToOpen.channel && $0.chatType == chatToOpen.chatType }).map { [$0] }
     }
     
     func closeCurrentChat() {
@@ -906,7 +908,7 @@ extension IQChannelsManager {
         
         networkManager.stopListenToEvents()
 
-        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType), getSettings: false, isInfoChat: isInfoChat).result
+        let result = await networkManager.loadMessages(request: .init(chatType: selectedChat.chatType), getSettings: false, isInfoChat: isInfoChat, language: detailViewModel?.selectedLanguage?.code).result
         let newMessages = (result?.0 ?? [])
             .filter { $0.hasValidPayload }
             .filter { indexOfMessage(messageID: $0.messageID) == nil }
@@ -935,7 +937,7 @@ extension IQChannelsManager {
             DispatchQueue.main.async { self.detailViewModel?.isLoading = true }
             
 
-            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true, isInfoChat: isInfoChat)
+            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true, isInfoChat: isInfoChat, language: detailViewModel?.selectedLanguage?.code)
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             
             if let error = result.error {
@@ -1005,7 +1007,7 @@ extension IQChannelsManager {
             let isInfoChat = detailViewModel?.client?.chatTypes.contains(.info) ?? false
             
  
-            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true, isInfoChat: isInfoChat)
+            let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true, isInfoChat: isInfoChat, language: detailViewModel?.selectedLanguage?.code)
             DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             
             if let error = result.error {
@@ -1039,7 +1041,7 @@ extension IQChannelsManager {
             
             let isInfoChat = detailViewModel?.client?.chatTypes.contains(.info) ?? false
             
-            let result = await networkManager.loadMessages(request: query, getSettings: false, isInfoChat: isInfoChat)
+            let result = await networkManager.loadMessages(request: query, getSettings: false, isInfoChat: isInfoChat, language: detailViewModel?.selectedLanguage?.code)
             isLoadingOldMessages = false
             
             if let error = result.error {

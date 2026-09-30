@@ -261,7 +261,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: value)
     }
     
-    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool, isInfoChat: Bool) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?)> {
+    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool, isInfoChat: Bool, language: String?) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?)> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
@@ -304,9 +304,16 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                     
                     IQLog.debug(message: "Auto greet avatarURL:\(String(describing: avatarURL))")
                     
-                    if(settings.totalOpenedTickets == 0){
+                    let effectiveLanguage = language
+                        ?? availableLanguages?.first(where: { $0.isDefault == true })?.code
+                        ?? "ru"
+                    let translation: String = settings.translations?
+                        .first(where: { $0.languageCode == effectiveLanguage})?
+                        .translation ?? settings.message
+                    
+                    if(settings.totalOpenedTickets == 0 && !isInfoChat){
                         value.append(IQMessage(
-                            text: settings.message,
+                            text: translation,
                             operatorName: settings.pseudonym ?? "Оператор",
                             avatarID: settings.avatarID,
                             avatarURL: avatarURL,
