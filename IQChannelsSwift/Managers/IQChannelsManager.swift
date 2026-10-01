@@ -25,6 +25,9 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     @Published var infoChatSettings: IQInfoChatSettings? = nil
     @Published var greetingSettings: IQGreetingSettings? = nil
     var listViewModel: IQChatListViewModel?
+    var isSingleChatExpected: Bool {
+        config.chatToOpen != nil || config.channels.count == 1
+    }
     var baseViewModels: [IQBaseViewModel] {
         [listViewModel, detailViewModel].compactMap { $0 }
     }
@@ -77,6 +80,10 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     
     func getViewController() -> IQChatDetailViewController? {
         return getDetailViewController(for: selectedChat, showNavBar: false)
+    }
+    
+    func getChatSkeletonViewController() -> IQChatDetailViewController {
+        return getDetailViewController(for: selectedChat, showNavBar: true)
     }
     
     
@@ -149,6 +156,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     func logout() {
         IQLog.debug(message: "logout")
         listViewModel?.dismissListener.send(())
+        detailViewModel?.dismissListener.send(())
         clear()
     }
     

@@ -16,6 +16,7 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onSendPoll(value: Int?, answers: [IQRatingPollClientAnswerInput], ratingId: Int, pollId: Int)
     func onPollIgnored(ratingId: Int, pollId: Int)
     func onChangeSegment(_ message: IQMessage)
+    func onDismissChat()
 }
 
 struct ChatDetailView: View {
@@ -40,7 +41,7 @@ struct ChatDetailView: View {
 
     // MARK: - BODY
     var body: some View {
-        if((viewModel.state == .authenticated || viewModel.state == .awaitingNetwork) && !showInfoChatStub){
+        if((viewModel.state == .authenticated || viewModel.state == .awaitingNetwork || viewModel.state == .authenticating) && !showInfoChatStub){
             ZStack(alignment: .top) {
                 VStack(spacing: 0) {
                     
@@ -99,12 +100,14 @@ struct ChatDetailView: View {
                 getErrorView(isPm: true)
             }
         }
-//        else {
-//            ZStack {
-//                backgroundColor.ignoresSafeArea()
-//                getErrorView(isPm: false)
-//            }
-//        }
+        else {
+            ZStack {
+                backgroundColor.ignoresSafeArea()
+                AuthorizationView(state: viewModel.state, infoChatSettings: viewModel.infoChatSettings) {
+                    delegate?.onDismissChat()
+                }
+            }
+        }
     }
     
     // MARK: - VIEWS

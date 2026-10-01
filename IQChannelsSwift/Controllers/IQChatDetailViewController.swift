@@ -234,6 +234,19 @@ class IQChatDetailViewController: IQViewController {
     }
     
     override func bindViewModel() {
+        viewModel.dismissListener
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.dismiss(animated: true)
+            }.store(in: &subscriptions)
+        
+        viewModel.replaceRootListener
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] controller in
+                guard let self, viewModel.isSkeleton, let navigationController = self.navigationController else { return }
+                navigationController.setViewControllers([controller], animated: false)
+            }.store(in: &subscriptions)
+        
         viewModel.errorListener
             .receive(on: DispatchQueue.main)
             .sink { [weak self] error in
@@ -420,6 +433,10 @@ class IQChatDetailViewController: IQViewController {
 extension IQChatDetailViewController: ChatDetailViewDelegate {
     func onAttachmentTap() {
         displayAttachmentOptions()
+    }
+    
+    func onDismissChat() {
+        output.detailControllerDismissChat()
     }
     
     func onFileTap(_ file: IQFile, sessionToken: String) {

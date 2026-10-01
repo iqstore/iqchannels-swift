@@ -31,6 +31,12 @@ extension IQChannelsManager {
                     } else {
                         self.listViewModel?.chatsInfo = items
                         self.selectedChat = nil
+                        
+                        if self.isSingleChatExpected, items.count > 1, let listViewModel = self.listViewModel {
+                            let list = IQChatListViewController(viewModel: listViewModel, output: self)
+                            self.detailViewModel?.replaceRootListener.send(list)
+                            self.detailViewModel = nil
+                        }
                     }
                 }
             }
@@ -40,7 +46,12 @@ extension IQChannelsManager {
             Task { [weak self] in
                 DispatchQueue.main.async { [weak self] in
                     if let self, let chat {
-                        listViewModel?.chatToPresentListener.send(getDetailViewController(for: chat, showNavBar: true))
+                        if let detailViewModel, isSingleChatExpected {
+                            configureDetailViewModel(detailViewModel, for: chat)
+                        } else {
+                            let detail = getDetailViewController(for: chat, showNavBar: true)
+                            listViewModel?.chatToPresentListener.send(detail)
+                        }
 //                        listenToUnread()
                         loadMessages()
                         
@@ -106,12 +117,18 @@ extension IQChannelsManager {
     
     func getDetailViewController(for chat: (auth: AuthResult, chatType: IQChatType)?, showNavBar: Bool) -> IQChatDetailViewController {
         let viewModel = IQChatDetailViewModel()
+        configureDetailViewModel(viewModel, for: chat)
+        return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
+    }
+    
+    func configureDetailViewModel(_ viewModel: IQChatDetailViewModel, for chat: (auth: AuthResult, chatType: IQChatType)?) {
         detailViewModel = viewModel
+        viewModel.isSkeleton = chat == nil
         if let saved = UserDefaults.standard.dictionary(forKey: "selectedLanguage") as? [String: String],
            let code = saved["code"], let name = saved["name"] {
             viewModel.selectedLanguage = IQLanguage(code: code, name: name, isDefault: nil, iconURL: nil)
         }
-        viewModel.backDismisses = displayChatItems(from: authResults, config: config)?.count == 1
+        viewModel.backDismisses = chat == nil || displayChatItems(from: authResults, config: config)?.count == 1
         viewModel.state = state
         viewModel.client = chat?.auth.auth.client
         viewModel.session = chat?.auth.auth.session
@@ -119,7 +136,6 @@ extension IQChannelsManager {
         viewModel.showBottomTypingBar = config.showBottomTypingBar
         viewModel.useRussianTrustedRootCA = config.useRussianTrustedRootCA
         viewModel.urlSession = config.urlSession
-        return IQChatDetailViewController(viewModel: viewModel, output: self, showNavBar: showNavBar)
     }
     
     func getChatItems(from results: [AuthResult], config: IQChannelsConfig) -> [IQChatItemModel] {
@@ -245,8 +261,8 @@ extension IQChannelsManager {
 
                             unread.channels?[index].lastMessage = event.lastMessage
                             unread.channels?[index].unreadCount = event.unreadCount
-                            
                             await MainActor.run {
+                                IQChannelsManager.advancedUnread = unread
                                 IQChannelsManager.advancedUnreadListeners.forEach { $0.iqChannelsAdvancedUnreadDidChange(unread) }
                             }
                         }
@@ -560,7 +576,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.4.2", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.4.3", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {

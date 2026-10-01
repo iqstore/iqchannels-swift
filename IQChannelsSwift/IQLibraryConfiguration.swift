@@ -20,9 +20,14 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         
         let viewModel = IQChatListViewModel()
         channelManager.setListViewModel(viewModel)
-        let list = IQChatListViewController(viewModel: viewModel, output: channelManager)
         
-        let navigationController = UINavigationController(rootViewController: list)
+        let root: UIViewController
+        if channelManager.isSingleChatExpected {
+            root = channelManager.getChatSkeletonViewController()
+        } else {
+            root = IQChatListViewController(viewModel: viewModel, output: channelManager)
+        }
+        let navigationController = UINavigationController(rootViewController: root)
         navigationController.modalPresentationStyle = .overFullScreen
         navigationController.modalTransitionStyle = .coverVertical
 

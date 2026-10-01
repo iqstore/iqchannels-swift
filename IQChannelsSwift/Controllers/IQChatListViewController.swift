@@ -9,14 +9,13 @@ class IQChatListViewController: IQViewController {
     
     private let output: IQChannelsManagerListOutput
     
-    private lazy var closeButton: UIButton = {
+    private lazy var backButton: UIButton = {
         let btn: UIButton = .init(frame: .init(x: 0, y: 0, width: 24, height: 24))
-        btn.setImage(UIImage(name: "xmark")?.withRenderingMode(.alwaysTemplate), for: [])
-        btn.tintColor = UIColor(hex: "242729")
+        btn.setImage(UIImage(name: "chevron_left"), for: .normal)
         btn.imageView?.contentMode = .scaleAspectFit
         btn.contentVerticalAlignment = .fill
         btn.contentHorizontalAlignment = .fill
-        btn.addTarget(self, action: #selector(onTapClose), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(onTapBack), for: .touchUpInside)
         return btn
     }()
     
@@ -41,7 +40,7 @@ class IQChatListViewController: IQViewController {
     }
     
     override func setupNavBar() {
-        navigationItem.rightBarButtonItem = .init(customView: closeButton)
+        navigationItem.leftBarButtonItem = .init(customView: backButton)
         IQLog.debug(message: "3")
     }
     
@@ -81,7 +80,7 @@ class IQChatListViewController: IQViewController {
     
     // MARK: - ACTIONS
     @objc
-    private func onTapClose() {
+    private func onTapBack() {
         output.listControllerDismissChat()
 //        dismiss(animated: true)
     }
