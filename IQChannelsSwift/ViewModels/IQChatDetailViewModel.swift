@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import UIKit
 
 class IQChatDetailViewModel: IQBaseViewModel {
     
@@ -34,6 +35,9 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var showBottomTypingBar: Bool = false
     var useRussianTrustedRootCA: Bool = false
     var urlSession: URLSession?
+    var isSkeleton = false
+    var replaceRootListener = PassthroughSubject<UIViewController, Never>()
+    var dismissListener = PassthroughSubject<Void, Never>()
     @Published var enableAnimMessages: Bool = true
     @Published var isAnonim: Bool = false
     @Published var greetingSettings: IQGreetingSettings?

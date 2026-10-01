@@ -198,14 +198,6 @@ struct IQMessage: Codable, Identifiable, Equatable {
         self.botpressPayload = choice.value
     }
     
-    init(product: IQProduct, chatType: IQChatType, clientID: Int?, localID: Int) {
-        self.init(localID: localID, clientID: clientID, chatType: chatType, replyMessageID: nil)
-        self.payload = .text
-        self.isRead = false
-        self.text = "product.title"
-        self.botpressPayload = "product.value"
-    }
-    
     init(text: String, operatorName: String, avatarID: String?, avatarURL: URL?, isAutoGreet: Bool = false) {
         self.author = .user
         self.createdAt = Int(Date().timeIntervalSince1970 * 1000)

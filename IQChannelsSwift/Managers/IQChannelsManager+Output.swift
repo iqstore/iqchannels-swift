@@ -39,7 +39,7 @@ extension IQChannelsManager: IQChannelsManagerDetailOutput {
     func detailControllerDismissChat() {
         guard eventListener?.iqChannelsShouldCloseModule() ?? true else { return }
         
-        listViewModel?.dismissListener.send(())
+        detailViewModel?.dismissListener.send(())
     }
 
     func detailControllerDidPop() {

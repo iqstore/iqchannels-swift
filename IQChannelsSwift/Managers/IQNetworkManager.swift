@@ -231,7 +231,6 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
     func getSignupGreetingSettings() async -> ResponseCallback<IQGreetingSettings> {
         let path = "/widget/greetings/\(channel)"
         let response = await post(path, body: nil, responseType: IQGreetingSettings.self)
-        print("!!!!!!!!!!!!!   greetingSettings  response      \(response)")
         
         guard response.error == nil else {
             IQLog.error(message: "getSignupGreetingSettings: \n error: \(String(describing: response.error))")
@@ -240,8 +239,6 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         guard let result = response.result, let value = result.value else { return .init(error: NSError.failedToParseModel(IQGreetingSettings.self)) }
         
         IQLog.debug(message: "getSignupGreetingSettings: \n success")
-        
-        print("!!!!!!!!!!!!!   greetingSettings  value      \(value)")
         
         return .init(result: value)
     }

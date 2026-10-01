@@ -9,6 +9,8 @@ import Foundation
 
 protocol IQChannelsManagerProtocol {
     func getViewController() -> IQChatDetailViewController?
+    var isSingleChatExpected: Bool { get }
+    func getChatSkeletonViewController() -> IQChatDetailViewController
     func configure(configuration: IQChannelsConfig)
     func login(_ loginType: IQLoginType, _ completion: (() -> Void)?)
     func logout()
