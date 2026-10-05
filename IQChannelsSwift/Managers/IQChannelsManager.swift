@@ -150,7 +150,11 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     
     func login(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
         logout()
-        auth(loginType, completion)
+        var fired = false
+        let onceCompletion = completion.map { callback in
+            { if !fired { fired = true; callback() } }
+        }
+        auth(loginType, onceCompletion)
     }
     
     func logout() {
