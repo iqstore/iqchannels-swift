@@ -1262,8 +1262,14 @@ extension IQChannelsManager {
     
     func auth(_ loginType: IQLoginType, _ completion: (() -> Void)?) {
         self.loginType = loginType
-        guard authResults.isEmpty,
-              networkStatusManager.isReachable else { return }
+        guard authResults.isEmpty else {
+            completion?()
+            return
+        }
+        guard networkStatusManager.isReachable else {
+            completion?()
+            return
+        }
         
         Task{
             authAttempt += 1
@@ -1304,20 +1310,19 @@ extension IQChannelsManager {
             
             if let error = errors.compactMap({$0}).first{
                 IQLog.debug(message: "Error authentication \n error: \(error)")
-                self.auth(loginType, failedWith: error, completion)
+                self.auth(loginType, failedWith: error, nil)
+                completion?()
             } else {
                 IQLog.debug(message: "Success authentication \n results: \(results)")
                 self.auth(loginType, succeededWith: results, completion)
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [] in
-                completion?()
             }
         }
     }
     
     private func auth(_ type: IQLoginType, succeededWith results: [(channel: String, auth: IQClientAuth?)], _ completion: (() -> Void)?) {
         guard results.allSatisfy({ $0.auth?.client != nil && $0.auth?.session != nil }) else {
-            self.auth(type, failedWith: nil, completion)
+            self.auth(type, failedWith: nil, nil)
+            completion?()
             return
         }
         
@@ -1339,6 +1344,7 @@ extension IQChannelsManager {
         authResults = results
         authAttempt = 0
         state = .authenticated
+        completion?()
     }
     
     private func auth(_ type: IQLoginType, failedWith error: Error?, _ completion: (() -> Void)?) {
