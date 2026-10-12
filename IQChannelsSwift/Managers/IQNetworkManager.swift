@@ -322,7 +322,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             }
         }
         
-        let unreadMessages = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user}
+        let readInDatabase = Set(IQDatabaseManager.shared.getAllMessages().filter { $0.isRead == true }.map { $0.messageID })
+        let unreadMessages = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user && !readInDatabase.contains($0.messageID ?? 0) }
         let unreadMessagesCount = unreadMessages.count
         
         

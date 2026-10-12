@@ -479,14 +479,18 @@ extension IQChannelsManager {
     
     
     func rated(index: Int, value: Int?) {
-        messages[index].rating?.state = .rated
-        messages[index].rating?.value = value
-        messages[index].isSystem = true
+        var updated = messages[index]
+        updated.rating?.state = .rated
+        updated.rating?.value = value
+        updated.isSystem = true
+        messages[index] = updated
     }
     
     func ignored(index: Int) {
-        messages[index].rating?.state = .ignored
-        messages[index].isSystem = true
+        var updated = messages[index]
+        updated.rating?.state = .ignored
+        updated.isSystem = true
+        messages[index] = updated
     }
     
 
@@ -842,6 +846,13 @@ extension IQChannelsManager {
         }
         
         readMessages.update(with: messageID)
+        
+        if let index = messages.firstIndex(where: { $0.messageID == messageID }) {
+            messages[index] = messages[index].withRead(true)
+        }
+        if !messages.contains(where: { ($0.isRead == nil || $0.isRead == false) && $0.author == .user }) {
+            messages.removeAll { $0.newMsgHeader == true }
+        }
         
         IQLog.debug(message: "Read message with messageID = \(messageID)")
         IQLog.debug(message: "Unread count = \(unreadCount)")
