@@ -71,3 +71,5 @@ Carthage/Build
 
 fastlane/report.xml
 fastlane/screenshots
+# Swift Package Manager / Xcode local state
+.swiftpm/
