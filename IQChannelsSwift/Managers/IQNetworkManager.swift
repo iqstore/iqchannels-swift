@@ -111,32 +111,6 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
     }
     
-//    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>) {
-//        let path = "/sse/chats/channel/unread/\(channel)"
-//        
-//        unreadListeners.forEach { $0.close() }
-//        unreadListeners.removeAll()
-//        
-//        unreadListener = sse(path: path, responseType: Int.self, onOpen: {} ){ result, error in
-//            if let error = error {
-//                callback(nil, error)
-//                IQLog.error(message: "listenToUnread: \(error)")
-//                return
-//            }
-//            if result == nil {
-//                callback(nil, nil)
-//                return
-//            }
-//            self.unreadCount = result?.value ?? 0
-//            IQLog.debug(message: "listenToUnread: \(String(describing: self.unreadCount))")
-//            
-//            callback(result?.value ?? 0, nil)
-//        }
-//        
-//        if let unreadListener = unreadListener {
-//            unreadListeners.append(unreadListener)
-//        }
-//    }
     
     func stopListenToEvents(){
         eventsListener?.close()
@@ -258,7 +232,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         return .init(result: value)
     }
     
-    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool, isInfoChat: Bool, language: String?) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?)> {
+    func loadMessages(request: IQLoadMessageRequest, getSettings: Bool, isInfoChat: Bool, language: String?) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?, String?)> {
         let path = "/chats/channel/messages/\(channel)"
         let response = await post(path, body: request, responseType: [IQMessage].self)
         
@@ -270,6 +244,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         
         var lifeTime: Int?
         var chatTitle: String = "Чат с оператором"
+        var chatSubtitle: String? = nil
         var systemChat: Bool = false
         var availableLanguages: [IQLanguage]?
         
@@ -280,10 +255,11 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
         
         if(getSettings){
-            let chatSettings = await getChatSettings(request: .init(clientId: request.clientId))
+            let chatSettings = await getChatSettings(request: .init(clientId: request.clientId, chatType: request.chatType))
             
             if let settings = chatSettings.result{
                 chatTitle = settings.chatTitle
+                chatSubtitle = settings.chatSubtitle
                 systemChat = settings.enabled == true
                 
                 if (settings.greetFrom == "bot") {
@@ -322,7 +298,8 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
             }
         }
         
-        let unreadMessages = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user}
+        let readInDatabase = Set(IQDatabaseManager.shared.getAllMessages().filter { $0.isRead == true }.map { $0.messageID })
+        let unreadMessages = value.filter { ($0.isRead == nil || $0.isRead == false) && $0.author == .user && !readInDatabase.contains($0.messageID ?? 0) }
         let unreadMessagesCount = unreadMessages.count
         
         
@@ -350,7 +327,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         IQLog.debug(message: "Unread count = \(unreadMessagesCount)")
         IQLog.debug(message: "Unread messages = \(unreadMessages)")
         
-        return .init(result: (value, systemChat, lifeTime, chatTitle, availableLanguages))
+        return .init(result: (value, systemChat, lifeTime, chatTitle, availableLanguages, chatSubtitle))
     }
     
     func rate(value: Int, ratingID: Int) async -> Error? {
