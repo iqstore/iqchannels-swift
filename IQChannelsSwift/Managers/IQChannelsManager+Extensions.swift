@@ -158,19 +158,31 @@ extension IQChannelsManager {
                 state = .authenticated
             }
             let isInfoChannel = client.multiChatsInfo?.channelType == "info"
+            let enableChat = client.multiChatsInfo?.enableChat ?? false
+            
             if !isInfoChannel && client.canAccessPersonalManager {
-                return [
-                    IQChatItemModel(
-                        channel: channel,
-                        info: client.multiChatsInfo,
-                        chatType: .chat
-                    ),
-                    IQChatItemModel(
-                        channel: channel,
-                        info: client.multiChatsInfo,
-                        chatType: .manager
-                    )
-                ]
+                if enableChat {
+                    return [
+                        IQChatItemModel(
+                            channel: channel,
+                            info: client.multiChatsInfo,
+                            chatType: .chat
+                        ),
+                        IQChatItemModel(
+                            channel: channel,
+                            info: client.multiChatsInfo,
+                            chatType: .manager
+                        )
+                    ]
+                } else{
+                    return [
+                        IQChatItemModel(
+                            channel: channel,
+                            info: client.multiChatsInfo,
+                            chatType: .manager
+                        )
+                    ]
+                }
             } else {
                 return [
                     IQChatItemModel(
@@ -604,7 +616,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.4.4", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.4.5", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -1290,7 +1302,8 @@ extension IQChannelsManager {
             }
             
             if let authResult = authResults.first(where: { $0.channel == message.transferToChannel?.name && $0.auth.client?.canAccessPersonalManager == false }) {
-                self.selectedChat = (authResult, IQChatType.manager)
+//                self.selectedChat = (authResult, IQChatType.manager)
+                self.selectedChat = (authResult, IQChatType.chat)
             }
         }
     }
