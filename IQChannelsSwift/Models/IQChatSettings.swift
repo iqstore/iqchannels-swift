@@ -15,7 +15,14 @@ struct IQChatSettings: Codable, Equatable {
     var avatarID: String? = ""
     var totalOpenedTickets: Int = 0
     var chatTitle: String = "Чат с оператором"
+    var chatSubtitle: String? = nil
     var translations: [IQTranslations]? = nil
+    
+    enum CodingKeys: String, CodingKey {
+        case id, message, enabled, greetFrom, lifetime, pseudonym, totalOpenedTickets, chatTitle, translations
+        case avatarID = "avatarId"
+        case chatSubtitle = "chat_subtitle"
+    }
 }
 
 struct IQTranslations: Codable, Equatable {

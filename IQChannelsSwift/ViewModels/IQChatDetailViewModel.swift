@@ -30,6 +30,8 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var selectedFiles: [DataFile]? = nil
     @Published var scrollDown: Bool = false
     @Published var chatLabel: String = ""
+    @Published var chatSubtitle: String? = nil
+    @Published var chatSettingsLoaded = false
     @Published var availableLanguages: [IQLanguage]?
     @Published var selectedLanguage: IQLanguage?
     @Published var showBottomTypingBar: Bool = false
