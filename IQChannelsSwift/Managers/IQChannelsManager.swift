@@ -40,6 +40,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var isAnonim = false
     var isLoadingOldMessages = false
     var typingSentDate: Date?
+    var advancedUnreadBounceTask: Task<Void, Never>?
     var didSendAttachments = false
     var fileLimit: IQFileConfig?
     var eventListener: IQChannelsEventListenerProtocol?

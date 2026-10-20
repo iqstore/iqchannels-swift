@@ -616,7 +616,7 @@ extension IQChannelsManager {
                 self.detailViewModel?.enableAnimMessages = true
             }
             
-            let message = IQMessage(text: "2.4.5", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
+            let message = IQMessage(text: "2.4.6", localID: nextLocalId(), clientID: selectedChat.auth.auth.client?.id)
             
             messages.append(message)
             DispatchQueue.main.async {
@@ -881,6 +881,22 @@ extension IQChannelsManager {
             }
         }
         
+        if var advancedUnread = IQChannelsManager.advancedUnread,
+           let chat = selectedChat,
+           let index = advancedUnread.channels?.firstIndex(where: { $0.name == chat.auth.channel && $0.chatType == chat.chatType.rawValue }) {
+            
+            advancedUnread.channels?[index].unreadCount = unreadCount
+            
+            advancedUnreadBounceTask?.cancel()
+            advancedUnreadBounceTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                guard !Task.isCancelled else { return }
+                IQChannelsManager.advancedUnread = advancedUnread
+                self.listViewModel?.advancedUnread = advancedUnread.channels ?? []
+                IQChannelsManager.advancedUnreadListeners.forEach { $0.iqChannelsAdvancedUnreadDidChange(advancedUnread) }
+            }
+        }
+        
         readMessages.update(with: messageID)
         
         if let index = messages.firstIndex(where: { $0.messageID == messageID }) {
@@ -904,20 +920,6 @@ extension IQChannelsManager {
         }
     }
     
-    private func updateMultichatPreview(with message: IQMessage) {
-        guard var unread = IQChannelsManager.advancedUnread,
-              let chat = selectedChat,
-              let index = unread.channels?.firstIndex(where: { $0.name == chat.auth.channel && $0.chatType == chat.chatType.rawValue }) else { return }
-        
-        let lastMessage = LastMessage(text: message.text, fileID: message.file?.id, isSurvey: false, date: ISO8601DateFormatter().string(from: Date()))
-        unread.channels?[index].lastMessage = lastMessage
-        IQChannelsManager.advancedUnread = unread
-        
-        Task { @MainActor in
-            listViewModel?.advancedUnread = unread.channels ?? []
-        }
-    }
-    
     private func sendMessage(_ message: IQMessage, attempts: Int = 0) async {
         if (!message.error){
             if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
@@ -928,7 +930,18 @@ extension IQChannelsManager {
             }
             messages.removeAll { $0.newMsgHeader == true }
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
-            updateMultichatPreview(with: message)
+            if var unread = IQChannelsManager.advancedUnread,
+               let chat = selectedChat,
+               let index = unread.channels?.firstIndex(where: { $0.name == chat.auth.channel && $0.chatType == chat.chatType.rawValue }) {
+                
+                unread.channels?[index].lastMessage = LastMessage(text: message.text, fileID: message.file?.id, isSurvey: false, date: ISO8601DateFormatter().string(from: Date()))
+                
+                Task { @MainActor in
+                    IQChannelsManager.advancedUnread = unread
+                    self.listViewModel?.advancedUnread = unread.channels ?? []
+                    IQChannelsManager.advancedUnreadListeners.forEach { $0.iqChannelsAdvancedUnreadDidChange(unread) }
+                }
+            }
             
             DispatchQueue.main.async { [self] in
                 self.detailViewModel?.idOfNewMessage = nil
