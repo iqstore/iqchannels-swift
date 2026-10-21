@@ -1013,6 +1013,51 @@ extension IQChannelsManager {
         listenToEvents()
     }
     
+    private func prefetchVisibleImages(in messages: [IQMessage]) async {
+        let urls = visibleImageUrls(in: messages)
+        guard !urls.isEmpty else { return }
+        
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let lock = NSLock()
+            var isFinished = false
+            let finish: () -> Void = {
+                lock.lock(); defer { lock.unlock() }
+                guard !isFinished else { return }
+                isFinished = true
+                continuation.resume()
+            }
+            
+            let group = DispatchGroup()
+            for url in urls {
+                group.enter()
+                SDWebImageManager.shared.loadImage(with: url, options: [], progress: nil) { _, _, _, _, _, _ in
+                    group.leave()
+                }
+            }
+            group.notify(queue: DispatchQueue.global()) { finish() }
+            DispatchQueue.global().asyncAfter(deadline: .now() + 3, execute: DispatchWorkItem(block: finish))
+        }
+    }
+    
+    private func visibleImageUrls(in messages: [IQMessage]) -> [URL] {
+        var urls: [URL] = []
+        var seen = Set<URL>()
+        
+        for message in messages.prefix(15) {
+            guard urls.count < 5 else { break }
+            guard let file = message.file,
+                  file.state == nil || file.state == .approved,
+                  !(file.isLoading),
+                  let url = file.imagePreviewUrl else { continue }
+            
+            if seen.insert(url).inserted {
+                urls.append(url)
+            }
+        }
+        
+        return urls
+    }
+    
     private func loadMessages() {
         Task {
             guard let networkManager = currentNetworkManager, let selectedChat else { return }
@@ -1026,13 +1071,17 @@ extension IQChannelsManager {
             
 
             let result = await networkManager.loadMessages(request: .init(clientId: selectedChat.auth.auth.client?.id, chatType: selectedChat.chatType), getSettings: true, isInfoChat: isInfoChat, language: detailViewModel?.selectedLanguage?.code)
-            DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             
             if let error = result.error {
+                DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
                 baseViewModels.sendError(error)
                 return
             }
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
+            
+            await prefetchVisibleImages(in: results)
+            
+            DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             self.systemChat = result.result?.1 ?? false
             let lifeTime = result.result?.2
             let chatLabel = result.result?.3
