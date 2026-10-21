@@ -28,17 +28,26 @@ struct MediaMessageCellView: View {
     @State private var cachedText: (NSAttributedString, [Link])?
     
     private func loadText() {
-        let result = AttributeTextManager.shared.getString(
-            from: message.text ?? "",
-            textColor: textColor,
-            fontSize: fontSize,
-            alingment: aligment,
-            isBold: isBold,
-            isItalic: isItalic
-        )
+        let textColor = self.textColor
+        let fontSize = self.fontSize
+        let aligment = self.aligment
+        let isBold = self.isBold
+        let isItalic = self.isItalic
+        let rawText = message.text ?? ""
+        
+        DispatchQueue.global().async {
+            let result = AttributeTextManager.shared.getString(
+                from: rawText,
+                textColor: textColor,
+                fontSize: fontSize,
+                alingment: aligment,
+                isBold: isBold,
+                isItalic: isItalic
+            )
 
-        DispatchQueue.main.async {
-            self.cachedText = result
+            DispatchQueue.main.async {
+                self.cachedText = result
+            }
         }
     }
     
@@ -236,7 +245,14 @@ struct MediaMessageCellView: View {
                             .layoutPriority(1)
                             .padding(.horizontal, 12)
                         } else {
-                            Text("")
+                            PlainMessageText(text: text,
+                                             textColor: textColor,
+                                             fontSize: fontSize,
+                                             aligment: aligment,
+                                             isBold: isBold,
+                                             isItalic: isItalic)
+                            .layoutPriority(1)
+                            .padding(.horizontal, 12)
                         }
                     }
                     .onAppear {

@@ -79,7 +79,10 @@ extension IQChannelsManager {
         $messages.receive(on: DispatchQueue.main).sink { [weak self] messages in
             guard let self else { return }
             
-            detailViewModel?.messages = messages.reversed()
+            let reversed = Array(messages.reversed())
+            if detailViewModel?.messages != reversed {
+                detailViewModel?.messages = reversed
+            }
         }.store(in: &subscriptions)
     }
     
@@ -99,10 +102,13 @@ extension IQChannelsManager {
         $messages.receive(on: DispatchQueue.main).sink { [weak self] messages in
             guard let self else { return }
             
-            detailViewModel?.messages = messages.reversed()
+            let reversed = Array(messages.reversed())
+            if detailViewModel?.messages != reversed {
+                detailViewModel?.messages = reversed
+            }
         }.store(in: &subscriptions)
     }
-    
+
     func setupFileLimits() {
         Task {
             fileLimit = try? await IQNetworkManager.getFileConfig(address: config.address, useRussianTrustedRootCA: config.useRussianTrustedRootCA, urlSession: config.urlSession)
@@ -654,6 +660,13 @@ extension IQChannelsManager {
     
         } else {
             let message = IQMessage(text: text, chatType: selectedChat.chatType, clientID: selectedChat.auth.auth.client?.id, localID: nextLocalId(), replyMessageID: replyToMessage)
+            let isLongText = text.count > 1000
+            detailViewModel?.disableMessagesAnimation = isLongText
+            if isLongText {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                    self?.detailViewModel?.disableMessagesAnimation = false
+                }
+            }
             DispatchQueue.main.async {
                 self.detailViewModel?.enableAnimMessages = true
             }
@@ -922,13 +935,16 @@ extension IQChannelsManager {
     
     private func sendMessage(_ message: IQMessage, attempts: Int = 0) async {
         if (!message.error){
-            if let index = messages.firstIndex(where: { $0.localID == message.localID }) {
+            if let index = messages.firstIndex(where: { $0.localID == message.localID }),
+               messages[index] != message {
                 messages[index] = message
             }
             DispatchQueue.main.async {
                 self.detailViewModel?.enableAnimMessages = true
             }
-            messages.removeAll { $0.newMsgHeader == true }
+            if messages.contains(where: { $0.newMsgHeader == true }) {
+                messages.removeAll { $0.newMsgHeader == true }
+            }
             IQDatabaseManager.shared.insertMessage(message.toDatabaseMessage())
             if var unread = IQChannelsManager.advancedUnread,
                let chat = selectedChat,
@@ -1198,7 +1214,9 @@ extension IQChannelsManager {
             DispatchQueue.main.async {
                 self.detailViewModel?.enableAnimMessages = true
             }
-            messages.insert(contentsOf: newMessages, at: 0)
+            if !newMessages.isEmpty {
+                messages.insert(contentsOf: newMessages, at: 0)
+            }
             markAsReceived(newMessages.map { $0.messageID })
         }
     }
