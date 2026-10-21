@@ -8,11 +8,17 @@ struct FilePreviewCellView: View {
     
     private let message: IQMessage
     private let replyMessage: IQMessage?
+    private let file: IQFile?
+    private let embedded: Bool
     private let onFileTapCompletion: (() -> Void)?
     private let onCancelFileSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let text: String
     private let isSender: Bool
+    
+    var currentFile: IQFile? {
+        file ?? message.file
+    }
     
     @State private var showMessageLoading: Bool = false
     @State private var cachedText: (NSAttributedString, [Link])?
@@ -150,11 +156,15 @@ struct FilePreviewCellView: View {
     // MARK: - INIT
     init(message: IQMessage,
          replyMessage: IQMessage? = nil,
+         file: IQFile? = nil,
+         embedded: Bool = false,
          onFileTapCompletion: (() -> Void)? = nil,
          onCancelFileSendCompletion: (() -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
+        self.file = file
+        self.embedded = embedded
         self.onFileTapCompletion = onFileTapCompletion
         self.onCancelFileSendCompletion = onCancelFileSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
@@ -164,6 +174,26 @@ struct FilePreviewCellView: View {
     
     // MARK: - BODY
     var body: some View {
+        if embedded {
+            embeddedBody
+        } else {
+            fullBody
+        }
+    }
+    
+    private var embeddedBody: some View {
+        Group {
+            if let file = currentFile {
+                getApprovedStateView(file)
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
+        .onTapGesture {
+            handleTap()
+        }
+    }
+    
+    private var fullBody: some View {
         VStack(alignment: .trailing, spacing: 4) {
             VStack(alignment: .leading, spacing: 4) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -173,7 +203,7 @@ struct FilePreviewCellView: View {
                                          onReplyMessageTapCompletion: onReplyMessageTapCompletion)
                     }
                     
-                    if let file = message.file {
+                    if let file = currentFile {
                         getApprovedStateView(file)
                     }
                 }
@@ -212,16 +242,20 @@ struct FilePreviewCellView: View {
             RoundedRectangle(cornerRadius: backgroundRadius)
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
-        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: message.file?.isLoading)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
         .onTapGesture {
-            if let file = message.file {
-                if let state = file.state {
-                    if state == .approved {
-                        onFileTapCompletion?()
-                    }
-                } else {
+            handleTap()
+        }
+    }
+    
+    private func handleTap() {
+        if let file = currentFile {
+            if let state = file.state {
+                if state == .approved {
                     onFileTapCompletion?()
                 }
+            } else {
+                onFileTapCompletion?()
             }
         }
     }

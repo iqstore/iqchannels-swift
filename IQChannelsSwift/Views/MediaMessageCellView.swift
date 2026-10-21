@@ -9,12 +9,18 @@ struct MediaMessageCellView: View {
     
     private let message: IQMessage
     private let replyMessage: IQMessage?
+    private let file: IQFile?
+    private let embedded: Bool
     private let onImageTapCompletion: (() -> Void)?
     private let onCancelImageSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     
     private let text: String
     private let isSender: Bool
+    
+    var currentFile: IQFile? {
+        file ?? message.file
+    }
     
     @State private var showMessageLoading: Bool = false
     @State private var uiImage: UIImage? = nil
@@ -143,11 +149,15 @@ struct MediaMessageCellView: View {
     // MARK: - INIT
     init(message: IQMessage,
          replyMessage: IQMessage? = nil,
+         file: IQFile? = nil,
+         embedded: Bool = false,
          onImageTapCompletion: (() -> Void)? = nil,
          onCancelImageSendCompletion: (() -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
+        self.file = file
+        self.embedded = embedded
         self.onImageTapCompletion = onImageTapCompletion
         self.onCancelImageSendCompletion = onCancelImageSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
@@ -157,6 +167,36 @@ struct MediaMessageCellView: View {
     
     // MARK: - BODY
     var body: some View {
+        if embedded {
+            embeddedBody
+        } else {
+            fullBody
+        }
+    }
+    
+    private var embeddedBody: some View {
+        VStack(alignment: .trailing) {
+            ZStack(alignment: .bottomTrailing) {
+                if let file = currentFile {
+                    if let state = file.state {
+                        if state == .approved || state == .onChecking{
+                            getApprovedStateView(file, state)
+                        } else {
+                            getNotApprovedStateView(state)
+                        }
+                    } else {
+                        getApprovedStateView(file, nil)
+                    }
+                }
+            }
+        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
+        .onTapGesture {
+            handleTap()
+        }
+    }
+    
+    private var fullBody: some View {
         VStack(alignment: .leading, spacing: 4) {
             if let replyMessage {
                 MessageReplyView(message: replyMessage,
@@ -168,7 +208,7 @@ struct MediaMessageCellView: View {
             
             VStack(alignment: .trailing){
                 ZStack(alignment: .bottomTrailing) {
-                    if let file = message.file {
+                    if let file = currentFile {
                         if let state = file.state {
                             if state == .approved || state == .onChecking{
                                 getApprovedStateView(file, state)
@@ -215,17 +255,21 @@ struct MediaMessageCellView: View {
             RoundedRectangle(cornerRadius: backgroundRadius)
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
-        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: message.file?.isLoading)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
         .onTapGesture {
-            if let uiImage = uiImage {
-                if let file = message.file {
-                    if let state = file.state {
-                        if state == .approved {
-                            onImageTapCompletion?()
-                        }
-                    } else {
+            handleTap()
+        }
+    }
+    
+    private func handleTap() {
+        if let uiImage = uiImage {
+            if let file = currentFile {
+                if let state = file.state {
+                    if state == .approved {
                         onImageTapCompletion?()
                     }
+                } else {
+                    onImageTapCompletion?()
                 }
             }
         }
@@ -234,7 +278,7 @@ struct MediaMessageCellView: View {
     // MARK: - VIEWS
     @ViewBuilder
     private func getApprovedStateView(_ file: IQFile, _ state: IQFileState?) -> some View {
-        let imageSize = calculateImageSize(file: message.file)
+        let imageSize = calculateImageSize(file: currentFile)
         HStack(spacing: 8) {
             if file.isLoading || state == .onChecking{
                     HStack(spacing: 8) {
@@ -296,7 +340,7 @@ struct MediaMessageCellView: View {
                         ProgressView()
                             .frame(minWidth: 150, minHeight: 150)
                     } else if let uiImage = uiImage {
-                        AnimatedImage(url: message.file?.imagePreviewUrl)
+                        AnimatedImage(url: currentFile?.imagePreviewUrl)
                             .resizable()
                             .indicator(SDWebImageActivityIndicator.gray)
                             .transition(SDWebImageTransition.fade)
@@ -327,7 +371,7 @@ struct MediaMessageCellView: View {
     }
     
     private func loadImage() {
-        guard let url = message.file?.imagePreviewUrl else {
+        guard let url = currentFile?.imagePreviewUrl else {
             isLoading = false
             return
         }

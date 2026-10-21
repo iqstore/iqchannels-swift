@@ -1045,12 +1045,15 @@ extension IQChannelsManager {
         
         for message in messages.prefix(15) {
             guard urls.count < 5 else { break }
-            guard let file = message.file,
-                  file.state == nil || file.state == .approved,
-                  !(file.isLoading),
-                  let url = file.imagePreviewUrl else { continue }
             
-            if seen.insert(url).inserted {
+            let messageFiles = message.files ?? [message.file].compactMap { $0 }
+            for file in messageFiles {
+                guard urls.count < 5,
+                      file.state == nil || file.state == .approved,
+                      !(file.isLoading),
+                      let url = file.imagePreviewUrl,
+                      seen.insert(url).inserted else { continue }
+                
                 urls.append(url)
             }
         }
@@ -1253,6 +1256,9 @@ extension IQChannelsManager {
             
             if let index = indexOfMessage(messageID: messageID) {
                 message.file?.state = newFile.state
+                if let fileIndex = message.files?.firstIndex(where: { $0.id == message.fileID }) {
+                    message.files?[fileIndex].state = newFile.state
+                }
                 self.messages[index] = message
             }
         }
