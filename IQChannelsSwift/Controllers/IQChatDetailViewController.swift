@@ -346,9 +346,6 @@ class IQChatDetailViewController: IQViewController {
     }
     
     // MARK: - ACTIONS
-    /// Итоговый текст подписи чата (chat_subtitle):
-    /// до загрузки настроек — пустой;
-    /// после — значение из настроек, а если его нет или настройки отключены — "На связи"
     private func resolvedChatSubtitle(for state: IQChannelsState = .authenticated) -> String {
         if let subtitle = viewModel.chatSubtitle {
             return subtitle

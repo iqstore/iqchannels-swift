@@ -35,6 +35,7 @@ class IQChatDetailViewModel: IQBaseViewModel {
     @Published var availableLanguages: [IQLanguage]?
     @Published var selectedLanguage: IQLanguage?
     @Published var showBottomTypingBar: Bool = false
+    var disableMessagesAnimation = false
     var useRussianTrustedRootCA: Bool = false
     var urlSession: URLSession?
     var isSkeleton = false
