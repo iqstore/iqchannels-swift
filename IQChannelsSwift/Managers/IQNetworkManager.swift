@@ -227,7 +227,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         }
         guard let result = response.result, let value = result.value else { return .init(error: NSError.failedToParseModel(IQChatSettings.self)) }
         
-        IQLog.debug(message: "getChatSettings: \n success")
+        IQLog.debug(message: "getChatSettings: \(value)")
         
         return .init(result: value)
     }
@@ -287,7 +287,7 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
                     if(settings.totalOpenedTickets == 0 && !isInfoChat){
                         value.append(IQMessage(
                             text: translation,
-                            operatorName: settings.pseudonym ?? "Оператор",
+                            operatorName: settings.pseudonym ?? settings.operatorName ?? "Оператор",
                             avatarID: settings.avatarID,
                             avatarURL: avatarURL,
                             isAutoGreet: true
