@@ -540,10 +540,10 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
 }
 
 extension IQChatDetailViewController: LimitedPhotosViewControllerDelegate {
-    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?) {
+    func limitedPhotosViewControllerDidPick(images: [(image: UIImage?, url: URL?)]) {
 
-        if let image {
-            output.detailController(didPick: [(url, image)])
+        if !images.isEmpty {
+            output.detailController(didPick: images.map { ($0.url, $0.image) })
         }
 
         viewModel.scrollDown.toggle()
@@ -683,13 +683,20 @@ final class LanguageCell: UITableViewCell {
 
 
 protocol LimitedPhotosViewControllerDelegate: AnyObject {
-    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?)
+    func limitedPhotosViewControllerDidPick(images: [(image: UIImage?, url: URL?)])
 }
 
 final class LimitedPhotosViewController: UIViewController {
 
     private var assets: [PHAsset] = []
+    private var selectedIndexPaths: [IndexPath] = []
     weak var delegate: LimitedPhotosViewControllerDelegate?
+
+    private lazy var sendButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Готово", style: .done, target: self, action: #selector(onSendTapped))
+        button.isEnabled = false
+        return button
+    }()
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -723,6 +730,7 @@ final class LimitedPhotosViewController: UIViewController {
         super.viewDidLoad()
 
         title = IQLanguageTexts.model.gallery ?? "Галерея"
+        navigationItem.rightBarButtonItem = sendButton
 
         view.backgroundColor = .systemBackground
 
@@ -836,6 +844,8 @@ extension LimitedPhotosViewController: UICollectionViewDataSource {
         }
 
         let asset = assets[indexPath.item]
+        let selectionIndex = selectedIndexPaths.firstIndex(of: indexPath).map { $0 + 1 }
+        cell.setSelected(selectionIndex)
 
         let size = CGSize(width: 300, height: 300)
 
@@ -855,34 +865,81 @@ extension LimitedPhotosViewController: UICollectionViewDataSource {
 extension LimitedPhotosViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let asset = assets[indexPath.item]
+        if let index = selectedIndexPaths.firstIndex(of: indexPath) {
+            selectedIndexPaths.remove(at: index)
+        } else {
+            selectedIndexPaths.append(indexPath)
+        }
+        collectionView.reloadItems(at: [indexPath])
+        updateSendButton()
+    }
+    
+    private func updateSendButton() {
+        if selectedIndexPaths.isEmpty {
+            sendButton.title = "Готово"
+            sendButton.isEnabled = false
+        } else {
+            sendButton.title = "Готово (\(selectedIndexPaths.count))"
+            sendButton.isEnabled = true
+        }
+    }
+    
+    @objc private func onSendTapped() {
+        let pickedAssets = selectedIndexPaths.compactMap { assets.indices.contains($0.item) ? assets[$0.item] : nil }
+        guard !pickedAssets.isEmpty else { return }
         
-        let options = PHContentEditingInputRequestOptions()
-        options.isNetworkAccessAllowed = true
+        var results: [(image: UIImage?, url: URL?)] = pickedAssets.map { _ in (nil, nil) }
+        let lock = NSLock()
+        var completed = [Bool](repeating: false, count: pickedAssets.count)
+        let group = DispatchGroup()
         
-        asset.requestContentEditingInput(with: options) { [weak self] input, _ in
+        for (index, asset) in pickedAssets.enumerated() {
+            group.enter()
+            let options = PHContentEditingInputRequestOptions()
+            options.isNetworkAccessAllowed = true
             
-            guard let self else { return }
-            
-            let url = input?.fullSizeImageURL
-            
-            self.imageManager.requestImage(
-                for: asset,
-                targetSize: CGSize(width: 1000, height: 1000),
-                contentMode: .aspectFill,
-                options: nil
-            ) { image, _ in
+            asset.requestContentEditingInput(with: options) { [weak self] input, _ in
+                guard let self else {
+                    lock.lock()
+                    if !completed[index] {
+                        completed[index] = true
+                        group.leave()
+                    }
+                    lock.unlock()
+                    return
+                }
+                let url = input?.fullSizeImageURL
                 
-                DispatchQueue.main.async {
+                let imageOptions = PHImageRequestOptions()
+                imageOptions.deliveryMode = .highQualityFormat
+                imageOptions.isNetworkAccessAllowed = true
+                
+                self.imageManager.requestImage(
+                    for: asset,
+                    targetSize: CGSize(width: 1000, height: 1000),
+                    contentMode: .aspectFill,
+                    options: imageOptions
+                ) { image, info in
+                    let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool) ?? false
+                    guard !isDegraded else { return }
                     
-                    self.delegate?.limitedPhotosViewControllerDidPick(
-                        image: image,
-                        url: url
-                    )
-                    
-                    self.dismiss(animated: true)
+                    lock.lock()
+                    if !completed[index] {
+                        completed[index] = true
+                        results[index] = (image, url)
+                        lock.unlock()
+                        group.leave()
+                    } else {
+                        lock.unlock()
+                    }
                 }
             }
+        }
+        
+        group.notify(queue: .main) { [weak self] in
+            guard let self else { return }
+            delegate?.limitedPhotosViewControllerDidPick(images: results)
+            dismiss(animated: true)
         }
     }
 }
@@ -901,6 +958,25 @@ final class PhotoCell: UICollectionViewCell {
         return imageView
     }()
 
+    private let dimView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        view.isHidden = true
+        return view
+    }()
+
+    private let badgeLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .white
+        label.backgroundColor = UIColor.systemBlue
+        label.clipsToBounds = true
+        label.layer.cornerRadius = 10
+        label.isHidden = true
+        return label
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -914,6 +990,35 @@ final class PhotoCell: UICollectionViewCell {
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+
+        contentView.addSubview(dimView)
+        contentView.addSubview(badgeLabel)
+
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            dimView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            dimView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+
+            badgeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            badgeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
+            badgeLabel.widthAnchor.constraint(equalToConstant: 20),
+            badgeLabel.heightAnchor.constraint(equalToConstant: 20)
+        ])
+    }
+
+    func setSelected(_ index: Int?) {
+        if let index {
+            badgeLabel.text = "\(index)"
+            badgeLabel.isHidden = false
+            dimView.isHidden = false
+        } else {
+            badgeLabel.isHidden = true
+            dimView.isHidden = true
+        }
     }
 
     required init?(coder: NSCoder) {
