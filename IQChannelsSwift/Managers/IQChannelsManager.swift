@@ -47,6 +47,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     static var unreadListeners: [any IQChannelsUnreadListenerProtocol] = []
     static var advancedUnreadListeners: [any IQChannelsAdvancedUnreadListenerProtocol] = []
     static var advancedUnread: IQAdvancedUnread? = nil
+    static var linkListeners: [any IQChannelsLinkListenerProtocol] = []
     var subscriptions = Set<AnyCancellable>()
     
     //MARK: - Managers
@@ -152,6 +153,18 @@ class IQChannelsManager: IQChannelsManagerProtocol {
                 IQChannelsManager.advancedUnreadListeners.removeAll(where: { $0.id == listener.id })
             }
         }
+    }
+    
+    func addLink(listener: IQChannelsLinkListenerProtocol) {
+        IQChannelsManager.linkListeners.append(listener)
+    }
+    
+    func removeLink(listener: IQChannelsLinkListenerProtocol) {
+        IQChannelsManager.linkListeners.removeAll(where: { $0.id == listener.id })
+    }
+    
+    static func shouldHandleLink(_ link: String) -> Bool {
+        !linkListeners.contains { !$0.iqChannelsShouldHandleLink(link: link) }
     }
     
     func login(_ loginType: IQLoginType, _ completion: (() -> Void)?) {

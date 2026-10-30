@@ -324,8 +324,10 @@ private struct LinkTapOverlay: UIViewRepresentable {
             guard let url = result.url else {
                 return
             }
-            
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+
+            if IQChannelsManager.shouldHandleLink(url.absoluteString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
         }
         
         private func link(at point: CGPoint) -> NSTextCheckingResult? {

@@ -559,7 +559,9 @@ extension IQChannelsManager {
         case "Open URL":
             guard let url = URL(string: action.url ?? "") else { return }
             
-            UIApplication.shared.open(url)
+            if IQChannelsManager.shouldHandleLink(url.absoluteString) {
+                UIApplication.shared.open(url)
+            }
         default: break
         }
         

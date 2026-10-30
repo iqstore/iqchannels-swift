@@ -12,7 +12,7 @@ import SDWebImage
 
 var navigationControl: UINavigationController?
 
-class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol {
+class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadListenerProtocol, IQChannelsLinkListenerProtocol {
     var isPickingStyle = false
     
     var id: String {
@@ -22,6 +22,11 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         DispatchQueue.main.async {
             self.unreadLabel.text = "Непрочитанных сообщений: \(unread)"
         }
+    }
+    
+    func iqChannelsShouldHandleLink(link: String) -> Bool {
+        print("LINK TAPPED: \(link)")
+        return true
     }
     
     
@@ -246,6 +251,7 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         
         configuration.login(.anonymous)
         configuration.addUnread(listener: self)
+        configuration.addLink(listener: self)
         
         navigationControl = configuration.getViewController()
     }

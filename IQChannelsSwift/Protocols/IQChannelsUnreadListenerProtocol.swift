@@ -21,6 +21,12 @@ public protocol IQChannelsAdvancedUnreadListenerProtocol: AnyObject {
 }
 
 
+
+public protocol IQChannelsLinkListenerProtocol: AnyObject {
+    var id: String { get }
+    func iqChannelsShouldHandleLink(link: String) -> Bool
+}
+
 public struct IQAdvancedUnread: Decodable, Equatable {
     public var channels: [Channel]? = nil
 }
