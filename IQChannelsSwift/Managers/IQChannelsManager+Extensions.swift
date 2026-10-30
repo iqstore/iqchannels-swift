@@ -594,12 +594,17 @@ extension IQChannelsManager {
             
             guard let networkManager = currentNetworkManager else { return }
             
+            let error: Error?
             if(productTap.isAccept){
-                let error = await networkManager.acceptProduct(form: productForm)
+                error = await networkManager.acceptProduct(form: productForm)
             } else{
-                let error = await networkManager.declineProduct(form: productForm)
+                error = await networkManager.declineProduct(form: productForm)
             }
             
+            if error == nil,
+               let index = messages.firstIndex(where: { $0.messageID == productTap.messageID }) {
+                messages[index].productOfferState = productTap.isAccept ? "accepted" : "declined"
+            }
         }
     }
 
