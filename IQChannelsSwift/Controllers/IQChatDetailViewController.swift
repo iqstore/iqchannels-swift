@@ -275,6 +275,7 @@ class IQChatDetailViewController: IQViewController {
                 let hasNetwork = state == .authenticated
                 self.titleLabel.isHidden = !hasNetwork
                 self.statusLabel.text = self.resolvedChatSubtitle(for: state)
+                self.refreshTitleView()
             }
             .store(in: &subscriptions)
         
@@ -297,6 +298,7 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$chatLabel
             .receive(on: DispatchQueue.main).sink { [weak self] title in
                 self?.titleLabel.text = title
+                self?.refreshTitleView()
             }
             .store(in: &cancellables)
         
@@ -335,6 +337,14 @@ class IQChatDetailViewController: IQViewController {
     }
     
     // MARK: - ACTIONS
+    private func refreshTitleView() {
+        titleStackView.setNeedsLayout()
+        titleStackView.layoutIfNeeded()
+        navigationController?.navigationBar.setNeedsLayout()
+        navigationItem.titleView = nil
+        navigationItem.titleView = titleStackView
+    }
+    
     private func resolvedChatSubtitle(for state: IQChannelsState = .authenticated) -> String {
         if let subtitle = viewModel.chatSubtitle {
             return subtitle

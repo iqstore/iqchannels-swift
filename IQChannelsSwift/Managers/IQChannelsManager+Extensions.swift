@@ -1106,16 +1106,11 @@ extension IQChannelsManager {
             }
             let results = (result.result?.0 ?? []).filter { $0.hasValidPayload }
             
-            await prefetchVisibleImages(in: results)
-            
-            DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
             self.systemChat = result.result?.1 ?? false
             let lifeTime = result.result?.2
             let chatLabel = result.result?.3
             let availableLanguages = result.result?.4
             let chatSubtitle = result.result?.5
-            
-            messages = results
             
             DispatchQueue.main.async {
                 if let chatLabel = chatLabel {
@@ -1128,7 +1123,24 @@ extension IQChannelsManager {
                 }
                 
                 self.detailViewModel?.isAnonim = self.isAnonim
-                self.detailViewModel?.greetingSettings = self.greetingSettings
+                self.detailViewModel?.greetingSettings = self.greetingSettingsByChannel[selectedChat.auth.channel]
+            }
+            
+            await prefetchVisibleImages(in: results)
+            
+            DispatchQueue.main.async { self.detailViewModel?.isLoading = false }
+            
+            messages = results
+            
+            Task { [weak self] in
+                guard let self,
+                      let networkManager = self.currentNetworkManager else { return }
+                let languagesResponse = await networkManager.getAvailableLanguages()
+                if let languages = languagesResponse.result {
+                    await MainActor.run {
+                        self.detailViewModel?.availableLanguages = languages
+                    }
+                }
             }
             
             if let lifeTime {
