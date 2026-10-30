@@ -129,7 +129,8 @@ struct TextMessageCellView: View {
                 Group {
                     if let cachedText {
                         TextLabel(text: cachedText.0,
-                                  linkRanges: cachedText.1)
+                                  linkRanges: cachedText.1,
+                                  maxWidth: iqMessageTextMaxWidth(isSender: isSender, horizontalInsets: 48))
                         .layoutPriority(1)
                         .padding(.horizontal, 12)
                     } else {

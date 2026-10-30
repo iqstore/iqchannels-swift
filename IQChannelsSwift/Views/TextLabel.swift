@@ -7,11 +7,12 @@ struct TextLabel: UIViewRepresentable {
     
     let text: NSAttributedString
     let linkRanges: [Link]
+    var maxWidth: CGFloat = UIScreen.screenWidth / 1.5 - 24
     
     func makeUIView(context: Context) -> UILabel {
         let label: UILabel = .init()
         label.numberOfLines = 0
-        label.preferredMaxLayoutWidth = UIScreen.screenWidth / 1.5 - 24
+        label.preferredMaxLayoutWidth = maxWidth
         label.isUserInteractionEnabled = true
         label.lineBreakMode = .byWordWrapping
         

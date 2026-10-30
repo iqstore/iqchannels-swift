@@ -223,13 +223,15 @@ struct FilePreviewCellView: View {
                         if let cachedText {
                             if #available(iOS 16.0, *) {
                                 TextLabel(text: cachedText.0,
-                                          linkRanges: cachedText.1)
+                                          linkRanges: cachedText.1,
+                                          maxWidth: iqMessageTextMaxWidth(isSender: isSender, horizontalInsets: 24))
                                 .layoutPriority(1)
                                 .bold(isBold)
                                 .italic(isItalic)
                             } else {
                                 TextLabel(text: cachedText.0,
-                                          linkRanges: cachedText.1)
+                                          linkRanges: cachedText.1,
+                                          maxWidth: iqMessageTextMaxWidth(isSender: isSender, horizontalInsets: 24))
                                 .layoutPriority(1)
                             }
                         } else {

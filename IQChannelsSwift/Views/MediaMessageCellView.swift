@@ -241,7 +241,8 @@ struct MediaMessageCellView: View {
                     Group {
                         if let cachedText {
                             TextLabel(text: cachedText.0,
-                                      linkRanges: cachedText.1)
+                                      linkRanges: cachedText.1,
+                                      maxWidth: iqMessageTextMaxWidth(isSender: isSender, horizontalInsets: 24))
                             .layoutPriority(1)
                             .padding(.horizontal, 12)
                         } else {
@@ -354,7 +355,7 @@ struct MediaMessageCellView: View {
                     
                     if isLoading {
                         ProgressView()
-                            .frame(minWidth: 150, minHeight: 150)
+                            .frame(width: imageSize.width, height: imageSize.height)
                     } else if let uiImage = uiImage {
                         AnimatedImage(url: currentFile?.imagePreviewUrl)
                             .resizable()
@@ -434,36 +435,26 @@ struct MediaMessageCellView: View {
     
     // MARK: - METHODS
     private func calculateImageSize(file: IQFile?) -> CGSize {
-        let maxWidth = CGFloat(290)
-        let maxHeight = CGFloat(300)
-        let minWidth = CGFloat(150)
+        let horizontalReserve: CGFloat = isSender ? 80 : 128
+        let maxWidth = UIScreen.screenWidth - horizontalReserve
+        let maxHeight = CGFloat(450)
         
         if file?.isLoading ?? false {
             guard let data = file?.dataFile?.data,
                   let image = UIImage(data: data) else {
-                return CGSize(width: maxWidth, height: maxHeight)
+                return CGSize(width: maxWidth, height: 300)
             }
             
-            if image.size.width > image.size.height {
-                let height = maxWidth * image.size.height / image.size.width
-                return CGSize(width: maxWidth, height: height)
-            } else {
-                let width = maxHeight * image.size.width / image.size.height
-                return CGSize(width: max(width, minWidth), height: maxHeight)
-            }
+            let height = min(maxWidth * image.size.height / image.size.width, maxHeight)
+            return CGSize(width: maxWidth, height: height)
         } else {
             guard let width = file?.imageWidth,
                   let height = file?.imageHeight else {
-                return CGSize(width: maxWidth, height: maxHeight)
+                return CGSize(width: maxWidth, height: 300)
             }
             
-            let widthScale = maxWidth / CGFloat(width)
-            let heightScale = maxHeight / CGFloat(height)
-            
-            let scaleFactor = min(widthScale, heightScale)
-            
-            return CGSize(width: max(Double(CGFloat(width) * scaleFactor), minWidth),
-                          height: Double(CGFloat(height) * scaleFactor))
+            let proportionalHeight = maxWidth * CGFloat(height) / CGFloat(width)
+            return CGSize(width: maxWidth, height: min(proportionalHeight, maxHeight))
         }
     }
 }

@@ -123,6 +123,10 @@ struct HideKeyboardOnDragGesture: ViewModifier {
     }
 }
 
+func iqMessageTextMaxWidth(isSender: Bool, horizontalInsets: CGFloat) -> CGFloat {
+    UIScreen.screenWidth - (isSender ? 80 : 128) - horizontalInsets
+}
+
 func resignFirstResponder() {
     UIApplication.shared.sendAction(
         #selector(UIResponder.resignFirstResponder),
