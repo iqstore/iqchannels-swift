@@ -20,12 +20,11 @@ public protocol IQChannelsAdvancedUnreadListenerProtocol: AnyObject {
     func iqChannelsAdvancedUnreadException(_ e: Error)
 }
 
-
-
 public protocol IQChannelsLinkListenerProtocol: AnyObject {
     var id: String { get }
     func iqChannelsShouldHandleLink(link: String) -> Bool
 }
+
 
 public struct IQAdvancedUnread: Decodable, Equatable {
     public var channels: [Channel]? = nil

@@ -36,11 +36,12 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var productOfferState: String?
     var product: IQProduct?
     var transferToChannel: IQTransferToChannel?
+    var transferToChatType: IQChatType?
     
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, fileIDs, chatID, createdAt, localID, isDropDown, singleChoices, product, productOfferState, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author, transferToChannel
+        case payload, text, userID, clientID, fileID, fileIDs, chatID, createdAt, localID, isDropDown, singleChoices, product, productOfferState, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author, transferToChannel, transferToChatType
     }
 
     //MARK: - Custom

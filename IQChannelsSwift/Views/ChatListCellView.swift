@@ -69,51 +69,18 @@ struct ChatListCellView: View {
     var subtitleText: String {
         guard let lastMessage = unreadInfo?.lastMessage else { return "" }
         if lastMessage.isSurvey == true { return "Опрос" }
-        return lastMessage.text ?? ""
+        
+        let text = lastMessage.text ?? ""
+        if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let fileId = lastMessage.fileID {
+            return fileId
+        }
+        
+        return text
     }
     
     static func parseDate(_ raw: String) -> Date? {
-        if let interval = TimeInterval(raw) {
-            return interval > 1e12 ? Date(timeIntervalSince1970: interval / 1000) : Date(timeIntervalSince1970: interval)
-        }
-        
-        let iso = ISO8601DateFormatter()
-        if let date = iso.date(from: raw) { return date }
-        
-        let isoFractional = ISO8601DateFormatter()
-        isoFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = isoFractional.date(from: raw) { return date }
-        
-        let parts = raw.split(separator: " ")
-        if parts.count >= 2 {
-            var normalized = "\(parts[0]) \(parts[1])"
-            if normalized.contains(".") {
-                normalized = String(normalized.split(separator: ".").first ?? "")
-            }
-            
-            if let zonePart = parts.dropFirst(2).first(where: { $0.hasPrefix("+") || $0.hasPrefix("-") }) {
-                let zoned = DateFormatter()
-                zoned.locale = Locale(identifier: "en_US_POSIX")
-                zoned.dateFormat = "yyyy-MM-dd HH:mm:ss Z"
-                if let date = zoned.date(from: "\(normalized) \(zonePart)") { return date }
-            }
-            
-            let utc = DateFormatter()
-            utc.locale = Locale(identifier: "en_US_POSIX")
-            utc.timeZone = TimeZone(identifier: "UTC")
-            utc.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            if let date = utc.date(from: normalized) { return date }
-        }
-        
-        if raw.count >= 19 {
-            let prefix = String(raw.prefix(19))
-            let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            formatter.timeZone = TimeZone(identifier: "UTC")
-            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            return formatter.date(from: prefix)
-        }
-        return nil
+        LastMessage.parseDate(raw)
     }
     
     static func formatDate(_ raw: String) -> String {

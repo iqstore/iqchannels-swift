@@ -13,6 +13,7 @@ protocol IQNetworkManagerProtocol {
     func isConnectedToEvents() -> Bool
     func setCustomHeaders(_ headers: [String: String])
     func cancelTask(with taskIdentifier: Int)
+    func getAvailableLanguages() async -> ResponseCallback<[IQLanguage]>
     func listenToEvents(request: IQListenEventsRequest, onOpen: @escaping (() -> Void), callback: @escaping ResponseCallbackClosure<[IQChatEvent]>)
     func listenToAdvancedUnread(callback: @escaping ResponseCallbackClosure<IQAdvancedUnreadResult>)
 //    func listenToUnread(callback: @escaping ResponseCallbackClosure<Int>)

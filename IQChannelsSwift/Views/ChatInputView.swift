@@ -204,7 +204,6 @@ struct ChatInputView: View {
             }
             .opacity(showSendButton ? 1 : 0)
         }
-        .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: showSendButton)
         .padding(.horizontal, 8)
         .padding(.vertical, 12)
         .background(backgroundColor)

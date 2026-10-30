@@ -319,7 +319,6 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$availableLanguages
             .receive(on: DispatchQueue.main)
             .sink { [weak self] availableLanguages in
-                
                 if(!(availableLanguages?.isEmpty ?? true)){
                     self?.navigationItem.rightBarButtonItem = self?.languageBarButton
                 }

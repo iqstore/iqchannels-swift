@@ -21,29 +21,22 @@ struct FilePreviewCellView: View {
     }
     
     @State private var showMessageLoading: Bool = false
-    @State private var cachedText: (NSAttributedString, [Link])?
+    @State private var cachedText: (NSAttributedString, [Link])? = nil
     
     private func loadText() {
-        let textColor = self.textColor
-        let fontSize = self.fontSize
-        let aligment = self.aligment
-        let isBold = self.isBold
-        let isItalic = self.isItalic
-        let rawText = message.text ?? ""
+        guard cachedText == nil else { return }
         
-        DispatchQueue.global().async {
-            let result = AttributeTextManager.shared.getString(
-                from: rawText,
-                textColor: textColor,
-                fontSize: fontSize,
-                alingment: aligment,
-                isBold: isBold,
-                isItalic: isItalic
-            )
+        let result = AttributeTextManager.shared.getString(
+            from: message.text ?? "",
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
 
-            DispatchQueue.main.async {
-                self.cachedText = result
-            }
+        DispatchQueue.main.async {
+            self.cachedText = result
         }
     }
     
@@ -179,6 +172,15 @@ struct FilePreviewCellView: View {
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.text = message.text ?? ""
         self.isSender = message.isMy ?? false
+        
+        _cachedText = State(initialValue: AttributeTextManager.shared.getStringSync(
+            from: message.text ?? "",
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        ))
     }
     
     // MARK: - BODY

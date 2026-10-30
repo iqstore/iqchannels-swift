@@ -22,8 +22,11 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     @Published var detailViewModel: IQChatDetailViewModel?
     @Published var systemChat: Bool = false
     var config: IQChannelsConfig
-    @Published var infoChatSettings: IQInfoChatSettings? = nil
-    @Published var greetingSettings: IQGreetingSettings? = nil
+    /// Key is channel. Blocker (info-stub) settings are fetched per channel,
+    /// so they must not leak from one channel into another.
+    @Published var infoChatSettingsByChannel: [String: IQInfoChatSettings] = [:]
+    /// Key is channel
+    @Published var greetingSettingsByChannel: [String: IQGreetingSettings] = [:]
     var listViewModel: IQChatListViewModel?
     var isSingleChatExpected: Bool {
         config.chatToOpen != nil || config.channels.count == 1
@@ -32,6 +35,8 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         [listViewModel, detailViewModel].compactMap { $0 }
     }
     var unsentMessages = [IQMessage]()
+    /// Защита от параллельных циклов повторной отправки unsent-сообщений
+    var isRetryingUnsentMessages = false
     var readMessages = Set<Int>()
     var authAttempt = 0
     var lastLocalID = 0
@@ -46,8 +51,8 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var eventListener: IQChannelsEventListenerProtocol?
     static var unreadListeners: [any IQChannelsUnreadListenerProtocol] = []
     static var advancedUnreadListeners: [any IQChannelsAdvancedUnreadListenerProtocol] = []
-    static var advancedUnread: IQAdvancedUnread? = nil
     static var linkListeners: [any IQChannelsLinkListenerProtocol] = []
+    static var advancedUnread: IQAdvancedUnread? = nil
     var subscriptions = Set<AnyCancellable>()
     
     //MARK: - Managers
@@ -62,8 +67,23 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         guard let channel = selectedChat?.auth.channel else { return nil}
         return networkManagers[channel]
     }
+    /// Channel of the chat that is currently open (or will be opened automatically)
+    var currentChannel: String? {
+        selectedChat?.auth.channel ?? config.chatToOpen?.channel ?? config.channels.first
+    }
+    /// Blocker (info-stub) settings of the current channel only
+    var infoChatSettings: IQInfoChatSettings? {
+        currentChannel.flatMap { infoChatSettingsByChannel[$0] }
+    }
+    /// Greeting settings of the current channel only
+    var greetingSettings: IQGreetingSettings? {
+        currentChannel.flatMap { greetingSettingsByChannel[$0] }
+    }
     var lifecycleObserver: AppLifecycleObserver?
     var sendDelay: TimeInterval = 0
+    /// Пауза между загрузками файлов одной партии (в секундах),
+    /// чтобы не отправлять на сервер всплеск запросов
+    let fileUploadPause: TimeInterval = 0.5
     
     init(configuration: IQChannelsConfig) {
         self.config = configuration
