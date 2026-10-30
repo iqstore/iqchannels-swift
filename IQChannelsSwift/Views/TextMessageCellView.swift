@@ -11,6 +11,7 @@ struct TextMessageCellView: View {
     private let replyMessage: IQMessage?
     private let onLongPress: ((MessageControlInfo) -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
+    private let onLinkTap: ((URL) -> Void)?
     
     private let text: String
     private let isSender: Bool
@@ -19,29 +20,22 @@ struct TextMessageCellView: View {
     @State private var keyboardShown: Bool = false
     @State private var computeFrame = false
     @State private var frame: CGRect = .zero
-    @State private var cachedText: (NSAttributedString, [Link])?
+    @State private var cachedText: (NSAttributedString, [Link])? = nil
     
     private func loadText() {
-        let textColor = self.textColor
-        let fontSize = self.fontSize
-        let aligment = self.aligment
-        let isBold = self.isBold
-        let isItalic = self.isItalic
-        let rawText = message.text ?? ""
+        guard cachedText == nil else { return }
         
-        DispatchQueue.global().async {
-            let result = AttributeTextManager.shared.getString(
-                from: rawText,
-                textColor: textColor,
-                fontSize: fontSize,
-                alingment: aligment,
-                isBold: isBold,
-                isItalic: isItalic
-            )
+        let result = AttributeTextManager.shared.getString(
+            from: message.text ?? "",
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        )
 
-            DispatchQueue.main.async {
-                self.cachedText = result
-            }
+        DispatchQueue.main.async {
+            self.cachedText = result
         }
     }
     
@@ -99,11 +93,13 @@ struct TextMessageCellView: View {
     init (message: IQMessage,
           replyMessage: IQMessage? = nil,
           onLongPress: ((MessageControlInfo) -> Void)? = nil,
-          onReplyMessageTapCompletion: ((Int) -> Void)? = nil) {
+          onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
+          onLinkTap: ((URL) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
         self.onLongPress = onLongPress
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
+        self.onLinkTap = onLinkTap
         self.text = message.messageText
         self.isSender = message.isMy ?? false
         
@@ -111,6 +107,15 @@ struct TextMessageCellView: View {
         
         let wholeString = NSRange(location: 0, length: nsText.length)
         links = linkDetector.matches(in: text, options: [], range: wholeString)
+        
+        _cachedText = State(initialValue: AttributeTextManager.shared.getStringSync(
+            from: message.text ?? "",
+            textColor: textColor,
+            fontSize: fontSize,
+            alingment: aligment,
+            isBold: isBold,
+            isItalic: isItalic
+        ))
     }
     
     // MARK: - BODY
@@ -129,16 +134,23 @@ struct TextMessageCellView: View {
                 Group {
                     if let cachedText {
                         TextLabel(text: cachedText.0,
-                                  linkRanges: cachedText.1)
+                                  linkRanges: cachedText.1,
+                                  maxWidth: iqMessageTextMaxWidth(isSender: isSender, horizontalInsets: 48),
+                                  onLinkTap: onLinkTap)
                         .layoutPriority(1)
                         .padding(.horizontal, 12)
                     } else {
-                        PlainMessageText(text: text,
-                                         textColor: textColor,
-                                         fontSize: fontSize,
-                                         aligment: aligment,
-                                         isBold: isBold,
-                                         isItalic: isItalic)
+                        TextLabel(
+                            text: AttributeTextManager.shared.plainString(
+                                from: text,
+                                textColor: textColor,
+                                fontSize: fontSize,
+                                alingment: aligment,
+                                isBold: isBold,
+                                isItalic: isItalic
+                            ),
+                            linkRanges: []
+                        )
                         .layoutPriority(1)
                         .padding(.horizontal, 12)
                     }
@@ -324,8 +336,10 @@ private struct LinkTapOverlay: UIViewRepresentable {
             guard let url = result.url else {
                 return
             }
-            
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+
+            if IQChannelsManager.shouldHandleLink(url.absoluteString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
         }
         
         private func link(at point: CGPoint) -> NSTextCheckingResult? {

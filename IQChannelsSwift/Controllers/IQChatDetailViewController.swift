@@ -17,6 +17,11 @@ class IQChatDetailViewController: IQViewController {
     private let showNavBar: Bool
     
     private var cancellables = Set<AnyCancellable>()
+
+    private let offerLifecycle = IQAnalyticsOfferTrackerLifecycle()
+    private var offerTickTimer: Timer?
+    private var appBackgroundObserver: NSObjectProtocol?
+    private var appActiveObserver: NSObjectProtocol?
     
     private lazy var titleStackView: UIStackView = {
         let stackView: UIStackView = .init(arrangedSubviews: [titleLabel, statusView])
@@ -90,18 +95,10 @@ class IQChatDetailViewController: IQViewController {
     }()
     
     private lazy var statusView: UIStackView = {
-        let stackView: UIStackView = .init(arrangedSubviews: [loadingView, statusLabel])
+        let stackView: UIStackView = .init(arrangedSubviews: [statusLabel])
         stackView.axis = .horizontal
         stackView.spacing = 4
         return stackView
-    }()
-    
-    private lazy var loadingView: UIActivityIndicatorView = {
-        let view: UIActivityIndicatorView = .init()
-        view.color = IQStyle.getUIColor(theme: IQStyle.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
-        view.hidesWhenStopped = true
-        view.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        return view
     }()
     
     private lazy var backButton: UIButton = {
@@ -234,6 +231,15 @@ class IQChatDetailViewController: IQViewController {
     }
     
     override func bindViewModel() {
+        ensureOfferTracking()
+
+        viewModel.$messages
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.ensureOfferTracking()
+            }.store(in: &subscriptions)
+
         viewModel.dismissListener
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -282,10 +288,8 @@ class IQChatDetailViewController: IQViewController {
                 
                 let hasNetwork = state == .authenticated
                 self.titleLabel.isHidden = !hasNetwork
-                hasNetwork ? self.loadingView.stopAnimating() : self.loadingView.startAnimating()
-                self.loadingView.isHidden = hasNetwork
-                self.loadingView.alpha = hasNetwork ? 0 : 1
                 self.statusLabel.text = self.resolvedChatSubtitle(for: state)
+                self.refreshTitleView()
             }
             .store(in: &subscriptions)
         
@@ -308,6 +312,7 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$chatLabel
             .receive(on: DispatchQueue.main).sink { [weak self] title in
                 self?.titleLabel.text = title
+                self?.refreshTitleView()
             }
             .store(in: &cancellables)
         
@@ -328,7 +333,6 @@ class IQChatDetailViewController: IQViewController {
         viewModel.$availableLanguages
             .receive(on: DispatchQueue.main)
             .sink { [weak self] availableLanguages in
-                
                 if(!(availableLanguages?.isEmpty ?? true)){
                     self?.navigationItem.rightBarButtonItem = self?.languageBarButton
                 }
@@ -346,6 +350,14 @@ class IQChatDetailViewController: IQViewController {
     }
     
     // MARK: - ACTIONS
+    private func refreshTitleView() {
+        titleStackView.setNeedsLayout()
+        titleStackView.layoutIfNeeded()
+        navigationController?.navigationBar.setNeedsLayout()
+        navigationItem.titleView = nil
+        navigationItem.titleView = titleStackView
+    }
+    
     private func resolvedChatSubtitle(for state: IQChannelsState = .authenticated) -> String {
         if let subtitle = viewModel.chatSubtitle {
             return subtitle
@@ -365,7 +377,85 @@ class IQChatDetailViewController: IQViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        viewModel.offerVisibilityReset.send(())
+
+        if appActiveObserver == nil {
+            appActiveObserver = NotificationCenter.default.addObserver(
+                forName: UIApplication.didBecomeActiveNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.viewModel.offerVisibilityReset.send(())
+            }
+        }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        offerLifecycle.tracker?.flush(reason: .leftChannel)
+    }
+
+    deinit {
+        offerTickTimer?.invalidate()
+        if let appBackgroundObserver {
+            NotificationCenter.default.removeObserver(appBackgroundObserver)
+        }
+        if let appActiveObserver {
+            NotificationCenter.default.removeObserver(appActiveObserver)
+        }
+    }
+
     // MARK: - PRIVATE METHODS
+    private func ensureOfferTracking() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let context = await self.output.detailControllerOfferTrackingContext()
+            switch self.offerLifecycle.refresh(context: context) {
+            case .recreated(let tracker):
+                self.setupOfferTracking(tracker)
+            case .unchanged, .none:
+                break
+            }
+        }
+    }
+
+    private func setupOfferTracking(_ tracker: IQAnalyticsViewabilityTracker) {
+        tracker.onRead = { [weak self] messageID, durationMs in
+            self?.trackOffer(messageID: messageID, readWithDurationMs: durationMs)
+        }
+        tracker.onSkipped = { [weak self] messageID, reason in
+            self?.trackOffer(messageID: messageID, skippedWithReason: reason)
+        }
+
+        offerTickTimer?.invalidate()
+        offerTickTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak tracker] _ in
+            tracker?.tick()
+        }
+        if let appBackgroundObserver {
+            NotificationCenter.default.removeObserver(appBackgroundObserver)
+            self.appBackgroundObserver = nil
+        }
+        appBackgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak tracker] _ in
+            tracker?.flush(reason: .appBackground)
+        }
+    }
+
+    private func trackOffer(messageID: Int, readWithDurationMs durationMs: Int? = nil, skippedWithReason reason: IQAnalyticsSkipReason? = nil) {
+        guard let channel = offerLifecycle.channel,
+              let message = viewModel.messages.first(where: { $0.messageID == messageID }) else { return }
+        if let durationMs {
+            output.detailController(didReadOffer: message, channel: channel, visibleDurationMs: durationMs)
+        } else if let reason {
+            output.detailController(didSkipOffer: message, channel: channel, reason: reason)
+        }
+    }
+
     private func photoSourceDidTap(source: UIImagePickerController.SourceType) {
         switch source {
 
@@ -481,6 +571,19 @@ extension IQChatDetailViewController: ChatDetailViewDelegate {
     func onMessageAppear(with messageId: Int) {
         output.detailController(didDisplayMessageWith: messageId)
     }
+
+    func onOfferVisibilityChanged(message: IQMessage, visible: Bool) {
+        guard message.isMailingOffer else { return }
+        if visible {
+            offerLifecycle.tracker?.show(id: message.messageID)
+        } else {
+            offerLifecycle.tracker?.hide(id: message.messageID, reason: .scrolledPast)
+        }
+    }
+
+    func onLinkTap(url: URL, message: IQMessage?) {
+        output.detailController(didTapLink: url, in: message)
+    }
     
     func onSendMessage(_ text: String) {
         output.detailController(didSend: text, files: viewModel.selectedFiles, replyToMessage: viewModel.messageToReply?.messageID)
@@ -540,10 +643,10 @@ extension IQChatDetailViewController: UIImagePickerControllerDelegate {
 }
 
 extension IQChatDetailViewController: LimitedPhotosViewControllerDelegate {
-    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?) {
+    func limitedPhotosViewControllerDidPick(images: [(image: UIImage?, url: URL?)]) {
 
-        if let image {
-            output.detailController(didPick: [(url, image)])
+        if !images.isEmpty {
+            output.detailController(didPick: images.map { ($0.url, $0.image) })
         }
 
         viewModel.scrollDown.toggle()
@@ -683,13 +786,20 @@ final class LanguageCell: UITableViewCell {
 
 
 protocol LimitedPhotosViewControllerDelegate: AnyObject {
-    func limitedPhotosViewControllerDidPick(image: UIImage?, url: URL?)
+    func limitedPhotosViewControllerDidPick(images: [(image: UIImage?, url: URL?)])
 }
 
 final class LimitedPhotosViewController: UIViewController {
 
     private var assets: [PHAsset] = []
+    private var selectedIndexPaths: [IndexPath] = []
     weak var delegate: LimitedPhotosViewControllerDelegate?
+
+    private lazy var sendButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Готово", style: .done, target: self, action: #selector(onSendTapped))
+        button.isEnabled = false
+        return button
+    }()
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -723,6 +833,7 @@ final class LimitedPhotosViewController: UIViewController {
         super.viewDidLoad()
 
         title = IQLanguageTexts.model.gallery ?? "Галерея"
+        navigationItem.rightBarButtonItem = sendButton
 
         view.backgroundColor = .systemBackground
 
@@ -836,6 +947,8 @@ extension LimitedPhotosViewController: UICollectionViewDataSource {
         }
 
         let asset = assets[indexPath.item]
+        let selectionIndex = selectedIndexPaths.firstIndex(of: indexPath).map { $0 + 1 }
+        cell.setSelected(selectionIndex)
 
         let size = CGSize(width: 300, height: 300)
 
@@ -855,34 +968,81 @@ extension LimitedPhotosViewController: UICollectionViewDataSource {
 extension LimitedPhotosViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let asset = assets[indexPath.item]
+        if let index = selectedIndexPaths.firstIndex(of: indexPath) {
+            selectedIndexPaths.remove(at: index)
+        } else {
+            selectedIndexPaths.append(indexPath)
+        }
+        collectionView.reloadItems(at: [indexPath])
+        updateSendButton()
+    }
+    
+    private func updateSendButton() {
+        if selectedIndexPaths.isEmpty {
+            sendButton.title = "Готово"
+            sendButton.isEnabled = false
+        } else {
+            sendButton.title = "Готово (\(selectedIndexPaths.count))"
+            sendButton.isEnabled = true
+        }
+    }
+    
+    @objc private func onSendTapped() {
+        let pickedAssets = selectedIndexPaths.compactMap { assets.indices.contains($0.item) ? assets[$0.item] : nil }
+        guard !pickedAssets.isEmpty else { return }
         
-        let options = PHContentEditingInputRequestOptions()
-        options.isNetworkAccessAllowed = true
+        var results: [(image: UIImage?, url: URL?)] = pickedAssets.map { _ in (nil, nil) }
+        let lock = NSLock()
+        var completed = [Bool](repeating: false, count: pickedAssets.count)
+        let group = DispatchGroup()
         
-        asset.requestContentEditingInput(with: options) { [weak self] input, _ in
+        for (index, asset) in pickedAssets.enumerated() {
+            group.enter()
+            let options = PHContentEditingInputRequestOptions()
+            options.isNetworkAccessAllowed = true
             
-            guard let self else { return }
-            
-            let url = input?.fullSizeImageURL
-            
-            self.imageManager.requestImage(
-                for: asset,
-                targetSize: CGSize(width: 1000, height: 1000),
-                contentMode: .aspectFill,
-                options: nil
-            ) { image, _ in
+            asset.requestContentEditingInput(with: options) { [weak self] input, _ in
+                guard let self else {
+                    lock.lock()
+                    if !completed[index] {
+                        completed[index] = true
+                        group.leave()
+                    }
+                    lock.unlock()
+                    return
+                }
+                let url = input?.fullSizeImageURL
                 
-                DispatchQueue.main.async {
+                let imageOptions = PHImageRequestOptions()
+                imageOptions.deliveryMode = .highQualityFormat
+                imageOptions.isNetworkAccessAllowed = true
+                
+                self.imageManager.requestImage(
+                    for: asset,
+                    targetSize: CGSize(width: 1000, height: 1000),
+                    contentMode: .aspectFill,
+                    options: imageOptions
+                ) { image, info in
+                    let isDegraded = (info?[PHImageResultIsDegradedKey] as? Bool) ?? false
+                    guard !isDegraded else { return }
                     
-                    self.delegate?.limitedPhotosViewControllerDidPick(
-                        image: image,
-                        url: url
-                    )
-                    
-                    self.dismiss(animated: true)
+                    lock.lock()
+                    if !completed[index] {
+                        completed[index] = true
+                        results[index] = (image, url)
+                        lock.unlock()
+                        group.leave()
+                    } else {
+                        lock.unlock()
+                    }
                 }
             }
+        }
+        
+        group.notify(queue: .main) { [weak self] in
+            guard let self else { return }
+            delegate?.limitedPhotosViewControllerDidPick(images: results)
+            dismiss(animated: true)
         }
     }
 }
@@ -901,6 +1061,25 @@ final class PhotoCell: UICollectionViewCell {
         return imageView
     }()
 
+    private let dimView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        view.isHidden = true
+        return view
+    }()
+
+    private let badgeLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .white
+        label.backgroundColor = UIColor.systemBlue
+        label.clipsToBounds = true
+        label.layer.cornerRadius = 10
+        label.isHidden = true
+        return label
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -914,6 +1093,35 @@ final class PhotoCell: UICollectionViewCell {
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+
+        contentView.addSubview(dimView)
+        contentView.addSubview(badgeLabel)
+
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            dimView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            dimView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+
+            badgeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            badgeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
+            badgeLabel.widthAnchor.constraint(equalToConstant: 20),
+            badgeLabel.heightAnchor.constraint(equalToConstant: 20)
+        ])
+    }
+
+    func setSelected(_ index: Int?) {
+        if let index {
+            badgeLabel.text = "\(index)"
+            badgeLabel.isHidden = false
+            dimView.isHidden = false
+        } else {
+            badgeLabel.isHidden = true
+            dimView.isHidden = true
+        }
     }
 
     required init?(coder: NSCoder) {

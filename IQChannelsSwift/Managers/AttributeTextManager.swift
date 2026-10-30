@@ -10,6 +10,91 @@ final class AttributeTextManager {
         cache.totalCostLimit = 50 * 1024 * 1024
     }
     
+    private func cacheKey(
+        from markdown: String,
+        textColor: UIColor,
+        fontSize: CGFloat,
+        alingment: TextAlignment,
+        isBold: Bool,
+        isItalic: Bool
+    ) -> NSString {
+        "\(markdown)|\(textColor.hashValue)|\(fontSize.hashValue)|\(alingment.hashValue)|\(isBold)|\(isItalic)" as NSString
+    }
+    
+    func getStringSync(
+        from markdown: String,
+        textColor: UIColor,
+        fontSize: CGFloat,
+        alingment: TextAlignment,
+        isBold: Bool,
+        isItalic: Bool
+    ) -> (NSAttributedString, [Link])? {
+        let key = cacheKey(from: markdown, textColor: textColor, fontSize: fontSize, alingment: alingment, isBold: isBold, isItalic: isItalic)
+        if let cached = cache.object(forKey: key) {
+            return (cached.attributed, cached.links)
+        }
+        return plainString(from: markdown, textColor: textColor, fontSize: fontSize, alingment: alingment, isBold: isBold, isItalic: isItalic, cacheKey: key)
+    }
+    
+    private func isPlainText(_ text: String) -> Bool {
+        if text.isEmpty { return true }
+        for marker in ["<", "`", "]", "*", "_", "http", "www"] where text.contains(marker) {
+            return false
+        }
+        return true
+    }
+    
+    private func plainString(
+        from markdown: String,
+        textColor: UIColor,
+        fontSize: CGFloat,
+        alingment: TextAlignment,
+        isBold: Bool,
+        isItalic: Bool,
+        cacheKey: NSString
+    ) -> (NSAttributedString, [Link])? {
+        var normalized = markdown.replacingOccurrences(of: "\\\n", with: "\n")
+        normalized = normalized.replacingOccurrences(of: "\r\n", with: "\n")
+        normalized = normalized.replacingOccurrences(of: "\r", with: "\n")
+        
+        guard isPlainText(normalized) else { return nil }
+        
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+        var font = UIFont.systemFont(ofSize: fontSize)
+        if let descriptor = font.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            font = UIFont(descriptor: descriptor, size: fontSize)
+        }
+        
+        let textAlignments: [TextAlignment: NSTextAlignment] = [
+            .leading: .left,
+            .center: .center,
+            .trailing: .right
+        ]
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = textAlignments[alingment] ?? .left
+        
+        let attributed = NSMutableAttributedString(string: normalized)
+        attributed.addAttributes(
+            [
+                .font: font,
+                .foregroundColor: textColor,
+                .paragraphStyle: paragraphStyle
+            ],
+            range: NSRange(location: 0, length: attributed.length)
+        )
+        
+        let cached = CachedAttributeText(attributed: attributed, links: [])
+        cache.setObject(cached, forKey: cacheKey, cost: attributed.length)
+        
+        return (attributed, [])
+    }
+    
     func getString(
         from markdown: String,
         textColor: UIColor,
@@ -18,12 +103,15 @@ final class AttributeTextManager {
         isBold: Bool,
         isItalic: Bool
     ) -> (NSAttributedString, [Link]) {
-        let cacheKey = "\(markdown)|\(textColor.hashValue)|\(fontSize.hashValue)|\(alingment.hashValue)|\(isBold)|\(isItalic)" as NSString
-        if let cached = cache.object(forKey: cacheKey) {
+        let key = cacheKey(from: markdown, textColor: textColor, fontSize: fontSize, alingment: alingment, isBold: isBold, isItalic: isItalic)
+        if let cached = cache.object(forKey: key) {
             return (cached.attributed, cached.links)
         }
-
+        
         var formattedMarkdown = markdown.replacingOccurrences(of: "\\\n", with: "\n")
+        formattedMarkdown = formattedMarkdown.replacingOccurrences(of: "\r\n", with: "\n")
+        formattedMarkdown = formattedMarkdown.replacingOccurrences(of: "\r", with: "\n")
+        formattedMarkdown = formattedMarkdown.replacingOccurrences(of: "\n", with: "<br>")
 
         // MARK: - Base font
 
@@ -80,7 +168,9 @@ final class AttributeTextManager {
             attributedString = htmlString
 
         } else {
-            attributedString = NSMutableAttributedString(string: formattedMarkdown)
+            attributedString = NSMutableAttributedString(
+                string: formattedMarkdown.replacingOccurrences(of: "<br>", with: "\n")
+            )
         }
 
         var linkRanges: [Link] = []
@@ -445,11 +535,59 @@ final class AttributeTextManager {
         }
 
         let cached = CachedAttributeText(attributed: attributedString, links: linkRanges)
-        cache.setObject(cached, forKey: cacheKey, cost: attributedString.length)
-        
+        cache.setObject(cached, forKey: cacheKey(from: markdown, textColor: textColor, fontSize: fontSize, alingment: alingment, isBold: isBold, isItalic: isItalic), cost: attributedString.length)
+
         return (
-            cached.attributed,
-            cached.links
+            attributedString,
+            linkRanges
+        )
+    }
+
+    func plainString(
+        from text: String,
+        textColor: UIColor,
+        fontSize: CGFloat,
+        alingment: TextAlignment,
+        isBold: Bool,
+        isItalic: Bool
+    ) -> NSAttributedString {
+        let normalizedText = text
+            .replacingOccurrences(of: "\\\n", with: "\n")
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+
+        var symbolicTraits: UIFontDescriptor.SymbolicTraits = []
+
+        if isBold {
+            symbolicTraits.insert(.traitBold)
+        }
+
+        if isItalic {
+            symbolicTraits.insert(.traitItalic)
+        }
+
+        var font = UIFont.systemFont(ofSize: fontSize)
+
+        if let descriptor = font.fontDescriptor.withSymbolicTraits(symbolicTraits) {
+            font = UIFont(descriptor: descriptor, size: fontSize)
+        }
+
+        let textAlignments: [TextAlignment: NSTextAlignment] = [
+            .leading: .left,
+            .center: .center,
+            .trailing: .right
+        ]
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = textAlignments[alingment] ?? .left
+
+        return NSAttributedString(
+            string: normalizedText,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor,
+                .paragraphStyle: paragraphStyle
+            ]
         )
     }
 }

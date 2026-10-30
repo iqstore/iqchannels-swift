@@ -32,6 +32,11 @@ class IQChatListViewController: IQViewController {
     }
 
     // MARK: - LIFECYCLE
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        output.listControllerDidAppear()
+    }
+    
     override func setupSwiftUI() {
         let hostView: ChatListView = .init(viewModel: viewModel, output: output)
         let controller: UIHostingController = .init(rootView: hostView)
@@ -41,6 +46,17 @@ class IQChatListViewController: IQViewController {
     
     override func setupNavBar() {
         navigationItem.leftBarButtonItem = .init(customView: backButton)
+        
+        let backgroundColor = IQStyle.getUIColor(theme: IQStyle.model?.appBar?.background) ?? UIColor(hex: "ffffff")
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = backgroundColor
+
+        navigationItem.standardAppearance = appearance
+        navigationItem.scrollEdgeAppearance = appearance
+        navigationItem.compactAppearance = appearance
+        
         IQLog.debug(message: "3")
     }
     

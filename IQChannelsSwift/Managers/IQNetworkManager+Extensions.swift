@@ -178,10 +178,16 @@ extension IQNetworkManager: URLSessionDelegate {
         let url = requestUrl(path)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        // Загрузка больших файлов может идти дольше дефолтных 60 секунд на запрос
+        request.timeoutInterval = 120
         
         let boundary = "-----------iqchannels-boundary-\(UUID().uuidString)"
         let contentType = "multipart/form-data; boundary=\(boundary)"
         request.addValue(contentType, forHTTPHeaderField: "Content-Type")
+        
+        if let token {
+            request.addValue("Client \(token)", forHTTPHeaderField: "Authorization")
+        }
         
         if let customHeaders {
             for (key, value) in customHeaders {
@@ -251,8 +257,8 @@ extension IQNetworkManager: URLSessionDelegate {
         }
         
         guard (200..<300).contains(httpResponse.statusCode) else {
-            let text = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
-            let error = NSError.clientError(text)
+            let iqError = responseError(from: data)
+            let error = NSError.httpError(statusCode: httpResponse.statusCode, iqError: iqError)
             return .init(error: error)
         }
         
@@ -295,5 +301,10 @@ extension IQNetworkManager: URLSessionDelegate {
             return .init(error: error)
         }
     }
-    
+
+    private func responseError(from data: Data?) -> IQError? {
+        guard let data, !data.isEmpty else { return nil }
+        return (try? IQJSONDecoder().decode(IQResponse<IQEmptyResponse>.self, from: data))?.error
+    }
+
 }

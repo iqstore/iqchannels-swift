@@ -139,15 +139,19 @@ struct ChatMessageCellView: View {
                                 triggerHapticFeedback(style: .rigid)
                                 onReplyToMessage?(message)
                             }
-                            dragAmountX = 0
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                dragAmountX = 0
+                            }
                         }
                 : nil
             )
         } else{
-            SystemMessageCellView(message: message)
+            SystemMessageCellView(message: message) { [weak delegate] url in
+                delegate?.onLinkTap(url: url, message: message)
+            }
         }
     }
-    
+
     // MARK: - VIEWS
     @ViewBuilder
     private func getAvatarView(avatarURL: URL?, userDisplayName: String) -> some View {

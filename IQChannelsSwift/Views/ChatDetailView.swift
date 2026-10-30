@@ -8,6 +8,8 @@ protocol ChatDetailViewDelegate: AnyObject {
     func onProductTap(_ product: IQProductTap)
     func onActionTap(_ action: IQAction)
     func onMessageAppear(with messageId: Int)
+    func onOfferVisibilityChanged(message: IQMessage, visible: Bool)
+    func onLinkTap(url: URL, message: IQMessage?)
     func onSendMessage(_ text: String)
     func onResendMessage(_ message: IQMessage)
     func onCancelUpload(_ message: IQMessage)
@@ -32,10 +34,11 @@ struct ChatDetailView: View {
     }
     
     var showInfoChatStub: Bool {
-        if(viewModel.isAnonim && viewModel.greetingSettings?.channelType == "info"){
+        let isInfoChannel = viewModel.client?.chatTypes.contains(.info) ?? false
+        if(viewModel.isAnonim && isInfoChannel && viewModel.greetingSettings?.channelType == "info"){
             return true
         } else {
-            return (viewModel.client?.chatTypes.contains(.info) ?? false) && viewModel.messages.isEmpty
+            return isInfoChannel && viewModel.messages.isEmpty
         }
     }
 

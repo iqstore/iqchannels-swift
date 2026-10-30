@@ -16,6 +16,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var fileID: String?
     var fileIDs: [String]?
     var chatID: Int?
+    var channelID: Int?
     var createdAt: Int?
     var userID: Int?
     var clientID: Int?
@@ -33,13 +34,21 @@ struct IQMessage: Codable, Identifiable, Equatable {
     var isAutoGreet: Bool = false
     var actions: [IQAction]?
     var singleChoices: [IQSingleChoice]?
+    var productOfferState: String?
     var product: IQProduct?
     var transferToChannel: IQTransferToChannel?
-    
+    var transferToChatType: IQChatType?
+    var mailingMessageID: Int?
+
     enum CodingKeys: String, CodingKey {
         case messageID = "id"
         case isRead = "read"
-        case payload, text, userID, clientID, fileID, fileIDs, chatID, createdAt, localID, isDropDown, singleChoices, product, actions, replyToMessageID, botpressPayload, disableFreeText, ratingID, author, transferToChannel
+        case mailingMessageID
+        case payload, text, userID, clientID, fileID, fileIDs,
+            chatID, channelID, createdAt, localID, isDropDown,
+            singleChoices, product, productOfferState, actions,
+            replyToMessageID, botpressPayload, disableFreeText,
+            ratingID, author, transferToChannel, transferToChatType
     }
 
     //MARK: - Custom
@@ -78,6 +87,10 @@ struct IQMessage: Codable, Identifiable, Equatable {
     
     var isPendingRatingMessage: Bool {
         return rating?.state == .pending || rating?.state == .poll
+    }
+
+    var isMailingOffer: Bool {
+        mailingMessageID != nil
     }
     
     var isMessageReplied: Bool {
@@ -239,6 +252,7 @@ struct IQMessage: Codable, Identifiable, Equatable {
         // Ids
         copy.messageID = message.messageID
         copy.eventID = message.eventID
+        copy.error = false
 
         // Payload
         copy.payload = message.payload
