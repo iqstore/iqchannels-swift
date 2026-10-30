@@ -89,9 +89,7 @@ struct ChatMessagesView: View {
                                                             }
                                                         },
                                                         onReplyToMessage: { message in
-                                                            withAnimation {
-                                                                viewModel.messageToReply = message
-                                                            }
+                                                            viewModel.messageToReply = message
                                                         },
                                                         onReplyMessageTapCompletion: { messageId in
                                                             if let id = viewModel.messages.first(where: { $0.messageID == messageId })?.id {
