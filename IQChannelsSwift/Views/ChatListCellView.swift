@@ -1,4 +1,5 @@
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct ChatListCellView: View {
     
@@ -8,6 +9,56 @@ struct ChatListCellView: View {
     
     var title: String {
         return chatInfoModel.info?.channelName ?? ""
+    }
+    
+    var iconUrl: URL? {
+        switch chatInfoModel.chatType {
+        case .chat:
+            return IQStyle.model?.multiChat?.iconRegularChat
+        case .manager:
+            return IQStyle.model?.multiChat?.iconPersonalManagerChat
+        case .info:
+            return IQStyle.model?.multiChat?.iconInfoChat
+        }
+    }
+    
+    var iconBackgroundColor: Color {
+        if let channelIconColor = chatInfoModel.info?.channelIconColor {
+            return Color(hex: channelIconColor)
+        }
+        return IQStyle.getColor(theme: IQStyle.model?.multiChat?.backgroundIcon) ?? Color(hex: "66B2B2")
+    }
+    
+    var titleColor: Color {
+        IQStyle.getColor(theme: IQStyle.model?.multiChat?.title?.color) ?? Color(hex: "494949")
+    }
+    var titleFontSize: CGFloat {
+        CGFloat(IQStyle.model?.multiChat?.title?.textSize ?? 18)
+    }
+    var titleIsBold: Bool {
+        IQStyle.model?.multiChat?.title?.textStyle?.bold ?? false
+    }
+    var titleIsItalic: Bool {
+        IQStyle.model?.multiChat?.title?.textStyle?.italic ?? false
+    }
+    var titleAlignment: TextAlignment {
+        stringToAlignment(stringAlignment: IQStyle.model?.multiChat?.title?.textAlign) ?? .leading
+    }
+    
+    var lastMessageColor: Color {
+        IQStyle.getColor(theme: IQStyle.model?.multiChat?.lastMessage?.color) ?? Color(hex: "8E8E93")
+    }
+    var lastMessageFontSize: CGFloat {
+        CGFloat(IQStyle.model?.multiChat?.lastMessage?.textSize ?? 15)
+    }
+    var lastMessageIsBold: Bool {
+        IQStyle.model?.multiChat?.lastMessage?.textStyle?.bold ?? false
+    }
+    var lastMessageIsItalic: Bool {
+        IQStyle.model?.multiChat?.lastMessage?.textStyle?.italic ?? false
+    }
+    var lastMessageAlignment: TextAlignment {
+        stringToAlignment(stringAlignment: IQStyle.model?.multiChat?.lastMessage?.textAlign) ?? .leading
     }
     
     var timeText: String {
@@ -87,21 +138,42 @@ struct ChatListCellView: View {
         HStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: chatInfoModel.info?.channelIconColor ?? "66B2B2"))
+                    .fill(iconBackgroundColor)
                     .frame(width: 52, height: 52)
                 
-                let imageName = chatInfoModel.chatType == .manager ? "user" : "chat"
-                Image(name: imageName)
-                    .resizable()
-                    .frame(width: 24, height: 24)
+                if let iconUrl {
+                    AnimatedImage(url: iconUrl)
+                        .resizable()
+                        .indicator(SDWebImageActivityIndicator.gray)
+                        .transition(SDWebImageTransition.fade)
+                        .scaledToFill()
+                        .frame(width: 52, height: 52)
+                        .clipShape(Circle())
+                } else {
+                    let imageName = chatInfoModel.chatType == .manager ? "user" : "chat"
+                    Image(name: imageName)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .top, spacing: 8) {
-                    Text(title)
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color(hex: "494949"))
-                        .lineLimit(1)
+                    if #available(iOS 16.0, *) {
+                        Text(title)
+                            .font(.system(size: titleFontSize))
+                            .foregroundColor(titleColor)
+                            .multilineTextAlignment(titleAlignment)
+                            .bold(titleIsBold)
+                            .italic(titleIsItalic)
+                            .lineLimit(1)
+                    } else {
+                        Text(title)
+                            .font(.system(size: titleFontSize))
+                            .foregroundColor(titleColor)
+                            .multilineTextAlignment(titleAlignment)
+                            .lineLimit(1)
+                    }
                     
                     Spacer(minLength: 0)
                     
@@ -114,10 +186,21 @@ struct ChatListCellView: View {
                 }
                 
                 HStack(alignment: .top, spacing: 8) {
-                    Text(subtitleText)
-                        .font(.system(size: 15))
-                        .foregroundColor(Color(hex: "8E8E93"))
-                        .lineLimit(1)
+                    if #available(iOS 16.0, *) {
+                        Text(subtitleText)
+                            .font(.system(size: lastMessageFontSize))
+                            .foregroundColor(lastMessageColor)
+                            .multilineTextAlignment(lastMessageAlignment)
+                            .bold(lastMessageIsBold)
+                            .italic(lastMessageIsItalic)
+                            .lineLimit(1)
+                    } else {
+                        Text(subtitleText)
+                            .font(.system(size: lastMessageFontSize))
+                            .foregroundColor(lastMessageColor)
+                            .multilineTextAlignment(lastMessageAlignment)
+                            .lineLimit(1)
+                    }
                     
                     Spacer(minLength: 0)
                     
