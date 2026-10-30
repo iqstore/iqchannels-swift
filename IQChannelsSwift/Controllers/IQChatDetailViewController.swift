@@ -90,18 +90,10 @@ class IQChatDetailViewController: IQViewController {
     }()
     
     private lazy var statusView: UIStackView = {
-        let stackView: UIStackView = .init(arrangedSubviews: [loadingView, statusLabel])
+        let stackView: UIStackView = .init(arrangedSubviews: [statusLabel])
         stackView.axis = .horizontal
         stackView.spacing = 4
         return stackView
-    }()
-    
-    private lazy var loadingView: UIActivityIndicatorView = {
-        let view: UIActivityIndicatorView = .init()
-        view.color = IQStyle.getUIColor(theme: IQStyle.model?.chat?.chatHistory) ?? UIColor(hex: "919399")
-        view.hidesWhenStopped = true
-        view.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        return view
     }()
     
     private lazy var backButton: UIButton = {
@@ -282,9 +274,6 @@ class IQChatDetailViewController: IQViewController {
                 
                 let hasNetwork = state == .authenticated
                 self.titleLabel.isHidden = !hasNetwork
-                hasNetwork ? self.loadingView.stopAnimating() : self.loadingView.startAnimating()
-                self.loadingView.isHidden = hasNetwork
-                self.loadingView.alpha = hasNetwork ? 0 : 1
                 self.statusLabel.text = self.resolvedChatSubtitle(for: state)
             }
             .store(in: &subscriptions)
