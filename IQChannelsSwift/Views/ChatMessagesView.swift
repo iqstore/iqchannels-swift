@@ -1,4 +1,5 @@
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct ChatMessagesView: View {
     
@@ -218,9 +219,19 @@ struct ChatMessagesView: View {
     @ViewBuilder
     private func getLoadingView() -> some View {
         if viewModel.isLoading {
-            ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: loaderColor))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let iconUrl = IQStyle.model?.chat?.chatLoaderIcon {
+                AnimatedImage(url: iconUrl)
+                    .resizable()
+                    .indicator(SDWebImageActivityIndicator.gray)
+                    .transition(SDWebImageTransition.fade)
+                    .scaledToFit()
+                    .frame(width: 48, height: 48)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: loaderColor))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
     }
     
