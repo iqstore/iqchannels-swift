@@ -494,7 +494,12 @@ class IQNetworkManager: NSObject, IQNetworkManagerProtocol {
         let params = ["ChannelNames": channels]
         let response = await post(path, body: params, responseType: IQAdvancedUnread.self)
         
-        if let result = response.result?.value{
+        if var result = response.result?.value{
+            result.channels = result.channels?.map { channel in
+                var copy = channel
+                copy.lastMessage = channel.lastMessage?.withNormalizedDate
+                return copy
+            }
             IQChannelsManager.advancedUnread = result
             Task {
                 await MainActor.run {

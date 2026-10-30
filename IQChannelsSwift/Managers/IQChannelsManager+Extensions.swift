@@ -280,6 +280,7 @@ extension IQChannelsManager {
                            let event = events,
                            let index = unread.channels?.firstIndex(where: { $0.name == event.name && $0.chatType == event.chatType }) {
 
+                            event.lastMessage = event.lastMessage?.withNormalizedDate
                             unread.channels?[index].lastMessage = event.lastMessage
                             unread.channels?[index].unreadCount = event.unreadCount
                             await MainActor.run {
@@ -957,7 +958,7 @@ extension IQChannelsManager {
                let chat = selectedChat,
                let index = unread.channels?.firstIndex(where: { $0.name == chat.auth.channel && $0.chatType == chat.chatType.rawValue }) {
                 
-                unread.channels?[index].lastMessage = LastMessage(text: message.text, fileID: message.file?.id, isSurvey: false, date: ISO8601DateFormatter().string(from: Date()))
+                unread.channels?[index].lastMessage = LastMessage(text: message.text, fileID: message.file?.id, isSurvey: false, date: LastMessage.serverDateString(from: Date()))
                 
                 Task { @MainActor in
                     IQChannelsManager.advancedUnread = unread
