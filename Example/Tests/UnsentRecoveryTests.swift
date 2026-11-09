@@ -74,13 +74,61 @@ final class UnsentRecoveryTests: XCTestCase {
     }
 
     private func makeStuckMessage(localID: Int, text: String) -> IQMessage {
-        var message = IQMessage(text: text, chatType: .chat, clientID: 11, localID: localID, replyMessageID: nil)
+        var message = IQMessage(text: text, chatType: .chat, channel: nil, clientID: 11, localID: localID, replyMessageID: nil)
         message.messageID = 0
         message.error = true
         return message
     }
 
-    func testNetworkRecoveryFlushesUnsentQueueInOrder() {
+    private func makeStuckMessage(localID: Int, text: String, chatType: IQChatType, channel: String) -> IQMessage {
+        var message = IQMessage(text: text, chatType: chatType, channel: channel, clientID: 11, localID: localID, replyMessageID: nil)
+        message.messageID = 0
+        message.error = true
+        return message
+    }
+
+    func testUnsentMessageFromOtherChatIsNotSentThroughCurrentChat() {
+        let regularMock = NetworkMock()
+        let pmMock = NetworkMock()
+        let config = IQChannelsConfig(address: "http://127.0.0.1:1", channels: ["regular", "pm"])
+        let manager = IQChannelsManager(configuration: config)
+        manager.networkManagers["regular"] = regularMock
+        manager.networkManagers["pm"] = pmMock
+        let auth = IQClientAuth(client: IQClient(), session: nil, analytics: nil)
+        manager.authResults = [
+            (channel: "regular", auth: auth),
+            (channel: "pm", auth: auth),
+        ]
+
+        waitForChatSelection()
+        manager.selectedChat = ((channel: "regular", auth: auth), .chat)
+
+        let settled = expectation(description: "selectedChat sink and loadMessages settled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 4)
+
+        let pmMessage = makeStuckMessage(localID: 301, text: "pm-failed", chatType: .manager, channel: "pm")
+        manager.messages = [pmMessage]
+
+        manager.resendMessage(pmMessage.withError(false))
+
+        let sent = expectation(description: "manual resend settled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { sent.fulfill() }
+        wait(for: [sent], timeout: 5)
+
+        XCTAssertEqual(
+            pmMock.sentForms.map(\.localId),
+            [301],
+            "Ручная переотправка pm-сообщения должна идти через менеджер своего канала"
+        )
+        XCTAssertEqual(
+            regularMock.sentForms.count,
+            0,
+            "Неотправленное сообщение pm-чата не должно отправляться через текущий обычный чат"
+        )
+    }
+
+    func testNetworkRecoveryDoesNotAutoSendUnsentMessages() {
         let mock = NetworkMock()
         let manager = makeManager(mock: mock)
         waitForChatSelection()
@@ -91,26 +139,21 @@ final class UnsentRecoveryTests: XCTestCase {
 
         manager.networkStatusChanged(.reachable)
 
-        let flushed = expectation(description: "unsent queue flushed")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { flushed.fulfill() }
-        wait(for: [flushed], timeout: 5)
+        let settled = expectation(description: "recovery cycle finished")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 5)
 
-        XCTAssertEqual(
-            mock.sentForms.map(\.localId),
-            [101, 102],
-            "После возврата сети unsent-очередь должна уйти целиком в порядке createdDate (SDK-703)"
-        )
-        XCTAssertEqual(
-            mock.sentForms.map { $0.text ?? "" },
-            ["offline-1", "offline-2"]
-        )
         XCTAssertTrue(
-            manager.unsentMessages.isEmpty,
-            "После успешной доставки очередь unsent должна опустеть"
+            mock.sentForms.isEmpty,
+            "Упавшие сообщения (красный восклицательный знак) не должны отправляться сами при восстановлении сети — только вручную"
+        )
+        XCTAssertEqual(
+            manager.unsentMessages.count, 2,
+            "Очередь unsent должна сохраниться: сообщения ждут ручной переотправки"
         )
     }
 
-    func testSseOpenDuringFlushDoesNotDuplicateSends() {
+    func testSseOpenDoesNotAutoSendUnsentMessages() {
         let mock = NetworkMock()
         let manager = makeManager(mock: mock)
         waitForChatSelection()
@@ -125,14 +168,39 @@ final class UnsentRecoveryTests: XCTestCase {
         }
         wait(for: [sseOpened], timeout: 3)
 
-        let settled = expectation(description: "flush settled")
+        let settled = expectation(description: "settled")
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { settled.fulfill() }
         wait(for: [settled], timeout: 4)
 
-        XCTAssertEqual(
-            mock.sentForms.filter { $0.localId == 201 }.count,
-            1,
-            "SSE onOpen и networkStatusChanged не должны дублировать отправку одного unsent-сообщения"
+        XCTAssertTrue(
+            mock.sentForms.isEmpty,
+            "SSE onOpen не должен авто-отправлять сообщения из unsent-очереди"
+        )
+    }
+
+    func testDeletedMessageIsNotSentAfterRecovery() {
+        let mock = NetworkMock()
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        let stuck = makeStuckMessage(localID: 301, text: "will-be-deleted")
+        manager.messages = [stuck]
+        manager.unsentMessages = [stuck]
+
+        manager.cancelSendMessage(stuck)
+
+        XCTAssertTrue(manager.messages.isEmpty, "сообщение удалено из UI")
+        XCTAssertTrue(manager.unsentMessages.isEmpty, "сообщение удалено из unsent-очереди")
+
+        manager.networkStatusChanged(.reachable)
+
+        let settled = expectation(description: "recovery finished")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 5)
+
+        XCTAssertTrue(
+            mock.sentForms.isEmpty,
+            "Удалённое сообщение не должно отправляться при восстановлении сети"
         )
     }
 
