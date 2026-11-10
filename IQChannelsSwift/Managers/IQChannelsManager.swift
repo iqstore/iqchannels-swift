@@ -27,6 +27,8 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     @Published var infoChatSettingsByChannel: [String: IQInfoChatSettings] = [:]
     /// Key is channel
     @Published var greetingSettingsByChannel: [String: IQGreetingSettings] = [:]
+    var chatSettingsCache: [String: (label: String, subtitle: String?)] = [:]
+    var availableLanguagesByChannel: [String: [IQLanguage]] = [:]
     var listViewModel: IQChatListViewModel?
     var isSingleChatExpected: Bool {
         config.chatToOpen != nil || config.channels.count == 1
@@ -35,7 +37,6 @@ class IQChannelsManager: IQChannelsManagerProtocol {
         [listViewModel, detailViewModel].compactMap { $0 }
     }
     var unsentMessages = [IQMessage]()
-    var isRetryingUnsentMessages = false
     var readMessages = Set<Int>()
     var authAttempt = 0
     var lastLocalID = 0
@@ -155,6 +156,10 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     
     func addUnread(listener: IQChannelsUnreadListenerProtocol) {
         IQChannelsManager.unreadListeners.append(listener)
+    }
+    
+    func loadMessages(showLoading: Bool = true) {
+        loadMessagesInternal(showLoading: showLoading)
     }
     
     func removeUnread(listener: IQChannelsUnreadListenerProtocol) {
