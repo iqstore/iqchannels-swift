@@ -42,6 +42,7 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var lastLocalID = 0
     var loginType: IQLoginType?
     var typingTimer: Timer?
+    var greetingRemovalWorkItem: DispatchWorkItem?
     var isAnonim = false
     var isLoadingOldMessages = false
     var typingSentDate: Date?

@@ -245,6 +245,8 @@ extension IQChannelsManager {
         self.typingTimer?.invalidate()
         self.typingTimer = nil
         self.typingSentDate = nil
+        self.greetingRemovalWorkItem?.cancel()
+        self.greetingRemovalWorkItem = nil
     }
     
     func clear() {
@@ -1125,6 +1127,7 @@ extension IQChannelsManager {
             let newMessages = serverMessages
                 .filter { self.indexOfMessage(messageID: $0.messageID) == nil }
                 .filter { !mergedMessageIDs.contains($0.messageID) }
+                .filter { $0.localID != -1 }
 
             if !newMessages.isEmpty || didMergePending {
                 self.detailViewModel?.enableAnimMessages = true
@@ -1291,8 +1294,10 @@ extension IQChannelsManager {
                 }
             }
             
+            greetingRemovalWorkItem?.cancel()
             if let lifeTime {
-                DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime)) {
+                let workItem = DispatchWorkItem { [weak self] in
+                    guard let self else { return }
                     if let index = self.messages.firstIndex(where: { $0.localID == -1 }) {
                         DispatchQueue.main.async {
                             self.detailViewModel?.enableAnimMessages = true
@@ -1300,6 +1305,8 @@ extension IQChannelsManager {
                         self.messages.remove(at: index)
                     }
                 }
+                greetingRemovalWorkItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(lifeTime), execute: workItem)
             }
             
             
