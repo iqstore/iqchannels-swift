@@ -18,7 +18,9 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.5.1'
+# Укажите нужную версию — список доступных тегов:
+# https://github.com/iqstore/iqchannels-swift/releases
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => 'x.y.z'
 ```
 
 Затем выполните команду:
