@@ -231,6 +231,25 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         row.spacing = 8
         return row
     }()
+
+    private var disableScreenshots = false
+
+    private lazy var screenshotsSwitch: UISwitch = {
+        let sw = UISwitch()
+        sw.isOn = disableScreenshots
+        sw.addTarget(self, action: #selector(screenshotsSwitchChanged), for: .valueChanged)
+        return sw
+    }()
+
+    private lazy var screenshotsRow: UIStackView = {
+        let label = UILabel()
+        label.text = "Запрет скриншотов"
+        label.textColor = .black
+        let row = UIStackView(arrangedSubviews: [label, screenshotsSwitch])
+        row.axis = .horizontal
+        row.spacing = 8
+        return row
+    }()
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -248,7 +267,7 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
         buttons.spacing = 5
         
         let view = UIStackView(arrangedSubviews: [
-            serverField, emailField, channelsField, chatToOpenField, authLabel, unreadLabel, advancedUnreadLabel, loginButton, anonButton, pmButton, preFilledMsgButton, styleButton, languageButton, changeStyle, buttons, clearCacheButton, typingBarRow
+            serverField, emailField, channelsField, chatToOpenField, authLabel, unreadLabel, advancedUnreadLabel, loginButton, anonButton, pmButton, preFilledMsgButton, styleButton, languageButton, changeStyle, buttons, clearCacheButton, typingBarRow, screenshotsRow
         ])
         view.spacing = 5
         view.axis = .vertical
@@ -334,7 +353,9 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
                                       preFillMessages: preFillMessages,
                                       showBottomTypingBar: showBottomTypingBar,
                                       useRussianTrustedRootCA: false,
-                                      urlSession: urlSession)
+                                      urlSession: urlSession,
+                                      disableScreenshots: disableScreenshots
+        )
         preFillMessages = nil
         let headers = ["User-Agent": "MyAgent"]
         configuration.configure(config)
@@ -382,6 +403,10 @@ class ViewController: UIViewController, UITextFieldDelegate, IQChannelsUnreadLis
     
     @objc private func typingBarSwitchChanged(_ sender: UISwitch) {
         showBottomTypingBar = sender.isOn
+    }
+
+    @objc private func screenshotsSwitchChanged(_ sender: UISwitch) {
+        disableScreenshots = sender.isOn
     }
     
     @objc func clearCacheDidTap() {

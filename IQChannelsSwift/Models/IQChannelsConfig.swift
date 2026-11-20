@@ -24,6 +24,7 @@ public struct IQChannelsConfig {
     var useRussianTrustedRootCA: Bool = false
     var urlSession: URLSession?
     var source: String? = nil
+    var disableScreenshots: Bool = false
 
     public init(address: String,
                 channels: [String],
@@ -37,7 +38,8 @@ public struct IQChannelsConfig {
                 showBottomTypingBar: Bool = false,
                 useRussianTrustedRootCA: Bool = false,
                 urlSession: URLSession? = nil,
-                source: String? = nil) {
+                source: String? = nil,
+                disableScreenshots: Bool = false) {
         self.address = address
         self.channels = channels
         self.chatToOpen = chatToOpen
@@ -51,6 +53,7 @@ public struct IQChannelsConfig {
         self.useRussianTrustedRootCA = useRussianTrustedRootCA
         self.urlSession = urlSession
         self.source = source
+        self.disableScreenshots = disableScreenshots
     }
 
 }

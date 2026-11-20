@@ -27,7 +27,12 @@ public class IQLibraryConfiguration: IQLibraryConfigurationProtocol {
         } else {
             root = IQChatListViewController(viewModel: viewModel, output: channelManager)
         }
-        let navigationController = UINavigationController(rootViewController: root)
+        let navigationController: UINavigationController
+        if channelManager.config.disableScreenshots {
+            navigationController = IQSecureNavigationController(rootViewController: root)
+        } else {
+            navigationController = UINavigationController(rootViewController: root)
+        }
         navigationController.modalPresentationStyle = .overFullScreen
         navigationController.modalTransitionStyle = .coverVertical
 
