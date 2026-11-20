@@ -262,6 +262,7 @@ struct MediaMessageCellView: View {
                             .padding(.horizontal, 12)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: aligment) ?? .leading)
                     .onAppear {
                         loadText()
                     }
