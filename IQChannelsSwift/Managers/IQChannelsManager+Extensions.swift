@@ -1646,21 +1646,28 @@ extension IQChannelsManager {
     }
     
     func auth(_ loginType: IQLoginType, _ completion: ((Bool) -> Void)?) {
-        self.loginType = loginType
-        guard authResults.isEmpty else {
-            completion?(true)
-            return
-        }
-        guard networkStatusManager.isReachable else {
-            completion?(false)
-            return
-        }
-        Task {
+        Task { @MainActor in
+            self.loginType = loginType
+            if let completion {
+                pendingAuthCompletions.append(completion)
+            }
+
+            guard authResults.isEmpty else {
+                drainAuthCompletions(true)
+                return
+            }
+            guard networkStatusManager.isReachable else {
+                drainAuthCompletions(false)
+                return
+            }
+            guard !isAuthenticating else { return }
+            isAuthenticating = true
+
             authAttempt += 1
             if authAttempt == 1 {
                 state = .authenticating
             }
-            
+
             var errors = [Error?]()
             var results = [(String, IQClientAuth?)]()
             await networkManagers.asyncForEach { (channel, networkManager) in
@@ -1668,60 +1675,68 @@ extension IQChannelsManager {
                 switch loginType {
                     case .anonymous:
                         IQLog.debug(message: "Authentication anonymous \n loginType: \(loginType)")
-                    
+
                         if let token = storageManager.anonymousTokens?["\(channel)\(config.address)"] {
                             response = await networkManager.clientsAuth(token: token)
                         } else {
                             response = await networkManager.clientsSignup()
                         }
-                    
+
                         if let greetingSettingsResult = await networkManager.getSignupGreetingSettings().result{
                             greetingSettingsByChannel[channel] = greetingSettingsResult
                         }
                         if let infoChatSettingsResult = await networkManager.getBlocker().result{
                             infoChatSettingsByChannel[channel] = infoChatSettingsResult
                         }
-                    
+
                         isAnonim = true
                     case let .credentials(credential):
                         IQLog.debug(message: "Authentication credentials \n loginType: \(loginType)")
                         response = await networkManager.clientsIntegrationAuth(credentials: credential)
-                    
+
                         if let infoChatSettingsResult = await networkManager.getBlocker().result{
                             infoChatSettingsByChannel[channel] = infoChatSettingsResult
                         }
-                    
+
                         isAnonim = false
                 }
                 errors.append(response.error)
                 results.append((channel, response.result))
             }
-            
+
+            isAuthenticating = false
+
             if let error = errors.compactMap({$0}).first{
                 IQLog.debug(message: "Error authentication \n error: \(error)")
-                self.auth(loginType, failedWith: error, nil)
+                self.auth(loginType, failedWith: error)
             } else {
                 IQLog.debug(message: "Success authentication \n results: \(results)")
-                self.auth(loginType, succeededWith: results, completion)
+                self.auth(loginType, succeededWith: results)
             }
         }
     }
-    
-    private func auth(_ type: IQLoginType, succeededWith results: [(channel: String, auth: IQClientAuth?)], _ completion: ((Bool) -> Void)?) {
+
+    private func drainAuthCompletions(_ success: Bool) {
+        let completions = pendingAuthCompletions
+        pendingAuthCompletions.removeAll()
+        completions.forEach { $0(success) }
+    }
+
+    private func auth(_ type: IQLoginType, succeededWith results: [(channel: String, auth: IQClientAuth?)]) {
         guard results.allSatisfy({
             $0.auth?.client != nil && $0.auth?.session != nil
         }) else {
-            self.auth(type, failedWith: nil, nil)
-            completion?(false)
+            self.auth(type, failedWith: nil)
+            drainAuthCompletions(false)
             return
         }
-        
+
         let results = Array(zip(results.map { $0.channel }, results.compactMap { $0.auth }))
-        
+
         results.forEach { (channel, auth) in
             guard let token = auth.session?.token else { return }
             let address = config.address
-            
+
             networkManagers[channel]?.token = token
             if type == .anonymous {
                 if storageManager.anonymousTokens != nil {
@@ -1735,10 +1750,10 @@ extension IQChannelsManager {
         authAttempt = 0
         state = .authenticated
         activateAnalytics(results: results)
-        completion?(true)
+        drainAuthCompletions(true)
     }
-    
-    private func auth(_ type: IQLoginType, failedWith error: Error?, _ completion: ((Bool) -> Void)?) {
+
+    private func auth(_ type: IQLoginType, failedWith error: Error?) {
         authResults = []
         state = networkStatusManager.isReachable ? .loggedOut : .awaitingNetwork
 
@@ -1747,15 +1762,15 @@ extension IQChannelsManager {
 
         if isInfoChannelsOnly && isAnonim {
             state = .infoChatStub
-            completion?(true)
+            drainAuthCompletions(true)
         } else {
             if networkStatusManager.isReachable {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { [weak self] in
                     let isAuthError = error?.iqIsAuthError ?? false
-                    self?.auth(isAuthError ? .anonymous : type, completion)
+                    self?.auth(isAuthError ? .anonymous : type, nil)
                 }
             } else {
-                completion?(false)
+                drainAuthCompletions(false)
             }
         }
     }
