@@ -15,6 +15,7 @@ struct MediaMessageCellView: View {
     private let onCancelImageSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let onLinkTap: ((URL) -> Void)?
+    private let onLongPress: ((MessageControlInfo) -> Void)?
     
     private let text: String
     private let isSender: Bool
@@ -157,7 +158,8 @@ struct MediaMessageCellView: View {
          onImageTapCompletion: (() -> Void)? = nil,
          onCancelImageSendCompletion: (() -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
-         onLinkTap: ((URL) -> Void)? = nil) {
+         onLinkTap: ((URL) -> Void)? = nil,
+         onLongPress: ((MessageControlInfo) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
         self.file = file
@@ -166,6 +168,7 @@ struct MediaMessageCellView: View {
         self.onCancelImageSendCompletion = onCancelImageSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.onLinkTap = onLinkTap
+        self.onLongPress = onLongPress
         self.text = message.text ?? ""
         self.isSender = message.isMy ?? false
         
@@ -232,13 +235,16 @@ struct MediaMessageCellView: View {
                         } else {
                             getApprovedStateView(file, nil)
                         }
-                        
-                        
+
+
                         if(text == "" && !file.isLoading){
                             MessageStatusView(message: message, withBackground: uiImage != nil)
                                 .padding(8)
                         }
                     }
+                }
+                .onTapGesture {
+                    handleTap()
                 }
                 
                 if(text != ""){
@@ -262,6 +268,8 @@ struct MediaMessageCellView: View {
                             .padding(.horizontal, 12)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: aligment) ?? .leading)
+                    .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
                     .onAppear {
                         loadText()
                     }
@@ -279,11 +287,8 @@ struct MediaMessageCellView: View {
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
         .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
-        .onTapGesture {
-            handleTap()
-        }
     }
-    
+
     private func handleTap() {
         if let uiImage = uiImage {
             if let file = currentFile {

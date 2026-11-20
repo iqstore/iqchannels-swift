@@ -39,9 +39,12 @@ class IQChannelsManager: IQChannelsManagerProtocol {
     var unsentMessages = [IQMessage]()
     var readMessages = Set<Int>()
     var authAttempt = 0
+    var isAuthenticating = false
+    var pendingAuthCompletions: [(Bool) -> Void] = []
     var lastLocalID = 0
     var loginType: IQLoginType?
     var typingTimer: Timer?
+    var greetingRemovalWorkItem: DispatchWorkItem?
     var isAnonim = false
     var isLoadingOldMessages = false
     var typingSentDate: Date?

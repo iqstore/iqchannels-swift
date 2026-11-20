@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name             = 'IQChannelsSwift'
-    s.version          = '2.5.1'
+    s.version          = File.read(File.join(__dir__, 'IQChannelsSwift', 'Managers', 'IQChannelsVersion.swift'))[/current\s*=\s*"([^"]+)"/, 1]
     s.summary          = 'A short description of IQChannelsSwift.'
     
     # This description is used to generate tags and improve search results.

@@ -133,7 +133,7 @@ final class SseRecoveryTests: XCTestCase {
     }
 
     private func historyMessage(id: Int) -> IQMessage {
-        var message = IQMessage(text: "history \(id)", chatType: .chat, clientID: 11, localID: 0, replyMessageID: nil)
+        var message = IQMessage(text: "history \(id)", chatType: .chat, channel: nil, clientID: 11, localID: 0, replyMessageID: nil)
         message.messageID = id
         return message
     }
@@ -181,7 +181,7 @@ final class SseRecoveryTests: XCTestCase {
             return
         }
 
-        var echo = IQMessage(text: "привет", chatType: .chat, clientID: 11, localID: localID, replyMessageID: nil)
+        var echo = IQMessage(text: "привет", chatType: .chat, channel: nil, clientID: 11, localID: localID, replyMessageID: nil)
         echo.messageID = 42
         mock.enqueueLoadMessages(.init(result: ([echo], false, nil, "", nil, nil)))
 
@@ -381,7 +381,7 @@ final class SseRecoveryTests: XCTestCase {
             .filter { $0.messageID == 0 && $0.author == "\"client\"" }
             .forEach { IQDatabaseManager.shared.deleteMessageByLocalId($0.localID ?? 0) }
 
-        var pending = IQMessage(text: "pending", chatType: .chat, clientID: 0, localID: 910_001, replyMessageID: nil)
+        var pending = IQMessage(text: "pending", chatType: .chat, channel: "a", clientID: 0, localID: 910_001, replyMessageID: nil)
         pending.createdAt = 1
         IQDatabaseManager.shared.insertMessage(pending.toDatabaseMessage())
         defer { IQDatabaseManager.shared.deleteMessageByLocalId(910_001) }

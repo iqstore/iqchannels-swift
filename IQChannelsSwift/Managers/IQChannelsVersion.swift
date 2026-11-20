@@ -6,5 +6,5 @@
 import Foundation
 
 enum IQChannelsVersion {
-    static let current = "2.5.1"
+    static let current = "2.5.2"
 }

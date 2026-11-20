@@ -8,6 +8,7 @@
 import Foundation
 
 protocol IQChannelsManagerProtocol {
+    var config: IQChannelsConfig { get }
     func getViewController() -> IQChatDetailViewController?
     var isSingleChatExpected: Bool { get }
     func getChatSkeletonViewController() -> IQChatDetailViewController

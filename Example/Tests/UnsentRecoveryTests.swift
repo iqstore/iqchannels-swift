@@ -7,7 +7,10 @@ final class UnsentRecoveryTests: XCTestCase {
         var token: String?
 
         var sendMessageResult: ((IQMessageForm) -> Error?)?
+        var clientsIntegrationAuthResult: IQClientAuth?
+        var loadMessagesResult: ([IQMessage], Bool, Int?, String, [IQLanguage]?, String?)?
         private(set) var sentForms: [IQMessageForm] = []
+        private(set) var integrationAuthCalls = 0
         private(set) var listenRequests: [IQListenEventsRequest] = []
         var onOpenHandler: (() -> Void)?
         private(set) var resetSessionCalls = 0
@@ -24,7 +27,10 @@ final class UnsentRecoveryTests: XCTestCase {
         ) {
             listenRequests.append(request)
             onOpenHandler = onOpen
+            eventsCallback = callback
         }
+
+        var eventsCallback: ResponseCallbackClosure<[IQChatEvent]>?
 
         func listenToAdvancedUnread(callback: @escaping ResponseCallbackClosure<IQAdvancedUnreadResult>) {}
         func stopListenToEvents() {}
@@ -36,7 +42,7 @@ final class UnsentRecoveryTests: XCTestCase {
         func sendAnalyticsEvent(_ event: IQAnalyticsEvent) async -> ResponseCallback<IQResult<IQEmptyResponse>> { .init() }
         func getFile(id: String) async throws -> IQFile? { nil }
         func loadMessages(request: IQLoadMessageRequest, getSettings: Bool, isInfoChat: Bool, language: String?) async -> ResponseCallback<([IQMessage], Bool, Int?, String, [IQLanguage]?, String?)> {
-            .init(result: ([], false, nil, "", nil, nil))
+            .init(result: loadMessagesResult ?? ([], false, nil, "", nil, nil))
         }
         func getBlocker() async -> ResponseCallback<IQInfoChatSettings> { .init() }
         func rate(value: Int, ratingID: Int) async -> Error? { nil }
@@ -51,7 +57,10 @@ final class UnsentRecoveryTests: XCTestCase {
         func declineProduct(form: IQProductForm) async -> Error? { nil }
         func clientsAuth(token: String) async -> ResponseCallback<IQClientAuth> { .init() }
         func clientsSignup() async -> ResponseCallback<IQClientAuth> { .init() }
-        func clientsIntegrationAuth(credentials: String) async -> ResponseCallback<IQClientAuth> { .init() }
+        func clientsIntegrationAuth(credentials: String) async -> ResponseCallback<IQClientAuth> {
+            integrationAuthCalls += 1
+            return .init(result: clientsIntegrationAuthResult)
+        }
         func getSignupGreetingSettings() async -> ResponseCallback<IQGreetingSettings> { .init() }
         func setLanguage(languageCode: String) async -> Error? { nil }
         func getAvailableLanguages() async -> ResponseCallback<[IQLanguage]> { .init() }
@@ -126,6 +135,174 @@ final class UnsentRecoveryTests: XCTestCase {
             0,
             "Неотправленное сообщение pm-чата не должно отправляться через текущий обычный чат"
         )
+    }
+
+    func testConcurrentAuthCallsAreSingleFlight() {
+        let mock = NetworkMock()
+        mock.clientsIntegrationAuthResult = IQClientAuth(
+            client: IQClient(),
+            session: IQClientSession(id: 1, clientId: 1, token: "token", integration: nil, integrationHash: nil, integrationCredentials: nil),
+            analytics: nil
+        )
+        let config = IQChannelsConfig(address: "http://127.0.0.1:1", channels: ["support"])
+        let manager = IQChannelsManager(configuration: config)
+        manager.networkManagers["support"] = mock
+        manager.networkStatusManager.status = .reachable
+
+        var first: Bool?
+        var second: Bool?
+        manager.auth(.credentials("101")) { first = $0 }
+        manager.auth(.credentials("101")) { second = $0 }
+
+        let settled = expectation(description: "auth settled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { settled.fulfill() }
+        wait(for: [settled], timeout: 5)
+
+        XCTAssertEqual(
+            mock.integrationAuthCalls, 1,
+            "Параллельные вызовы auth не должны запускать вторую авторизацию — гонка на словарях ломала память (краш-группы 17238947001032442108, 4061562132654801282)"
+        )
+        XCTAssertEqual(first, true)
+        XCTAssertEqual(second, true)
+        XCTAssertEqual(manager.authResults.count, 1)
+        XCTAssertFalse(manager.isAuthenticating)
+    }
+
+    func testLoadMessagesFillsHistorySettingsAndRestoresUnsent() {
+        let mock = NetworkMock()
+        var serverMessage = IQMessage(text: "ответ оператора", chatType: .chat, channel: "support", clientID: 11, localID: 500, replyMessageID: nil)
+        serverMessage.messageID = 5000
+        serverMessage.author = .user
+        mock.loadMessagesResult = ([serverMessage], false, nil, "Чат с поддержкой",
+                                   [IQLanguage(code: "ru", name: "Русский", isDefault: true, iconURL: nil)], "подзаголовок")
+
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        manager.loadMessages(showLoading: true)
+
+        let loaded = expectation(description: "messages loaded")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { loaded.fulfill() }
+        wait(for: [loaded], timeout: 5)
+
+        XCTAssertTrue(
+            manager.messages.contains { $0.messageID == 5000 && $0.text == "ответ оператора" },
+            "история с сервера должна попасть в сообщения"
+        )
+        XCTAssertEqual(manager.chatSettingsCache["support"]?.label, "Чат с поддержкой")
+        XCTAssertEqual(manager.chatSettingsCache["support"]?.subtitle, "подзаголовок")
+    }
+
+    private func makeEvent(_ type: IQChatEventType, id: Int = 1, message: IQMessage? = nil,
+                           messages: [IQMessage]? = nil, messageID: Int? = nil,
+                           user: IQUser? = nil, actor: IQAuthorType? = nil) -> IQChatEvent {
+        IQChatEvent(id: id, type: type, chatID: nil, messageID: messageID, actor: actor,
+                    clientID: nil, userID: nil, messages: messages, client: nil, user: user,
+                    chat: nil, message: message, chatSubtitle: nil)
+    }
+
+    func testSseMessageCreatedAppendsIncomingMessage() {
+        let mock = NetworkMock()
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        manager.networkStatusChanged(.reachable)
+        let sseStarted = expectation(description: "sse started")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { sseStarted.fulfill() }
+        wait(for: [sseStarted], timeout: 3)
+
+        var incoming = IQMessage(text: "новое входящее", chatType: .chat, channel: nil, clientID: 1, localID: 900, replyMessageID: nil)
+        incoming.messageID = 3000
+        incoming.author = .user
+        mock.eventsCallback?([makeEvent(.messageCreated, id: 10, message: incoming)], nil)
+
+        let applied = expectation(description: "event applied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { applied.fulfill() }
+        wait(for: [applied], timeout: 3)
+
+        XCTAssertTrue(
+            manager.messages.contains { $0.messageID == 3000 },
+            "SSE messageCreated должен добавить входящее сообщение"
+        )
+    }
+
+    func testSseMessageCreatedMergesPendingByLocalId() {
+        let mock = NetworkMock()
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        manager.networkStatusChanged(.reachable)
+        let sseStarted = expectation(description: "sse started")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { sseStarted.fulfill() }
+        wait(for: [sseStarted], timeout: 3)
+
+        var pending = IQMessage(text: "отправленное", chatType: .chat, channel: nil, clientID: 1, localID: 777, replyMessageID: nil)
+        pending.author = .client
+        manager.messages = [pending]
+
+        var echo = pending
+        echo.messageID = 3001
+        mock.eventsCallback?([makeEvent(.messageCreated, id: 11, message: echo)], nil)
+
+        let applied = expectation(description: "event applied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { applied.fulfill() }
+        wait(for: [applied], timeout: 3)
+
+        XCTAssertEqual(manager.messages.count, 1, "эхо должно мержиться с локальной копией, не дублироваться")
+        XCTAssertEqual(manager.messages.first?.messageID, 3001)
+        XCTAssertEqual(manager.messages.first?.localID, 777)
+    }
+
+    func testSseMessageReadMarksOwnMessageRead() {
+        let mock = NetworkMock()
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        manager.networkStatusChanged(.reachable)
+        let sseStarted = expectation(description: "sse started")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { sseStarted.fulfill() }
+        wait(for: [sseStarted], timeout: 3)
+
+        var mine = IQMessage(text: "моё", chatType: .chat, channel: nil, clientID: 1, localID: 800, replyMessageID: nil)
+        mine.messageID = 3002
+        mine.author = .client
+        mine.isRead = false
+        mine.eventID = 1
+        manager.messages = [mine]
+
+        mock.eventsCallback?([makeEvent(.messageRead, id: 20, messageID: 3002)], nil)
+
+        let applied = expectation(description: "event applied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { applied.fulfill() }
+        wait(for: [applied], timeout: 3)
+
+        XCTAssertEqual(manager.messages.first?.isRead, true, "messageRead должен ставить галочку прочтения")
+    }
+
+    func testSseDeleteMessagesRemovesFromHistory() {
+        let mock = NetworkMock()
+        let manager = makeManager(mock: mock)
+        waitForChatSelection()
+
+        manager.networkStatusChanged(.reachable)
+        let sseStarted = expectation(description: "sse started")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { sseStarted.fulfill() }
+        wait(for: [sseStarted], timeout: 3)
+
+        var first = IQMessage(text: "1", chatType: .chat, channel: nil, clientID: 1, localID: 810, replyMessageID: nil)
+        first.messageID = 3010
+        var second = IQMessage(text: "2", chatType: .chat, channel: nil, clientID: 1, localID: 811, replyMessageID: nil)
+        second.messageID = 3011
+        manager.messages = [first, second]
+
+        var deleted = second
+        mock.eventsCallback?([makeEvent(.deleteMessages, id: 21, messages: [deleted])], nil)
+
+        let applied = expectation(description: "event applied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { applied.fulfill() }
+        wait(for: [applied], timeout: 3)
+
+        XCTAssertEqual(manager.messages.map(\.messageID), [3010], "delete-messages должен убирать сообщение из истории")
     }
 
     func testNetworkRecoveryDoesNotAutoSendUnsentMessages() {
