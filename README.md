@@ -18,7 +18,9 @@ CocoaPods
 IQChannelsSwift доступен через [CocoaPods](https://cocoapods.org). Чтобы установить его, добавьте следующую строку в ваш Podfile:
 
 ```ruby
-pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => '2.5.2'
+# Укажите нужную версию — список доступных тегов:
+# https://github.com/iqstore/iqchannels-swift/releases
+pod 'IQChannelsSwift', :git => 'https://github.com/iqstore/iqchannels-swift.git', :tag => 'x.y.z'
 ```
 
 Затем выполните команду:
@@ -1708,3 +1710,47 @@ extension ViewController: UIDocumentPickerDelegate {
  }
 ```
 </details>
+
+## Выпуск dev- и prod-сборок
+
+Сборки собираются и публикуются в Nexus (`sdk_ios`) автоматически через CI.
+Версия задаётся **в одном месте** — `IQChannelsSwift/Managers/IQChannelsVersion.swift`
+(`static let current`); `IQChannelsSwift.podspec` читает её оттуда, поэтому
+вручную правится только эта строка.
+
+### Dev-сборка (по коммиту)
+
+Триггер — пуш в **любую** ветку. Делать руками ничего не нужно: CI сам
+соберёт архивы с исходниками и опубликует их в Nexus с версией вида
+`<ветка>-dev.<короткий-sha>`, а также пришлёт уведомление в Telegram.
+
+### Prod-сборка (релиз по тегу)
+
+1. Поднимите версию в `IQChannelsSwift/Managers/IQChannelsVersion.swift`:
+
+   ```swift
+   static let current = "2.5.2"
+   ```
+
+2. Закоммитьте и влейте изменение в `master`.
+
+3. Создайте в GitLab тег с **тем же** номером (`2.5.2`) — через UI
+   (Repository → Tags → New tag) или из консоли:
+
+   ```bash
+   git tag 2.5.2
+   git push origin 2.5.2
+   ```
+
+   Именно создание тега запускает prod-пайплайн.
+
+4. CI проверит, что версия в коде совпадает с тегом (`version-check`),
+   соберёт `zip` и `tar.gz` с исходниками, опубликует их в Nexus как
+   релиз `2.5.2` и пришлёт уведомление в Telegram.
+
+> Если номер тега не совпадёт с версией в `IQChannelsVersion.swift`,
+> джоба `version-check` остановит пайплайн — релиз с рассинхроном версии
+> не опубликуется.
+
+Опубликованные архивы появляются в Nexus по пути
+`sdk_ios/ru/iqstore/iqchannels-sdk-ios/<версия>/`.
