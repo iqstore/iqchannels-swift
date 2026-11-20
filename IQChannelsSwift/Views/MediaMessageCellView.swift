@@ -15,6 +15,7 @@ struct MediaMessageCellView: View {
     private let onCancelImageSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let onLinkTap: ((URL) -> Void)?
+    private let onLongPress: ((MessageControlInfo) -> Void)?
     
     private let text: String
     private let isSender: Bool
@@ -157,7 +158,8 @@ struct MediaMessageCellView: View {
          onImageTapCompletion: (() -> Void)? = nil,
          onCancelImageSendCompletion: (() -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
-         onLinkTap: ((URL) -> Void)? = nil) {
+         onLinkTap: ((URL) -> Void)? = nil,
+         onLongPress: ((MessageControlInfo) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
         self.file = file
@@ -166,6 +168,7 @@ struct MediaMessageCellView: View {
         self.onCancelImageSendCompletion = onCancelImageSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.onLinkTap = onLinkTap
+        self.onLongPress = onLongPress
         self.text = message.text ?? ""
         self.isSender = message.isMy ?? false
         
@@ -263,6 +266,7 @@ struct MediaMessageCellView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: aligment) ?? .leading)
+                    .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
                     .onAppear {
                         loadText()
                     }

@@ -55,7 +55,8 @@ struct MessageCellBubbleView: View {
                                           files: files,
                                           sessionToken: sessionToken,
                                           delegate: delegate,
-                                          onReplyMessageTapCompletion: onReplyMessageTapCompletion)
+                                          onReplyMessageTapCompletion: onReplyMessageTapCompletion,
+                                          onLongPress: onLongPress)
             } else if let file = message.file {
                 if file.isImage {
                     MediaMessageCellView(message: message, replyMessage: replyMessage) {
@@ -66,6 +67,8 @@ struct MessageCellBubbleView: View {
                         onReplyMessageTapCompletion?(messageId)
                     } onLinkTap: { url in
                         onLinkTap?(url)
+                    } onLongPress: { info in
+                        onLongPress?(info)
                     }
                 } else if file.isFile {
                     FilePreviewCellView(message: message, replyMessage: replyMessage) {
@@ -76,6 +79,8 @@ struct MessageCellBubbleView: View {
                         onReplyMessageTapCompletion?(messageId)
                     } onLinkTap: { url in
                         onLinkTap?(url)
+                    } onLongPress: { info in
+                        onLongPress?(info)
                     }
                 }
             }

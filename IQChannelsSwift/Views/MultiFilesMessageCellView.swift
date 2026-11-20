@@ -11,6 +11,7 @@ struct MultiFilesMessageCellView: View {
     private var sessionToken: String
     private weak var delegate: ChatDetailViewDelegate?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
+    private let onLongPress: ((MessageControlInfo) -> Void)?
     
     private let text: String
     private let isSender: Bool
@@ -87,13 +88,15 @@ struct MultiFilesMessageCellView: View {
          files: [IQFile],
          sessionToken: String,
          delegate: ChatDetailViewDelegate? = nil,
-         onReplyMessageTapCompletion: ((Int) -> Void)? = nil) {
+         onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
+         onLongPress: ((MessageControlInfo) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
         self.files = files
         self.sessionToken = sessionToken
         self.delegate = delegate
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
+        self.onLongPress = onLongPress
         self.text = message.text ?? ""
         self.isSender = message.isMy ?? false
         
@@ -158,6 +161,7 @@ struct MultiFilesMessageCellView: View {
                     .onAppear {
                         loadText()
                     }
+                    .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
                 }
             }
             MessageStatusView(message: message)

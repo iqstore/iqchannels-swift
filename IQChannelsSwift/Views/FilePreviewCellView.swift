@@ -14,6 +14,7 @@ struct FilePreviewCellView: View {
     private let onCancelFileSendCompletion: (() -> Void)?
     private let onReplyMessageTapCompletion: ((Int) -> Void)?
     private let onLinkTap: ((URL) -> Void)?
+    private let onLongPress: ((MessageControlInfo) -> Void)?
     private let text: String
     private let isSender: Bool
     
@@ -164,7 +165,8 @@ struct FilePreviewCellView: View {
          onFileTapCompletion: (() -> Void)? = nil,
          onCancelFileSendCompletion: (() -> Void)? = nil,
          onReplyMessageTapCompletion: ((Int) -> Void)? = nil,
-         onLinkTap: ((URL) -> Void)? = nil) {
+         onLinkTap: ((URL) -> Void)? = nil,
+         onLongPress: ((MessageControlInfo) -> Void)? = nil) {
         self.message = message
         self.replyMessage = replyMessage
         self.file = file
@@ -173,6 +175,7 @@ struct FilePreviewCellView: View {
         self.onCancelFileSendCompletion = onCancelFileSendCompletion
         self.onReplyMessageTapCompletion = onReplyMessageTapCompletion
         self.onLinkTap = onLinkTap
+        self.onLongPress = onLongPress
         self.text = message.text ?? ""
         self.isSender = message.isMy ?? false
         
@@ -254,6 +257,7 @@ struct FilePreviewCellView: View {
                     .onAppear {
                         loadText()
                     }
+                    .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
                 }
             }
             MessageStatusView(message: message)
