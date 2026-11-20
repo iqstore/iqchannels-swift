@@ -224,6 +224,9 @@ struct FilePreviewCellView: View {
                         getApprovedStateView(file)
                     }
                 }
+                .onTapGesture {
+                    handleTap()
+                }
                 
                 if(text != ""){
 
@@ -258,6 +261,7 @@ struct FilePreviewCellView: View {
                         loadText()
                     }
                     .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: aligment) ?? .leading)
                 }
             }
             MessageStatusView(message: message)
@@ -271,11 +275,8 @@ struct FilePreviewCellView: View {
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
         .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
-        .onTapGesture {
-            handleTap()
-        }
     }
-    
+
     private func handleTap() {
         if let file = currentFile {
             if let state = file.state {

@@ -162,6 +162,7 @@ struct MultiFilesMessageCellView: View {
                         loadText()
                     }
                     .modifier(MessageMenuGesture(message: message, replyMessage: replyMessage, onLongPress: onLongPress))
+                    .frame(maxWidth: .infinity, alignment: textAlignmentToAlignment(textAlignment: aligment) ?? .leading)
                 }
             }
             MessageStatusView(message: message)

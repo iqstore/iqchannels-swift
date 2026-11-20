@@ -235,13 +235,16 @@ struct MediaMessageCellView: View {
                         } else {
                             getApprovedStateView(file, nil)
                         }
-                        
-                        
+
+
                         if(text == "" && !file.isLoading){
                             MessageStatusView(message: message, withBackground: uiImage != nil)
                                 .padding(8)
                         }
                     }
+                }
+                .onTapGesture {
+                    handleTap()
                 }
                 
                 if(text != ""){
@@ -284,11 +287,8 @@ struct MediaMessageCellView: View {
                 .stroke(backgroundBorderColor, lineWidth: backgroundBorderSize)
         )
         .animation(.spring(response: 0.5, dampingFraction: 0.6, blendDuration: 0.3), value: currentFile?.isLoading)
-        .onTapGesture {
-            handleTap()
-        }
     }
-    
+
     private func handleTap() {
         if let uiImage = uiImage {
             if let file = currentFile {

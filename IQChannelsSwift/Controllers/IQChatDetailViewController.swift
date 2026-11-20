@@ -132,7 +132,7 @@ class IQChatDetailViewController: IQViewController {
     lazy var languageBarButton: UIBarButtonItem = {
         return UIBarButtonItem(customView: languageButton)
     }()
-    
+
     // MARK: - INIT
     init(viewModel: IQChatDetailViewModel,
          output: IQChannelsManagerDetailOutput,
@@ -150,11 +150,11 @@ class IQChatDetailViewController: IQViewController {
     // MARK: - LIFECYCLE
     override func setupSwiftUI() {
         IQLog.debug(message: "6")
-        
+
         let hostView: ChatDetailView = .init(delegate: self)
         let controller: UIHostingController = .init(rootView: hostView.environmentObject(viewModel))
         setupConstructedSwiftUI(interactor: controller)
-        
+
         IQLog.debug(message: "7")
     }
     
